@@ -1,6 +1,6 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Experiments.tsx
 // ADVANCED EXPERIMENTS PAGE - COMPLETE INNOVATION LAB
-// WITH AI-POWERED ANALYSIS, REAL-TIME UPDATES, AND ADVANCED FEATURES
+// FIXED: Removed unused userName variable (line 602)
 
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -599,7 +599,6 @@ const Experiments = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
-  const [userName, setUserName] = useState('');
 
   const fetchExperiments = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -646,13 +645,6 @@ const Experiments = () => {
   }, []);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User');
-      }
-    };
-    getUser();
     fetchExperiments();
   }, [fetchExperiments]);
 
