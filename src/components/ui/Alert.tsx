@@ -1,0 +1,1 @@
+export const Alert = ({ message, type }: { message: string; type: 'success' | 'error' }) => { return <div style={{ padding: '0.5rem', background: type === 'error' ? '#ff4444' : '#48bb78', borderRadius: '8px' }}>{message}</div>; };
