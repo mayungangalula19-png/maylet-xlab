@@ -1,6 +1,6 @@
 // C:\Users\user\maylet-xlab\src\app\routes\CreateProject.tsx
 // FULL CREATE PROJECT PAGE - CREATE NEW INNOVATION PROJECT
-// WITH SUPABASE CONNECTION, VALIDATION, AND REAL-TIME UPDATES
+// WITH SUPABASE CONNECTION AND AUTO-ADMIN ROLE
 
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -278,7 +278,6 @@ const CreateProject = () => {
 
       // Insert into Supabase
       const { error: supabaseError } = await supabase
-
         .from('projects')
         .insert([
           {
@@ -298,8 +297,7 @@ const CreateProject = () => {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           }
-        ])
-        .select();
+        ]);
 
       if (supabaseError) throw supabaseError;
 
@@ -587,7 +585,6 @@ const CreateProject = () => {
           }
         }
         
-        /* Header */
         .create-header {
           margin-bottom: 2rem;
         }
@@ -598,10 +595,6 @@ const CreateProject = () => {
           font-size: 0.9rem;
           display: inline-block;
           margin-bottom: 1rem;
-        }
-        
-        .back-link:hover {
-          text-decoration: underline;
         }
         
         .create-header h1 {
@@ -617,7 +610,6 @@ const CreateProject = () => {
           color: rgba(255,255,255,0.6);
         }
         
-        /* Form Card */
         .form-card {
           background: rgba(0,0,0,0.5);
           backdrop-filter: blur(10px);
@@ -717,7 +709,6 @@ const CreateProject = () => {
           color: rgba(255,255,255,0.4);
         }
         
-        /* Budget Progress */
         .budget-progress {
           margin-bottom: 1.5rem;
         }
@@ -753,7 +744,6 @@ const CreateProject = () => {
           margin-top: 0.5rem;
         }
         
-        /* Tech Stack Manager */
         .tech-stack-manager {
           margin-bottom: 1.5rem;
         }
@@ -829,7 +819,6 @@ const CreateProject = () => {
           background: rgba(124,95,230,0.3);
         }
         
-        /* AI Tip Card */
         .ai-tip-card {
           background: linear-gradient(135deg, rgba(124,95,230,0.15), rgba(47,212,255,0.08));
           border: 1px solid rgba(124,95,230,0.3);
@@ -855,7 +844,6 @@ const CreateProject = () => {
           color: rgba(255,255,255,0.7);
         }
         
-        /* Form Actions */
         .form-actions {
           display: flex;
           justify-content: flex-end;
@@ -897,7 +885,6 @@ const CreateProject = () => {
           cursor: not-allowed;
         }
         
-        /* Quick Tips */
         .quick-tips {
           background: rgba(0,0,0,0.3);
           border-radius: 16px;
