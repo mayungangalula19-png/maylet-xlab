@@ -1,8 +1,4 @@
-﻿// C:\Users\user\maylet-xlab\src\app\routes\AdminDashboard.tsx
-// FULL ADMIN DASHBOARD - COMPLETE ENTERPRISE ADMIN CONTROL CENTER
-// WITH REAL-TIME STATS, CHARTS, USER MANAGEMENT, SYSTEM MONITORING
-
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
 
