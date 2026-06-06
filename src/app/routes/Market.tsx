@@ -1,8 +1,8 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Market.tsx
 // PROFESSIONAL MARKET INSIGHTS – Market size, trends, competitor analysis, pricing benchmarks
 
-import { useState, useEffect } from 'react'; // Removed useRef
-import { Link } from 'react-router-dom'; // Removed useNavigate (not used)
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // ✅ added useNavigate for Sidebar
 import { supabase } from '../../lib/supabase/client';
 
 // Chart.js imports
@@ -64,7 +64,7 @@ interface PricingBenchmark {
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate(); // Still needed for logout
+  const navigate = useNavigate(); // ✅ now works because useNavigate is imported
 
   const mainMenu = [
     { icon: '📊', label: 'Dashboard', route: '/dashboard' },
