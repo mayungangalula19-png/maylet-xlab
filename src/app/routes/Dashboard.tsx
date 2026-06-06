@@ -1,6 +1,6 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Dashboard.tsx
 // FULL PRODUCTION CODE – Maylet XLab Dashboard with Supabase
-// ALL 20+ LINKS ARE REAL AND CLICKABLE
+// ALL 20+ LINKS ARE REAL AND CLICKABLE – LOGO ADDED
 
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -37,7 +37,7 @@ interface DashboardStats {
 }
 
 // ============================================================
-// SIDEBAR COMPONENT WITH ALL LINKS
+// SIDEBAR COMPONENT WITH ALL LINKS – LOGO ADDED
 // ============================================================
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -87,7 +87,12 @@ const Sidebar = () => {
 
       <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="logo-icon">✦</div>
+          {/* Logo image instead of text icon */}
+          <img 
+            src="/images/logo.jpeg" 
+            alt="Maylet XLab Logo" 
+            className="sidebar-logo-img" 
+          />
           {!collapsed && (
             <div className="logo-text">
               <div className="logo-title">MAYLET X LAB</div>
@@ -186,15 +191,12 @@ const Sidebar = () => {
           border-bottom: 1px solid rgba(255,255,255,0.1);
           position: relative;
         }
-        .logo-icon {
-          font-size: 2rem;
-          font-weight: bold;
-          background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          min-width: 40px;
-          text-align: center;
+        /* Logo image style */
+        .sidebar-logo-img {
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          object-fit: cover;
         }
         .logo-title {
           font-weight: 700;
@@ -256,6 +258,9 @@ const Sidebar = () => {
         .sidebar.collapsed .sidebar-link {
           justify-content: center;
           padding: 0.75rem;
+        }
+        .sidebar.collapsed .sidebar-logo-img {
+          margin-right: 0;
         }
         .sidebar-divider {
           height: 1px;
@@ -336,7 +341,7 @@ const RecentProjectCard = ({ project }: { project: Project }) => {
       </div>
       <div className="project-progress">
         <div className="progress-bar">
-          <div className="progress-fill" data-progress={project.progress}></div>
+          <div className="progress-fill" style={{ width: `${project.progress}%` }}></div>
         </div>
         <div className="progress-percent">{project.progress}%</div>
       </div>
@@ -581,28 +586,28 @@ const Dashboard = () => {
                   <div className="progress-stat-label">In Progress</div>
                   <div className="progress-stat-value">{inProgressCount} projects</div>
                   <div className="progress-stat-bar">
-                    <div className="progress-stat-fill" data-progress={recentProjects.length ? `${(inProgressCount / recentProjects.length) * 100}%` : '0%'}></div>
+                    <div className="progress-stat-fill" style={{ width: recentProjects.length ? `${(inProgressCount / recentProjects.length) * 100}%` : '0%' }}></div>
                   </div>
                 </div>
                 <div className="progress-stat">
                   <div className="progress-stat-label">Completed</div>
                   <div className="progress-stat-value">{completedCount} projects</div>
                   <div className="progress-stat-bar">
-                    <div className="progress-stat-fill completed-fill" data-progress={recentProjects.length ? `${(completedCount / recentProjects.length) * 100}%` : '0%'}></div>
+                    <div className="progress-stat-fill completed-fill" style={{ width: recentProjects.length ? `${(completedCount / recentProjects.length) * 100}%` : '0%' }}></div>
                   </div>
                 </div>
                 <div className="progress-stat">
                   <div className="progress-stat-label">On Hold</div>
                   <div className="progress-stat-value">{onHoldCount} projects</div>
                   <div className="progress-stat-bar">
-                    <div className="progress-stat-fill onhold-fill" data-progress={recentProjects.length ? `${(onHoldCount / recentProjects.length) * 100}%` : '0%'}></div>
+                    <div className="progress-stat-fill onhold-fill" style={{ width: recentProjects.length ? `${(onHoldCount / recentProjects.length) * 100}%` : '0%' }}></div>
                   </div>
                 </div>
                 <div className="progress-stat">
                   <div className="progress-stat-label">Not Started</div>
                   <div className="progress-stat-value">{notStartedCount} projects</div>
                   <div className="progress-stat-bar">
-                    <div className="progress-stat-fill notstarted-fill" data-progress={recentProjects.length ? `${(notStartedCount / recentProjects.length) * 100}%` : '0%'}></div>
+                    <div className="progress-stat-fill notstarted-fill" style={{ width: recentProjects.length ? `${(notStartedCount / recentProjects.length) * 100}%` : '0%' }}></div>
                   </div>
                 </div>
               </div>
@@ -687,7 +692,7 @@ const Dashboard = () => {
                 <div className="graph-bars">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => (
                     <div key={day} className="graph-bar-container">
-                      <div className="graph-bar" data-height={`${30 + idx * 7}px`}></div>
+                      <div className="graph-bar" style={{ height: `${30 + idx * 7}px` }}></div>
                       <span className="graph-label">{day}</span>
                     </div>
                   ))}
