@@ -1,11 +1,11 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Market.tsx
 // PROFESSIONAL MARKET INSIGHTS – Market size, trends, competitor analysis, pricing benchmarks
 
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react'; // Removed useRef
+import { Link } from 'react-router-dom'; // Removed useNavigate (not used)
 import { supabase } from '../../lib/supabase/client';
 
-// Chart.js imports (install via npm install chart.js react-chartjs-2)
+// Chart.js imports
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,8 +38,8 @@ ChartJS.register(
 interface MarketData {
   id: string;
   region: string;
-  market_size: number; // in millions USD
-  growth_rate: number; // percentage
+  market_size: number;
+  growth_rate: number;
   year: number;
 }
 
@@ -64,7 +64,7 @@ interface PricingBenchmark {
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Still needed for logout
 
   const mainMenu = [
     { icon: '📊', label: 'Dashboard', route: '/dashboard' },
@@ -173,12 +173,10 @@ const Market = () => {
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [pricingBenchmarks, setPricingBenchmarks] = useState<PricingBenchmark[]>([]);
   const [selectedRegion, setSelectedRegion] = useState('East Africa');
-  const navigate = useNavigate();
 
-  // Sample data (in production, fetch from Supabase table `market_data`)
+  // Sample data (in production, fetch from Supabase)
   useEffect(() => {
     const fetchData = async () => {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       setMarketData([
         { id: '1', region: 'East Africa', market_size: 42.5, growth_rate: 12.3, year: 2024 },
@@ -205,38 +203,31 @@ const Market = () => {
     fetchData();
   }, []);
 
-  // Chart data for market size by region
   const barChartData = {
     labels: marketData.map(d => d.region),
-    datasets: [
-      {
-        label: 'Market Size (USD Million)',
-        data: marketData.map(d => d.market_size),
-        backgroundColor: 'rgba(124, 95, 230, 0.6)',
-        borderColor: '#7c5fe6',
-        borderWidth: 1,
-      },
-    ],
+    datasets: [{
+      label: 'Market Size (USD Million)',
+      data: marketData.map(d => d.market_size),
+      backgroundColor: 'rgba(124, 95, 230, 0.6)',
+      borderColor: '#7c5fe6',
+      borderWidth: 1,
+    }],
   };
 
-  // Chart data for growth rate
   const lineChartData = {
     labels: marketData.map(d => d.region),
-    datasets: [
-      {
-        label: 'Growth Rate (%)',
-        data: marketData.map(d => d.growth_rate),
-        borderColor: '#2fd4ff',
-        backgroundColor: 'rgba(47, 212, 255, 0.1)',
-        fill: true,
-        tension: 0.3,
-      },
-    ],
+    datasets: [{
+      label: 'Growth Rate (%)',
+      data: marketData.map(d => d.growth_rate),
+      borderColor: '#2fd4ff',
+      backgroundColor: 'rgba(47, 212, 255, 0.1)',
+      fill: true,
+      tension: 0.3,
+    }],
   };
 
-  // Competitor pie chart data (simulated using simple divs)
-  const competitorTotal = competitors.reduce((sum, c) => sum + c.market_share, 0);
   const topCompetitors = [...competitors].sort((a, b) => b.market_share - a.market_share);
+  const competitorTotal = topCompetitors.reduce((sum, c) => sum + c.market_share, 0);
 
   if (loading) {
     return (
@@ -256,7 +247,6 @@ const Market = () => {
           <p>Data‑driven analysis to help you make strategic decisions</p>
         </div>
 
-        {/* Region Selector */}
         <div className="region-selector">
           <label>🌍 Region: </label>
           <select value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)}>
@@ -268,7 +258,6 @@ const Market = () => {
           </select>
         </div>
 
-        {/* Statistics Cards */}
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon">📈</div>
@@ -292,7 +281,6 @@ const Market = () => {
           </div>
         </div>
 
-        {/* Charts Row */}
         <div className="charts-row">
           <div className="chart-card">
             <h3>Market Size by Region</h3>
@@ -304,7 +292,6 @@ const Market = () => {
           </div>
         </div>
 
-        {/* Competitor Analysis & Pricing Benchmarks */}
         <div className="two-columns">
           <div className="competitor-card">
             <h3>🏅 Competitor Market Share</h3>
@@ -326,9 +313,7 @@ const Market = () => {
           <div className="pricing-card">
             <h3>💰 Pricing Benchmarks</h3>
             <table className="pricing-table">
-              <thead>
-                <tr><th>Product Type</th><th>Avg Price</th><th>Price Range</th></tr>
-              </thead>
+              <thead><tr><th>Product Type</th><th>Avg Price</th><th>Price Range</th></tr></thead>
               <tbody>
                 {pricingBenchmarks.map(item => (
                   <tr key={item.product_type}>
@@ -343,7 +328,6 @@ const Market = () => {
           </div>
         </div>
 
-        {/* Strategic Recommendations */}
         <div className="recommendations-card">
           <h3>💡 Strategic Recommendations</h3>
           <ul>
@@ -356,150 +340,36 @@ const Market = () => {
       </main>
 
       <style>{`
-        .market-container {
-          display: flex;
-          min-height: 100vh;
-          background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%);
-        }
-        .market-main {
-          flex: 1;
-          margin-left: 280px;
-          padding: 2rem;
-          transition: margin-left 0.3s ease;
-        }
-        @media (max-width: 768px) {
-          .market-main {
-            margin-left: 0;
-            padding: 1rem;
-            padding-top: 5rem;
-          }
-        }
-        .market-header {
-          margin-bottom: 2rem;
-        }
-        .market-header h1 {
-          font-size: 1.8rem;
-          background: linear-gradient(135deg, #fff, #9b7ff0);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
-        .region-selector {
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 1rem;
-          margin-bottom: 2rem;
-          display: inline-block;
-        }
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1rem;
-          margin-bottom: 2rem;
-        }
-        @media (max-width: 900px) {
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        .stat-card {
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
+        .market-container { display: flex; min-height: 100vh; background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%); }
+        .market-main { flex: 1; margin-left: 280px; padding: 2rem; transition: margin-left 0.3s ease; }
+        @media (max-width: 768px) { .market-main { margin-left: 0; padding: 1rem; padding-top: 5rem; } }
+        .market-header { margin-bottom: 2rem; }
+        .market-header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, #9b7ff0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .region-selector { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; padding: 1rem; margin-bottom: 2rem; display: inline-block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .stat-card { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; padding: 1rem; display: flex; align-items: center; gap: 1rem; }
         .stat-icon { font-size: 2rem; }
         .stat-value { font-size: 1.5rem; font-weight: 700; }
         .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
-        .charts-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-        }
-        @media (max-width: 900px) {
-          .charts-row {
-            grid-template-columns: 1fr;
-          }
-        }
-        .chart-card {
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 1rem;
-        }
-        .two-columns {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-        }
-        @media (max-width: 900px) {
-          .two-columns {
-            grid-template-columns: 1fr;
-          }
-        }
-        .competitor-card, .pricing-card, .recommendations-card {
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 1.5rem;
-        }
-        .competitor-item {
-          margin-bottom: 1rem;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-          padding-bottom: 0.5rem;
-        }
-        .competitor-name {
-          font-weight: bold;
-        }
-        .competitor-share {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin: 0.25rem 0;
-        }
-        .share-bar {
-          height: 8px;
-          border-radius: 4px;
-          background: #7c5fe6;
-          transition: width 0.3s;
-        }
-        .competitor-strength, .competitor-weakness {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.7);
-        }
-        .pricing-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        .pricing-table th, .pricing-table td {
-          padding: 0.5rem;
-          text-align: left;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .pricing-table th {
-          color: #7c5fe6;
-        }
-        .pricing-note {
-          font-size: 0.7rem;
-          margin-top: 0.5rem;
-          color: rgba(255,255,255,0.5);
-        }
-        .recommendations-card ul {
-          padding-left: 1.2rem;
-        }
-        .recommendations-card li {
-          margin-bottom: 0.5rem;
-        }
-        .loading-spinner {
-          width: 50px; height: 50px; border: 3px solid rgba(124,95,230,0.3); border-top-color: #7c5fe6;
-          border-radius: 50%; animation: spin 1s linear infinite; margin: 20% auto;
-        }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+        .chart-card { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; padding: 1rem; }
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .two-columns { grid-template-columns: 1fr; } }
+        .competitor-card, .pricing-card, .recommendations-card { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; padding: 1.5rem; }
+        .competitor-item { margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .competitor-name { font-weight: bold; }
+        .competitor-share { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; }
+        .share-bar { height: 8px; border-radius: 4px; transition: width 0.3s; }
+        .competitor-strength, .competitor-weakness { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+        .pricing-table { width: 100%; border-collapse: collapse; }
+        .pricing-table th, .pricing-table td { padding: 0.5rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .pricing-table th { color: #7c5fe6; }
+        .pricing-note { font-size: 0.7rem; margin-top: 0.5rem; color: rgba(255,255,255,0.5); }
+        .recommendations-card ul { padding-left: 1.2rem; }
+        .recommendations-card li { margin-bottom: 0.5rem; }
+        .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(124,95,230,0.3); border-top-color: #7c5fe6; border-radius: 50%; animation: spin 1s linear infinite; margin: 20% auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>

@@ -31,14 +31,7 @@ interface CartItem {
   quantity: number;
 }
 
-interface Order {
-  id: string;
-  buyer_id: string;
-  items: { product_id: string; title: string; price: number; quantity: number }[];
-  total: number;
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
-  created_at: string;
-}
+// Order interface removed – not used in this component
 
 // ============================================================
 // SIDEBAR (consistent with other pages)
@@ -70,7 +63,7 @@ const Sidebar = () => {
 
   const userMenu = [
     { icon: '🔔', label: 'Notifications', route: '/notifications' },
-    { icon: '⚙️', label: 'Settings', route: '/settings' },  // ✅ fixed missing quote
+    { icon: '⚙️', label: 'Settings', route: '/settings' },
     { icon: '👤', label: 'Profile', route: '/profile' },
   ];
 

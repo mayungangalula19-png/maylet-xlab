@@ -2,7 +2,7 @@
 // MAYA AI Assistant – Real AI integration with OpenRouter (free tier)
 // Supports project context, conversation memory, and streaming responses.
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react'; // ✅ removed unused useCallback
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
 

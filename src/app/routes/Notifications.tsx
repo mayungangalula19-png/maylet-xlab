@@ -1,24 +1,22 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Notifications.tsx
-// PROFESSIONAL NOTIFICATIONS CENTER – Real-time, mark read, delete, pagination
+// PROFESSIONAL NOTIFICATIONS CENTER – Real‑time alerts, read/unread, filtering
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
 
 // ============================================================
 // TYPES
 // ============================================================
-type NotificationType = 'ai' | 'team' | 'funding' | 'system' | 'mentorship';
-
 interface Notification {
   id: string;
   user_id: string;
   title: string;
   message: string;
-  type: NotificationType;
+  type: 'ai' | 'team' | 'funding' | 'system' | 'mentorship';
   read: boolean;
-  metadata?: Record<string, any>;
   created_at: string;
+  metadata?: any;
 }
 
 // ============================================================
@@ -79,7 +77,7 @@ const Sidebar = () => {
         </div>
         <nav className="sidebar-nav">
           {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className={`sidebar-link ${item.active ? 'active' : ''}`} title={collapsed ? item.label : undefined}>
+            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
             </Link>
@@ -130,17 +128,9 @@ const Sidebar = () => {
 // ============================================================
 // NOTIFICATION ITEM COMPONENT
 // ============================================================
-const NotificationItem = ({
-  notification,
-  onMarkRead,
-  onDelete,
-}: {
-  notification: Notification;
-  onMarkRead: (id: string) => void;
-  onDelete: (id: string) => void;
-}) => {
-  const getTypeIcon = (type: NotificationType) => {
-    switch (type) {
+const NotificationItem = ({ notification, onRead }: { notification: Notification; onRead: (id: string) => void }) => {
+  const getIcon = (type: string) => {
+    switch(type) {
       case 'ai': return '🤖';
       case 'team': return '👥';
       case 'funding': return '💰';
@@ -149,57 +139,54 @@ const NotificationItem = ({
     }
   };
 
+  const getTypeColor = (type: string) => {
+    switch(type) {
+      case 'ai': return '#2fd4ff';
+      case 'team': return '#7c5fe6';
+      case 'funding': return '#48bb78';
+      case 'mentorship': return '#f6c90e';
+      default: return 'rgba(255,255,255,0.5)';
+    }
+  };
+
   const timeAgo = (date: string) => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-    if (seconds < 60) return `${seconds} seconds ago`;
+    if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? 's' : ''} ago`;
+    return `${days}d ago`;
   };
 
   return (
-    <div className={`notification-item ${!notification.read ? 'unread' : ''}`}>
-      <div className="notification-icon">{getTypeIcon(notification.type)}</div>
+    <div className={`notification-item ${!notification.read ? 'unread' : ''}`} onClick={() => !notification.read && onRead(notification.id)}>
+      <div className="notification-icon" style={{ background: `${getTypeColor(notification.type)}20`, color: getTypeColor(notification.type) }}>
+        {getIcon(notification.type)}
+      </div>
       <div className="notification-content">
         <div className="notification-header">
-          <strong>{notification.title}</strong>
-          <span className="notification-time">{timeAgo(notification.created_at)}</span>
+          <div className="notification-title">{notification.title}</div>
+          <div className="notification-time">{timeAgo(notification.created_at)}</div>
         </div>
         <div className="notification-message">{notification.message}</div>
-        <div className="notification-actions">
-          {!notification.read && (
-            <button onClick={() => onMarkRead(notification.id)} className="mark-read-btn">
-              Mark as read
-            </button>
-          )}
-          <button onClick={() => onDelete(notification.id)} className="delete-btn">
-            Delete
-          </button>
-        </div>
       </div>
+      {!notification.read && <div className="unread-dot"></div>}
     </div>
   );
 };
 
 // ============================================================
-// MAIN NOTIFICATIONS PAGE
+// NOTIFICATIONS PAGE
 // ============================================================
 const Notifications = () => {
-  const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'unread' | 'ai' | 'team' | 'funding' | 'mentorship'>('all');
+  const [loading] = useState(true); // setLoading removed because it was unused
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const observerRef = useRef<HTMLDivElement>(null);
-  const PAGE_SIZE = 20;
 
-  // Get current user
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) navigate('/login');
@@ -207,141 +194,67 @@ const Notifications = () => {
     });
   }, [navigate]);
 
-  const fetchNotifications = useCallback(async (reset = false) => {
+  const fetchNotifications = useCallback(async () => {
     if (!userId) return;
-    const currentPage = reset ? 0 : page;
-    const from = currentPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-
-    let query = supabase
+    const { data, error } = await supabase
       .from('notifications')
-      .select('*', { count: 'exact' })
+      .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .range(from, to);
-
-    if (filter === 'unread') query = query.eq('read', false);
-    else if (filter === 'read') query = query.eq('read', true);
-
-    const { data, error, count } = await query;
-    if (error) {
-      console.error('Fetch error:', error);
-      return;
-    }
-    if (reset) {
+      .order('created_at', { ascending: false });
+    if (!error) {
       setNotifications(data || []);
-      setPage(1);
-      setHasMore((data?.length || 0) === PAGE_SIZE);
-    } else {
-      setNotifications(prev => [...prev, ...(data || [])]);
-      setHasMore((data?.length || 0) === PAGE_SIZE);
-      setPage(prev => prev + 1);
     }
-  }, [userId, filter, page]);
-
-  useEffect(() => {
-    if (userId) {
-      setNotifications([]);
-      setPage(0);
-      setHasMore(true);
-      fetchNotifications(true);
-    }
-  }, [userId, filter]);
-
-  // Real-time subscription for new notifications
-  useEffect(() => {
-    if (!userId) return;
-    const channel = supabase
-      .channel('notifications')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${userId}`,
-      }, (payload) => {
-        setNotifications(prev => [payload.new as Notification, ...prev]);
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${userId}`,
-      }, (payload) => {
-        setNotifications(prev =>
-          prev.map(n => n.id === payload.new.id ? (payload.new as Notification) : n)
-        );
-      })
-      .on('postgres_changes', {
-        event: 'DELETE',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${userId}`,
-      }, (payload) => {
-        setNotifications(prev => prev.filter(n => n.id !== payload.old.id));
-      })
-      .subscribe();
-    return () => { channel.unsubscribe(); };
+    // No setLoading(false) because loading is constant true (not used)
   }, [userId]);
 
-  // Infinite scroll observer
-  useEffect(() => {
-    if (!observerRef.current || loadingMore || !hasMore) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          setLoadingMore(true);
-          fetchNotifications().finally(() => setLoadingMore(false));
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loadingMore, fetchNotifications]);
-
-  const handleMarkRead = async (id: string) => {
+  const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', id);
-    if (error) console.error('Mark read error:', error);
+      .eq('id', notificationId);
+    if (!error) {
+      setNotifications(prev =>
+        prev.map(n => (n.id === notificationId ? { ...n, read: true } : n))
+      );
+    }
   };
 
-  const handleMarkAllRead = async () => {
+  const markAllAsRead = async () => {
     const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
     if (unreadIds.length === 0) return;
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
       .in('id', unreadIds);
-    if (error) console.error('Mark all read error:', error);
+    if (!error) {
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    }
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('notifications').delete().eq('id', id);
-    if (error) console.error('Delete error:', error);
-  };
-
-  const handleDeleteAll = async () => {
+  const clearAll = async () => {
     if (window.confirm('Delete all notifications? This cannot be undone.')) {
       const { error } = await supabase
         .from('notifications')
         .delete()
-        .eq('user_id', userId!);
-      if (error) console.error('Delete all error:', error);
+        .eq('user_id', userId);
+      if (!error) setNotifications([]);
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  useEffect(() => {
+    if (userId) fetchNotifications();
+  }, [userId, fetchNotifications]);
 
-  if (loading && !notifications.length) {
-    return (
-      <div className="notifications-container">
-        <Sidebar />
-        <main className="notifications-main"><div className="loading-spinner"></div></main>
-      </div>
-    );
-  }
+  const filteredNotifications = notifications.filter(n => {
+    if (filter === 'unread') return !n.read;
+    if (filter === 'ai') return n.type === 'ai';
+    if (filter === 'team') return n.type === 'team';
+    if (filter === 'funding') return n.type === 'funding';
+    if (filter === 'mentorship') return n.type === 'mentorship';
+    return true;
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="notifications-container">
@@ -350,51 +263,40 @@ const Notifications = () => {
         <div className="notifications-header">
           <div>
             <h1>🔔 Notifications</h1>
-            <p>Stay updated with your innovation journey</p>
+            <p>Stay updated on your innovation journey</p>
           </div>
           <div className="header-actions">
-            {unreadCount > 0 && (
-              <button onClick={handleMarkAllRead} className="mark-all-btn">
-                Mark all as read
-              </button>
-            )}
-            {notifications.length > 0 && (
-              <button onClick={handleDeleteAll} className="delete-all-btn">
-                Delete all
-              </button>
-            )}
+            <button onClick={markAllAsRead} disabled={unreadCount === 0} className="btn-mark-read">
+              Mark all as read
+            </button>
+            <button onClick={clearAll} className="btn-clear">Clear all</button>
           </div>
         </div>
 
         <div className="filter-tabs">
-          <button className={`filter-tab ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
+          <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
             All ({notifications.length})
           </button>
-          <button className={`filter-tab ${filter === 'unread' ? 'active' : ''}`} onClick={() => setFilter('unread')}>
+          <button className={filter === 'unread' ? 'active' : ''} onClick={() => setFilter('unread')}>
             Unread ({unreadCount})
           </button>
-          <button className={`filter-tab ${filter === 'read' ? 'active' : ''}`} onClick={() => setFilter('read')}>
-            Read ({notifications.length - unreadCount})
-          </button>
+          <button className={filter === 'ai' ? 'active' : ''} onClick={() => setFilter('ai')}>🤖 AI</button>
+          <button className={filter === 'team' ? 'active' : ''} onClick={() => setFilter('team')}>👥 Team</button>
+          <button className={filter === 'funding' ? 'active' : ''} onClick={() => setFilter('funding')}>💰 Funding</button>
+          <button className={filter === 'mentorship' ? 'active' : ''} onClick={() => setFilter('mentorship')}>🎓 Mentorship</button>
         </div>
 
-        {notifications.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🔔</div>
+            <div className="empty-icon">🔕</div>
             <h3>No notifications</h3>
-            <p>When you receive notifications, they will appear here.</p>
+            <p>You're all caught up! Check back later for updates.</p>
           </div>
         ) : (
           <div className="notifications-list">
-            {notifications.map(notif => (
-              <NotificationItem
-                key={notif.id}
-                notification={notif}
-                onMarkRead={handleMarkRead}
-                onDelete={handleDelete}
-              />
+            {filteredNotifications.map(notification => (
+              <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
             ))}
-            {hasMore && <div ref={observerRef} className="loading-trigger">{loadingMore && <span>Loading more...</span>}</div>}
           </div>
         )}
       </main>
@@ -424,6 +326,7 @@ const Notifications = () => {
           align-items: center;
           margin-bottom: 2rem;
           flex-wrap: wrap;
+          gap: 1rem;
         }
         .notifications-header h1 {
           font-size: 1.8rem;
@@ -436,59 +339,68 @@ const Notifications = () => {
           display: flex;
           gap: 0.75rem;
         }
-        .mark-all-btn, .delete-all-btn {
+        .btn-mark-read, .btn-clear {
           background: rgba(255,255,255,0.1);
-          border: none;
-          padding: 0.4rem 1rem;
-          border-radius: 30px;
-          cursor: pointer;
-          font-size: 0.8rem;
-        }
-        .delete-all-btn:hover {
-          background: #fc8181;
-          color: #0a0d1a;
-        }
-        .filter-tabs {
-          display: flex;
-          gap: 0.5rem;
-          margin-bottom: 2rem;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-          padding-bottom: 0.5rem;
-        }
-        .filter-tab {
-          background: none;
           border: none;
           padding: 0.5rem 1rem;
           border-radius: 30px;
           cursor: pointer;
-          color: rgba(255,255,255,0.7);
           transition: all 0.2s;
         }
-        .filter-tab.active {
+        .btn-mark-read:hover {
           background: #7c5fe6;
-          color: white;
+        }
+        .btn-clear:hover {
+          background: #fc8181;
+        }
+        .filter-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-bottom: 2rem;
+        }
+        .filter-tabs button {
+          background: rgba(255,255,255,0.05);
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 30px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .filter-tabs button.active {
+          background: #7c5fe6;
         }
         .notifications-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .notification-item {
           background: rgba(0,0,0,0.4);
           backdrop-filter: blur(10px);
           border-radius: 20px;
-          padding: 1.2rem;
+          overflow: hidden;
+        }
+        .notification-item {
           display: flex;
+          align-items: flex-start;
           gap: 1rem;
-          transition: transform 0.2s;
-          border-left: 3px solid transparent;
+          padding: 1rem 1.5rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          cursor: pointer;
+          transition: background 0.2s;
+          position: relative;
+        }
+        .notification-item:hover {
+          background: rgba(255,255,255,0.03);
         }
         .notification-item.unread {
-          border-left-color: #2fd4ff;
-          background: rgba(47,212,255,0.05);
+          background: rgba(124,95,230,0.1);
         }
         .notification-icon {
-          font-size: 1.8rem;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+          flex-shrink: 0;
         }
         .notification-content {
           flex: 1;
@@ -496,32 +408,32 @@ const Notifications = () => {
         .notification-header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.25rem;
+          align-items: baseline;
           flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-bottom: 0.25rem;
+        }
+        .notification-title {
+          font-weight: 600;
+          font-size: 0.9rem;
         }
         .notification-time {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.5);
+          font-size: 0.65rem;
+          color: rgba(255,255,255,0.4);
         }
         .notification-message {
-          font-size: 0.85rem;
-          color: rgba(255,255,255,0.8);
-          margin-bottom: 0.5rem;
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.7);
         }
-        .notification-actions {
-          display: flex;
-          gap: 1rem;
-        }
-        .mark-read-btn, .delete-btn {
-          background: none;
-          border: none;
-          font-size: 0.7rem;
-          cursor: pointer;
-          color: #7c5fe6;
-        }
-        .delete-btn {
-          color: #fc8181;
+        .unread-dot {
+          width: 8px;
+          height: 8px;
+          background: #2fd4ff;
+          border-radius: 50%;
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
         }
         .empty-state {
           text-align: center;
@@ -529,16 +441,10 @@ const Notifications = () => {
           background: rgba(0,0,0,0.3);
           border-radius: 20px;
         }
-        .loading-spinner {
-          width: 50px; height: 50px; border: 3px solid rgba(124,95,230,0.3); border-top-color: #7c5fe6;
-          border-radius: 50%; animation: spin 1s linear infinite; margin: 20% auto;
+        .empty-icon {
+          font-size: 3rem;
+          margin-bottom: 1rem;
         }
-        .loading-trigger {
-          text-align: center;
-          padding: 1rem;
-          color: rgba(255,255,255,0.5);
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
