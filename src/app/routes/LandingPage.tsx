@@ -218,7 +218,8 @@ const LandingPage = () => {
       {/* ========== NAVIGATION ========== */}
       <header className={`landing-header ${scrolled ? 'scrolled' : ''}`}>
         <Link to="/" className="landing-brand">
-          <div className="brand-mark">X</div>
+          {/* Logo image added here */}
+          <img src="/images/logo.jpeg" alt="Maylet XLab Logo" className="brand-logo-img" />
           <div className="brand-copy">
             <div className="brand-title">Maylet <span>XLab</span></div>
             <div className="brand-note">Innovation OS</div>
@@ -585,7 +586,13 @@ const LandingPage = () => {
         .landing-header.scrolled { background: rgba(4, 6, 16, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
         
         .landing-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; }
-        .brand-mark { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #7c5fe6, #2fd4ff); font-weight: 800; }
+        /* Logo image style */
+        .brand-logo-img {
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          object-fit: cover;
+        }
         .brand-title { font-size: 1rem; font-weight: 700; }
         .brand-title span { color: #7c5fe6; }
         .brand-note { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
