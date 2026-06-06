@@ -1,6 +1,6 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Dashboard.tsx
 // FULL PRODUCTION CODE – Maylet XLab Dashboard with Supabase
-// ALL 20+ LINKS ARE REAL AND CLICKABLE – LOGO ADDED
+// ALL 20+ LINKS ARE REAL AND CLICKABLE – LOGO ADDED – FULLY RESPONSIVE (MOBILE FRIENDLY)
 
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -37,14 +37,13 @@ interface DashboardStats {
 }
 
 // ============================================================
-// SIDEBAR COMPONENT WITH ALL LINKS – LOGO ADDED
+// SIDEBAR COMPONENT (mobile friendly)
 // ============================================================
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
-  // ALL 17 MAIN NAVIGATION LINKS - REAL ROUTES
   const mainMenu = [
     { icon: '📊', label: 'Dashboard', route: '/dashboard' },
     { icon: '📁', label: 'Projects', route: '/projects' },
@@ -65,7 +64,6 @@ const Sidebar = () => {
     { icon: '🛠️', label: 'Help & Support', route: '/help' },
   ];
 
-  // USER MENU LINKS
   const userMenu = [
     { icon: '🔔', label: 'Notifications', route: '/notifications' },
     { icon: '⚙️', label: 'Settings', route: '/settings' },
@@ -87,7 +85,6 @@ const Sidebar = () => {
 
       <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          {/* Logo image instead of text icon */}
           <img 
             src="/images/logo.jpeg" 
             alt="Maylet XLab Logo" 
@@ -111,6 +108,7 @@ const Sidebar = () => {
               to={item.route}
               className="sidebar-link"
               title={collapsed ? item.label : undefined}
+              onClick={() => setMobileOpen(false)}
             >
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
@@ -127,6 +125,7 @@ const Sidebar = () => {
               to={item.route}
               className="sidebar-link"
               title={collapsed ? item.label : undefined}
+              onClick={() => setMobileOpen(false)}
             >
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
@@ -175,7 +174,7 @@ const Sidebar = () => {
           display: flex;
           flex-direction: column;
           z-index: 99;
-          transition: width 0.3s ease;
+          transition: width 0.3s ease, transform 0.3s ease;
           overflow-y: auto;
           overflow-x: hidden;
           width: 280px;
@@ -191,7 +190,6 @@ const Sidebar = () => {
           border-bottom: 1px solid rgba(255,255,255,0.1);
           position: relative;
         }
-        /* Logo image style */
         .sidebar-logo-img {
           width: 40px;
           height: 40px;
@@ -277,6 +275,7 @@ const Sidebar = () => {
           background: rgba(252,129,129,0.2);
           color: #fc8181;
         }
+        /* Mobile styles */
         @media (max-width: 768px) {
           .mobile-sidebar-toggle {
             display: block;
@@ -290,6 +289,15 @@ const Sidebar = () => {
           }
           .sidebar-overlay {
             display: block;
+          }
+          .sidebar.collapsed {
+            width: 280px;
+          }
+          .sidebar.collapsed .sidebar-label {
+            display: inline-block;
+          }
+          .sidebar.collapsed .sidebar-link {
+            justify-content: flex-start;
           }
         }
       `}</style>
@@ -410,56 +418,41 @@ const Dashboard = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const navigate = useNavigate();
 
-  // Fetch dashboard data from Supabase
   useEffect(() => {
     const fetchDashboardData = async () => {
-      // Get current session
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
         navigate('/login');
         return;
       }
-
       const userId = session.user.id;
       setUserEmail(session.user.email || '');
       setUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Innovator');
 
       setLoading(true);
       try {
-        // Get projects count
         const { count: projectsCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId);
-
-        // Get experiments count
         const { count: experimentsCount } = await supabase
           .from('experiments')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId);
-
-        // Get AI analyses count
         const { count: aiCount } = await supabase
           .from('ai_analyses')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId);
-
-        // Get team members count
         const { count: teamCount } = await supabase
           .from('team_members')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId);
-
-        // Get recent projects
         const { data: projects } = await supabase
           .from('projects')
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(5);
-
-        // Get recent activities
         const { data: activitiesData } = await supabase
           .from('activities')
           .select('*')
@@ -473,10 +466,8 @@ const Dashboard = () => {
           totalAIAnalyses: aiCount || 0,
           totalTeamMembers: teamCount || 0,
         });
-
         setRecentProjects(projects as Project[] || []);
         setActivities(activitiesData as Activity[] || []);
-
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -486,24 +477,14 @@ const Dashboard = () => {
 
     fetchDashboardData();
 
-    // Set up real-time subscription
     const channel = supabase.channel('dashboard_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'projects' },
-        () => fetchDashboardData()
-      )
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'activities' },
-        () => fetchDashboardData()
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => fetchDashboardData())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activities' }, () => fetchDashboardData())
       .subscribe();
 
-    return () => {
-      channel.unsubscribe();
-    };
+    return () => { channel.unsubscribe(); };
   }, [navigate]);
 
-  // Calculate project progress overview
   const inProgressCount = recentProjects.filter(p => p.status !== 'Launched' && p.progress < 100).length;
   const completedCount = recentProjects.filter(p => p.progress === 100).length;
   const onHoldCount = recentProjects.filter(p => p.status === 'Idea').length;
@@ -549,21 +530,16 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <Sidebar />
-      
       <main className="dashboard-main">
-        {/* Welcome Section */}
         <div className="welcome-section">
           <div>
             <h1>Welcome back, {userName}! 🎉</h1>
             <p>Here's what's happening with your innovations today.</p>
             <p className="user-email">{userEmail}</p>
           </div>
-          <Link to="/projects/create" className="new-project-btn">
-            + New Project
-          </Link>
+          <Link to="/projects/create" className="new-project-btn">+ New Project</Link>
         </div>
 
-        {/* Stats Cards - ALL CLICKABLE */}
         <div className="stats-grid">
           <StatCard icon="📁" label="Total Projects" value={stats.totalProjects} trend={12} route="/projects" />
           <StatCard icon="🧪" label="Experiments" value={stats.totalExperiments} trend={8} route="/experiments" />
@@ -571,11 +547,8 @@ const Dashboard = () => {
           <StatCard icon="👥" label="Team Members" value={stats.totalTeamMembers} trend={5} route="/teams" />
         </div>
 
-        {/* Main Content Grid */}
         <div className="dashboard-grid">
-          {/* Left Column */}
           <div className="dashboard-left">
-            {/* Project Progress Overview */}
             <div className="card">
               <div className="card-header">
                 <h3>📊 Project Progress Overview</h3>
@@ -617,7 +590,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Recent Projects - EACH PROJECT CLICKABLE */}
             <div className="card">
               <div className="card-header">
                 <h3>📁 Recent Projects</h3>
@@ -627,9 +599,7 @@ const Dashboard = () => {
                 {recentProjects.length === 0 ? (
                   <p className="empty-state">No projects yet. Create your first project!</p>
                 ) : (
-                  recentProjects.map((project) => (
-                    <RecentProjectCard key={project.id} project={project} />
-                  ))
+                  recentProjects.map((project) => <RecentProjectCard key={project.id} project={project} />)
                 )}
               </div>
               {recentProjects.length === 0 && (
@@ -638,9 +608,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Right Column */}
           <div className="dashboard-right">
-            {/* AI Insights - CLICKABLE */}
             <div className="card ai-insights">
               <div className="card-header">
                 <h3>🤖 AI Insights</h3>
@@ -660,12 +628,9 @@ const Dashboard = () => {
                   <strong className="risk-low">Low</strong>
                 </div>
               </div>
-              <Link to="/ai-assistant/analyze" className="ai-analyze-btn">
-                Run Detailed Analysis →
-              </Link>
+              <Link to="/ai-assistant/analyze" className="ai-analyze-btn">Run Detailed Analysis →</Link>
             </div>
 
-            {/* Team Activity */}
             <div className="card">
               <div className="card-header">
                 <h3>👥 Team Activity</h3>
@@ -675,14 +640,11 @@ const Dashboard = () => {
                 {activities.length === 0 ? (
                   <p className="empty-state">No recent activity. Start collaborating!</p>
                 ) : (
-                  activities.map((activity) => (
-                    <ActivityItem key={activity.id} activity={activity} />
-                  ))
+                  activities.map((activity) => <ActivityItem key={activity.id} activity={activity} />)
                 )}
               </div>
             </div>
 
-            {/* Activity Overview Graph - CLICKABLE TO ANALYTICS */}
             <div className="card">
               <div className="card-header">
                 <h3>📈 Activity Overview</h3>
@@ -702,7 +664,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Footer with LINKS */}
         <footer className="dashboard-footer">
           <p>© 2025 Maylet XLab. All rights reserved.</p>
           <div className="footer-links">
@@ -716,23 +677,10 @@ const Dashboard = () => {
       </main>
 
       <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0a0a0f, #1a1a2e); color: white; }
 
-        body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: linear-gradient(135deg, #0a0a0f, #1a1a2e);
-          color: white;
-        }
-
-        .dashboard-container {
-          display: flex;
-          min-height: 100vh;
-        }
-
+        .dashboard-container { display: flex; min-height: 100vh; }
         .dashboard-main {
           flex: 1;
           margin-left: 280px;
@@ -740,11 +688,79 @@ const Dashboard = () => {
           transition: margin-left 0.3s ease;
         }
 
+        /* ========== RESPONSIVE FOR MOBILE ========== */
         @media (max-width: 768px) {
           .dashboard-main {
             margin-left: 0;
             padding: 1rem;
             padding-top: 5rem;
+          }
+          .welcome-section {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .welcome-section h1 {
+            font-size: 1.4rem;
+          }
+          .new-project-btn {
+            width: 100%;
+            text-align: center;
+          }
+          .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.75rem;
+          }
+          .stat-card {
+            padding: 0.75rem;
+          }
+          .stat-value {
+            font-size: 1.4rem;
+          }
+          .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .card {
+            padding: 1rem;
+          }
+          .card-header h3 {
+            font-size: 1rem;
+          }
+          .projects-list {
+            gap: 0.75rem;
+          }
+          .project-card {
+            padding: 0.75rem;
+          }
+          .project-name {
+            font-size: 0.9rem;
+          }
+          .progress-stat-value {
+            font-size: 0.8rem;
+          }
+          .ai-message {
+            font-size: 0.8rem;
+          }
+          .graph-bar {
+            width: 20px;
+          }
+          .footer-links {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+          .dashboard-footer {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .dashboard-grid {
+            grid-template-columns: 1fr;
           }
         }
 
@@ -774,7 +790,6 @@ const Dashboard = () => {
         }
         .new-project-btn {
           background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
-          border: none;
           padding: 0.75rem 1.5rem;
           border-radius: 40px;
           color: #0a0d1a;
@@ -795,16 +810,6 @@ const Dashboard = () => {
           gap: 1rem;
           margin-bottom: 2rem;
         }
-        @media (max-width: 1024px) {
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        @media (max-width: 640px) {
-          .stats-grid {
-            grid-template-columns: 1fr;
-          }
-        }
         .stat-card {
           background: rgba(0,0,0,0.5);
           backdrop-filter: blur(10px);
@@ -822,25 +827,11 @@ const Dashboard = () => {
           background: rgba(0,0,0,0.7);
           border-color: rgba(124,95,230,0.3);
         }
-        .stat-icon {
-          font-size: 2rem;
-        }
-        .stat-content {
-          flex: 1;
-        }
-        .stat-value {
-          font-size: 1.8rem;
-          font-weight: 700;
-          color: white;
-        }
-        .stat-label {
-          font-size: 0.8rem;
-          color: rgba(255,255,255,0.6);
-        }
-        .stat-trend {
-          font-size: 0.7rem;
-          color: #48bb78;
-        }
+        .stat-icon { font-size: 2rem; }
+        .stat-content { flex: 1; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: white; }
+        .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+        .stat-trend { font-size: 0.7rem; color: #48bb78; }
 
         /* Dashboard Grid */
         .dashboard-grid {
@@ -848,11 +839,6 @@ const Dashboard = () => {
           grid-template-columns: 1fr 1fr;
           gap: 1.5rem;
           margin-bottom: 2rem;
-        }
-        @media (max-width: 1024px) {
-          .dashboard-grid {
-            grid-template-columns: 1fr;
-          }
         }
 
         /* Cards */
@@ -872,74 +858,25 @@ const Dashboard = () => {
           flex-wrap: wrap;
           gap: 0.5rem;
         }
-        .card-header h3 {
-          font-size: 1.1rem;
-        }
-        .card-link {
-          color: #7c5fe6;
-          text-decoration: none;
-          font-size: 0.8rem;
-        }
-        .card-link:hover {
-          text-decoration: underline;
-        }
+        .card-header h3 { font-size: 1.1rem; }
+        .card-link { color: #7c5fe6; text-decoration: none; font-size: 0.8rem; }
+        .card-link:hover { text-decoration: underline; }
 
         /* Progress Stats */
-        .progress-stats {
-          margin-bottom: 1rem;
-        }
-        .progress-stat {
-          margin-bottom: 0.75rem;
-        }
-        .progress-stat-label {
-          font-size: 0.75rem;
-          color: rgba(255,255,255,0.6);
-          margin-bottom: 0.25rem;
-        }
-        .progress-stat-value {
-          font-size: 0.9rem;
-          font-weight: 600;
-          margin-bottom: 0.25rem;
-        }
-        .progress-stat-bar {
-          height: 6px;
-          background: rgba(255,255,255,0.1);
-          border-radius: 3px;
-          overflow: hidden;
-        }
-        .progress-stat-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #7c5fe6, #2fd4ff);
-          border-radius: 3px;
-        }
-        .completed-fill {
-          background: linear-gradient(90deg, #48bb78, #38a169);
-        }
-        .onhold-fill {
-          background: linear-gradient(90deg, #f6c90e, #ecc30b);
-        }
-        .notstarted-fill {
-          background: #fc8181;
-        }
-        .avg-progress {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 0.75rem;
-          border-top: 1px solid rgba(255,255,255,0.1);
-          font-size: 0.9rem;
-        }
-        .avg-progress strong {
-          font-size: 1.2rem;
-          color: #2fd4ff;
-        }
+        .progress-stats { margin-bottom: 1rem; }
+        .progress-stat { margin-bottom: 0.75rem; }
+        .progress-stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; }
+        .progress-stat-value { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .progress-stat-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+        .progress-stat-fill { height: 100%; background: linear-gradient(90deg, #7c5fe6, #2fd4ff); border-radius: 3px; }
+        .completed-fill { background: linear-gradient(90deg, #48bb78, #38a169); }
+        .onhold-fill { background: linear-gradient(90deg, #f6c90e, #ecc30b); }
+        .notstarted-fill { background: #fc8181; }
+        .avg-progress { display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
+        .avg-progress strong { font-size: 1.2rem; color: #2fd4ff; }
 
         /* Projects List */
-        .projects-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
+        .projects-list { display: flex; flex-direction: column; gap: 1rem; }
         .project-card {
           background: rgba(255,255,255,0.03);
           border-radius: 16px;
@@ -949,68 +886,22 @@ const Dashboard = () => {
           transition: all 0.2s;
           display: block;
         }
-        .project-card:hover {
-          background: rgba(255,255,255,0.08);
-          transform: translateX(4px);
-        }
-        .project-header {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          margin-bottom: 0.75rem;
-        }
-        .project-icon {
-          font-size: 1.5rem;
-        }
-        .project-name {
-          font-weight: 600;
-        }
-        .project-sector {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.5);
-        }
-        .project-progress {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 0.5rem;
-        }
-        .progress-bar {
-          flex: 1;
-          height: 6px;
-          background: rgba(255,255,255,0.1);
-          border-radius: 3px;
-          overflow: hidden;
-        }
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #7c5fe6, #2fd4ff);
-          border-radius: 3px;
-        }
-        .progress-percent {
-          font-size: 0.75rem;
-          color: rgba(255,255,255,0.7);
-        }
-        .project-status {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 0.7rem;
-        }
-        .status-badge {
-          padding: 0.2rem 0.5rem;
-          border-radius: 20px;
-          background: rgba(255,255,255,0.1);
-        }
+        .project-card:hover { background: rgba(255,255,255,0.08); transform: translateX(4px); }
+        .project-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .project-icon { font-size: 1.5rem; }
+        .project-name { font-weight: 600; }
+        .project-sector { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+        .project-progress { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .progress-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #7c5fe6, #2fd4ff); border-radius: 3px; }
+        .progress-percent { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+        .project-status { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; }
+        .status-badge { padding: 0.2rem 0.5rem; border-radius: 20px; background: rgba(255,255,255,0.1); }
         .status-idea { background: rgba(246,201,14,0.2); color: #f6c90e; }
         .status-experiment { background: rgba(47,212,255,0.2); color: #2fd4ff; }
         .status-prototype { background: rgba(124,95,230,0.2); color: #7c5fe6; }
         .status-launched { background: rgba(72,187,120,0.2); color: #48bb78; }
-        .empty-state {
-          text-align: center;
-          color: rgba(255,255,255,0.5);
-          padding: 2rem;
-        }
+        .empty-state { text-align: center; color: rgba(255,255,255,0.5); padding: 2rem; }
         .empty-create-btn {
           display: block;
           text-align: center;
@@ -1023,46 +914,19 @@ const Dashboard = () => {
           text-decoration: none;
           transition: all 0.2s;
         }
-        .empty-create-btn:hover {
-          background: rgba(124,95,230,0.3);
-        }
+        .empty-create-btn:hover { background: rgba(124,95,230,0.3); }
 
         /* AI Insights */
         .ai-insights {
           background: linear-gradient(135deg, rgba(124,95,230,0.15), rgba(47,212,255,0.08));
           border-color: rgba(124,95,230,0.3);
         }
-        .ai-message {
-          font-size: 0.85rem;
-          line-height: 1.5;
-          margin-bottom: 1rem;
-          color: rgba(255,255,255,0.9);
-        }
-        .ai-scores {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-        .ai-score, .ai-risk {
-          flex: 1;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.5rem;
-          background: rgba(0,0,0,0.3);
-          border-radius: 12px;
-        }
-        .ai-score span, .ai-risk span {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.6);
-        }
-        .ai-score strong {
-          font-size: 1.1rem;
-          color: #2fd4ff;
-        }
-        .risk-low {
-          color: #48bb78;
-        }
+        .ai-message { font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem; color: rgba(255,255,255,0.9); }
+        .ai-scores { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .ai-score, .ai-risk { flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 12px; }
+        .ai-score span, .ai-risk span { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+        .ai-score strong { font-size: 1.1rem; color: #2fd4ff; }
+        .risk-low { color: #48bb78; }
         .ai-analyze-btn {
           display: inline-block;
           padding: 0.5rem 1rem;
@@ -1074,75 +938,24 @@ const Dashboard = () => {
           font-size: 0.75rem;
           transition: all 0.2s;
         }
-        .ai-analyze-btn:hover {
-          background: #7c5fe6;
-        }
+        .ai-analyze-btn:hover { background: #7c5fe6; }
 
         /* Activities */
-        .activities-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .activity-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-          padding-bottom: 0.75rem;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .activity-icon {
-          font-size: 1.25rem;
-        }
-        .activity-content {
-          flex: 1;
-        }
-        .activity-title {
-          font-size: 0.8rem;
-          margin-bottom: 0.2rem;
-        }
-        .activity-project {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.5);
-        }
-        .activity-time {
-          font-size: 0.6rem;
-          color: rgba(255,255,255,0.3);
-          margin-top: 0.2rem;
-        }
+        .activities-list { display: flex; flex-direction: column; gap: 1rem; }
+        .activity-item { display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .activity-icon { font-size: 1.25rem; }
+        .activity-content { flex: 1; }
+        .activity-title { font-size: 0.8rem; margin-bottom: 0.2rem; }
+        .activity-project { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+        .activity-time { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 0.2rem; }
 
         /* Graph */
-        .activity-graph {
-          padding: 1rem 0;
-        }
-        .graph-bars {
-          display: flex;
-          justify-content: space-around;
-          align-items: flex-end;
-          height: 120px;
-        }
-        .graph-bar-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          flex: 1;
-        }
-        .graph-bar {
-          width: 30px;
-          background: linear-gradient(180deg, #7c5fe6, #2fd4ff);
-          border-radius: 4px 4px 0 0;
-          transition: height 0.3s;
-        }
-        .graph-label {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.5);
-        }
-        @media (max-width: 640px) {
-          .graph-bar {
-            width: 20px;
-          }
-        }
+        .activity-graph { padding: 1rem 0; }
+        .graph-bars { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; }
+        .graph-bar-container { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex: 1; }
+        .graph-bar { width: 30px; background: linear-gradient(180deg, #7c5fe6, #2fd4ff); border-radius: 4px 4px 0 0; transition: height 0.3s; }
+        .graph-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+        @media (max-width: 640px) { .graph-bar { width: 20px; } }
 
         /* Footer */
         .dashboard-footer {
@@ -1156,17 +969,9 @@ const Dashboard = () => {
           font-size: 0.7rem;
           color: rgba(255,255,255,0.5);
         }
-        .footer-links {
-          display: flex;
-          gap: 1.5rem;
-        }
-        .footer-links a {
-          color: rgba(255,255,255,0.5);
-          text-decoration: none;
-        }
-        .footer-links a:hover {
-          color: white;
-        }
+        .footer-links { display: flex; gap: 1.5rem; }
+        .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; }
+        .footer-links a:hover { color: white; }
       `}</style>
     </div>
   );
