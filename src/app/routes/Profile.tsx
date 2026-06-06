@@ -81,7 +81,7 @@ const Sidebar = () => {
         </div>
         <nav className="sidebar-nav">
           {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className={`sidebar-link ${item.active ? 'active' : ''}`} title={collapsed ? item.label : undefined}>
+            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
             </Link>
@@ -164,13 +164,13 @@ const Profile = () => {
       setProfile(data as Profile);
       setFormData(data as Partial<Profile>);
     } else {
-      // create empty profile
-      const newProfile = {
+      // create empty profile with correct user_type typing
+      const newProfile: Profile = {
         id: session.user.id,
         full_name: session.user.user_metadata?.full_name || '',
         avatar_url: null,
         bio: null,
-        user_type: 'innovator',
+        user_type: 'innovator' as Profile['user_type'],
         location: null,
         website: null,
         twitter: null,
@@ -236,12 +236,12 @@ const Profile = () => {
           twitter: formData.twitter,
           linkedin: formData.linkedin,
           github: formData.github,
-          user_type: formData.user_type,
+          user_type: formData.user_type as Profile['user_type'],
           updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
       if (updateError) throw updateError;
-      setProfile(prev => prev ? { ...prev, ...formData } : null);
+      setProfile(prev => prev ? { ...prev, ...formData as Profile } : null);
       setSuccess('Profile updated successfully');
       setEditing(false);
     } catch (err) {
