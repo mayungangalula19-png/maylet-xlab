@@ -27,12 +27,6 @@ interface Experiment {
   user_id: string;
 }
 
-interface Project {
-  id: string;
-  name: string;
-  sector: string;
-}
-
 interface AIAnalysisResult {
   score: number;
   risk_level: 'low' | 'medium' | 'high';
@@ -304,7 +298,6 @@ const ExperimentDetail = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [experiment, setExperiment] = useState<Experiment | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
     type: 'market' as ExperimentType,
@@ -351,21 +344,9 @@ const ExperimentDetail = () => {
     setLoading(false);
   }, [id, navigate]);
 
-  const fetchProjects = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      const { data } = await supabase
-        .from('projects')
-        .select('id, name, sector')
-        .eq('user_id', session.user.id);
-      setProjects(data || []);
-    }
-  }, []);
-
   useEffect(() => {
     fetchExperiment();
-    fetchProjects();
-  }, [fetchExperiment, fetchProjects]);
+  }, [fetchExperiment]);
 
   const handleSave = async () => {
     if (!experiment) return;
