@@ -1,4 +1,4 @@
-// C:\Users\user\maylet-xlab\src\app\routes\Analytics.tsx
+// src/app/routes/Analytics.tsx
 // PROFESSIONAL ANALYTICS DASHBOARD – Stats, charts, activity timeline
 
 import { useState, useEffect, useCallback } from 'react';
@@ -18,7 +18,7 @@ import {
   PointElement,
   LineElement,
 } from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2'; // ✅ Removed unused 'Line'
 
 ChartJS.register(
   CategoryScale,
