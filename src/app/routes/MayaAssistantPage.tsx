@@ -1,8 +1,9 @@
 // C:\Users\user\maylet-xlab\src\app\routes\MayaAssistantPage.tsx
-// MAYA AI Assistant – Real AI integration with OpenRouter (free tier)
-// Supports project context, conversation memory, and streaming responses.
+// MAYA AI Assistant – Real AI integration with GROQ
+// Supports project context, conversation memory.
+// Fixed: timestamp stored as ISO string, converted to Date on load.
 
-import { useState, useEffect, useRef } from 'react'; // ✅ removed unused useCallback
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
 
@@ -20,14 +21,14 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
+  timestamp: string; // Store as ISO string for serialization
 }
 
 interface Conversation {
   id: string;
   projectId: string | null;
   messages: Message[];
-  createdAt: Date;
+  createdAt: string; // ISO string
 }
 
 // ============================================================
@@ -139,10 +140,10 @@ const Sidebar = () => {
 // ============================================================
 // HELPERS
 // ============================================================
-const getOpenRouterKey = (): string => {
-  const key = import.meta.env.VITE_OPENROUTER_API_KEY;
+const getGroqApiKey = (): string => {
+  const key = import.meta.env.VITE_GROQ_API_KEY;
   if (!key) {
-    throw new Error('Missing VITE_OPENROUTER_API_KEY in environment variables');
+    throw new Error('Missing VITE_GROQ_API_KEY in environment variables');
   }
   return key;
 };
@@ -157,6 +158,17 @@ Answer as a helpful, concise, and expert innovation advisor. Focus on practical 
   return `You are MAYA, the AI innovation co-pilot for Maylet XLab. 
 You help innovators validate ideas, run experiments, build prototypes, and secure funding. 
 Answer clearly and concisely, always suggesting next steps.`;
+};
+
+// Helper to format timestamp for display
+const formatTime = (isoString: string) => {
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleTimeString();
+  } catch {
+    return '';
+  }
 };
 
 // ============================================================
@@ -199,7 +211,7 @@ const MayaAssistantPage = () => {
     ? `Project: ${selectedProject.name}\nSector: ${selectedProject.sector}\nDescription: ${selectedProject.description}`
     : null;
 
-  // Load conversations from localStorage (or could be from Supabase)
+  // Load conversations from localStorage
   useEffect(() => {
     const stored = localStorage.getItem('maya_conversations');
     if (stored) {
@@ -230,7 +242,7 @@ const MayaAssistantPage = () => {
       id: Date.now().toString(),
       projectId: selectedProjectId,
       messages: [],
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
     setConversations(prev => [newConv, ...prev]);
     setActiveConversationId(newConv.id);
@@ -243,19 +255,18 @@ const MayaAssistantPage = () => {
       id: Date.now().toString(),
       role: 'user',
       content: input.trim(),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     // Update conversation with user message
     let currentConv = activeConversation;
     if (!currentConv) {
-      // Create a new conversation if none active
       const newId = Date.now().toString();
       currentConv = {
         id: newId,
         projectId: selectedProjectId,
         messages: [],
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       };
       setConversations(prev => [currentConv!, ...prev]);
       setActiveConversationId(newId);
@@ -272,23 +283,22 @@ const MayaAssistantPage = () => {
     setError(null);
 
     try {
-      const apiKey = getOpenRouterKey();
+      const apiKey = getGroqApiKey();
 
-      // Build messages array for API
       const systemPrompt = buildSystemPrompt(projectContext);
       const apiMessages = [
         { role: 'system', content: systemPrompt },
         ...updatedMessages.map(m => ({ role: m.role, content: m.content })),
       ];
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'deepseek/deepseek-r1:free', // free tier model
+          model: 'llama-3.3-70b-versatile',
           messages: apiMessages,
           temperature: 0.7,
           max_tokens: 1024,
@@ -307,7 +317,7 @@ const MayaAssistantPage = () => {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: assistantContent,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       };
 
       setConversations(prev =>
@@ -318,7 +328,7 @@ const MayaAssistantPage = () => {
         )
       );
     } catch (err) {
-      console.error('AI request failed:', err);
+      console.error('Groq API request failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to get response from AI');
     } finally {
       setLoading(false);
@@ -342,7 +352,6 @@ const MayaAssistantPage = () => {
         </div>
 
         <div className="maya-workspace">
-          {/* Sidebar for conversations and project selector */}
           <aside className="maya-sidebar">
             <div className="project-selector">
               <label>📁 Project Context</label>
@@ -383,7 +392,6 @@ const MayaAssistantPage = () => {
             </div>
           </aside>
 
-          {/* Chat area */}
           <div className="chat-area">
             <div className="messages-container">
               {activeConversation?.messages.length === 0 && (
@@ -403,7 +411,7 @@ const MayaAssistantPage = () => {
                   <div className="message-avatar">{msg.role === 'user' ? '👤' : '🤖'}</div>
                   <div className="message-content">
                     <div className="message-text">{msg.content}</div>
-                    <div className="message-time">{msg.timestamp.toLocaleTimeString()}</div>
+                    <div className="message-time">{formatTime(msg.timestamp)}</div>
                   </div>
                 </div>
               ))}
@@ -443,259 +451,50 @@ const MayaAssistantPage = () => {
       </main>
 
       <style>{`
-        .maya-container {
-          display: flex;
-          min-height: 100vh;
-          background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%);
-        }
-        .maya-main {
-          flex: 1;
-          margin-left: 280px;
-          padding: 2rem;
-          transition: margin-left 0.3s ease;
-        }
-        @media (max-width: 768px) {
-          .maya-main {
-            margin-left: 0;
-            padding: 1rem;
-            padding-top: 5rem;
-          }
-        }
-        .maya-header {
-          margin-bottom: 2rem;
-        }
-        .maya-header h1 {
-          font-size: 1.8rem;
-          background: linear-gradient(135deg, #fff, #9b7ff0);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
-        .maya-header p {
-          color: rgba(255,255,255,0.6);
-          margin-top: 0.25rem;
-        }
-        .maya-workspace {
-          display: flex;
-          gap: 1.5rem;
-          height: calc(100vh - 160px);
-          min-height: 500px;
-        }
-        .maya-sidebar {
-          width: 280px;
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .project-selector label {
-          font-size: 0.7rem;
-          text-transform: uppercase;
-          color: #7c5fe6;
-          letter-spacing: 1px;
-          display: block;
-          margin-bottom: 0.25rem;
-        }
-        .project-selector select {
-          width: 100%;
-          padding: 0.5rem;
-          background: rgba(0,0,0,0.5);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 12px;
-          color: white;
-        }
-        .context-hint {
-          font-size: 0.7rem;
-          color: rgba(255,255,255,0.5);
-          margin-top: 0.5rem;
-        }
-        .conversations-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 0.5rem;
-        }
-        .new-chat-btn {
-          background: #7c5fe6;
-          border: none;
-          padding: 0.2rem 0.6rem;
-          border-radius: 20px;
-          font-size: 0.7rem;
-          cursor: pointer;
-        }
-        .conversations-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          overflow-y: auto;
-        }
-        .conv-item {
-          background: rgba(255,255,255,0.05);
-          border: none;
-          border-radius: 12px;
-          padding: 0.6rem;
-          text-align: left;
-          color: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.8rem;
-        }
-        .conv-item.active {
-          background: #7c5fe6;
-        }
-        .conv-title {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .empty-conv {
-          color: rgba(255,255,255,0.4);
-          text-align: center;
-          font-size: 0.8rem;
-          padding: 1rem;
-        }
-        .chat-area {
-          flex: 1;
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
-        .messages-container {
-          flex: 1;
-          padding: 1.5rem;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .message {
-          display: flex;
-          gap: 0.75rem;
-          align-items: flex-start;
-        }
-        .message.user .message-avatar {
-          background: #7c5fe6;
-        }
-        .message.assistant .message-avatar {
-          background: #2fd4ff;
-        }
-        .message-avatar {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255,255,255,0.2);
-        }
-        .message-content {
-          flex: 1;
-          background: rgba(255,255,255,0.05);
-          padding: 0.75rem;
-          border-radius: 16px;
-        }
-        .message.user .message-content {
-          background: rgba(124,95,230,0.2);
-        }
-        .message-text {
-          white-space: pre-wrap;
-          line-height: 1.5;
-          font-size: 0.9rem;
-        }
-        .message-time {
-          font-size: 0.6rem;
-          color: rgba(255,255,255,0.4);
-          margin-top: 0.25rem;
-        }
-        .typing-indicator {
-          display: flex;
-          gap: 4px;
-          padding: 0.25rem 0;
-        }
-        .typing-indicator span {
-          width: 8px;
-          height: 8px;
-          background: white;
-          border-radius: 50%;
-          animation: bounce 1.4s infinite;
-        }
+        /* (same styles as before – omitted for brevity, but keep all existing CSS) */
+        .maya-container { display: flex; min-height: 100vh; background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%); }
+        .maya-main { flex: 1; margin-left: 280px; padding: 2rem; transition: margin-left 0.3s ease; }
+        @media (max-width: 768px) { .maya-main { margin-left: 0; padding: 1rem; padding-top: 5rem; } }
+        .maya-header { margin-bottom: 2rem; }
+        .maya-header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, #9b7ff0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .maya-header p { color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+        .maya-workspace { display: flex; gap: 1.5rem; height: calc(100vh - 160px); min-height: 500px; }
+        .maya-sidebar { width: 280px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+        .project-selector label { font-size: 0.7rem; text-transform: uppercase; color: #7c5fe6; letter-spacing: 1px; display: block; margin-bottom: 0.25rem; }
+        .project-selector select { width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; }
+        .context-hint { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; }
+        .conversations-header { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+        .new-chat-btn { background: #7c5fe6; border: none; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; cursor: pointer; }
+        .conversations-list { display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; }
+        .conv-item { background: rgba(255,255,255,0.05); border: none; border-radius: 12px; padding: 0.6rem; text-align: left; color: white; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+        .conv-item.active { background: #7c5fe6; }
+        .conv-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .empty-conv { color: rgba(255,255,255,0.4); text-align: center; font-size: 0.8rem; padding: 1rem; }
+        .chat-area { flex: 1; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+        .messages-container { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+        .message { display: flex; gap: 0.75rem; align-items: flex-start; }
+        .message.user .message-avatar { background: #7c5fe6; }
+        .message.assistant .message-avatar { background: #2fd4ff; }
+        .message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); }
+        .message-content { flex: 1; background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 16px; }
+        .message.user .message-content { background: rgba(124,95,230,0.2); }
+        .message-text { white-space: pre-wrap; line-height: 1.5; font-size: 0.9rem; }
+        .message-time { font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.25rem; }
+        .typing-indicator { display: flex; gap: 4px; padding: 0.25rem 0; }
+        .typing-indicator span { width: 8px; height: 8px; background: white; border-radius: 50%; animation: bounce 1.4s infinite; }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
-        .welcome-message {
-          text-align: center;
-          padding: 2rem;
-        }
-        .welcome-icon {
-          font-size: 3rem;
-          margin-bottom: 1rem;
-        }
-        .suggestions {
-          display: flex;
-          gap: 0.75rem;
-          justify-content: center;
-          flex-wrap: wrap;
-          margin-top: 1rem;
-        }
-        .suggestions button {
-          background: rgba(255,255,255,0.1);
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 30px;
-          color: white;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .suggestions button:hover {
-          background: #7c5fe6;
-        }
-        .input-area {
-          padding: 1rem;
-          border-top: 1px solid rgba(255,255,255,0.1);
-          display: flex;
-          gap: 1rem;
-        }
-        .input-area textarea {
-          flex: 1;
-          background: rgba(0,0,0,0.5);
-          border: 1px solid rgba(255,255,255,0.2);
-          border-radius: 20px;
-          padding: 0.75rem;
-          color: white;
-          resize: none;
-        }
-        .input-area button {
-          background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
-          border: none;
-          padding: 0 1.5rem;
-          border-radius: 40px;
-          font-weight: 600;
-          cursor: pointer;
-          color: #0a0d1a;
-        }
-        .input-area button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .error-message {
-          background: rgba(252,129,129,0.2);
-          border: 1px solid #fc8181;
-          border-radius: 12px;
-          padding: 0.75rem;
-          color: #fc8181;
-          margin: 0.5rem 0;
-        }
+        @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+        .welcome-message { text-align: center; padding: 2rem; }
+        .welcome-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .suggestions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+        .suggestions button { background: rgba(255,255,255,0.1); border: none; padding: 0.5rem 1rem; border-radius: 30px; color: white; cursor: pointer; transition: all 0.2s; }
+        .suggestions button:hover { background: #7c5fe6; }
+        .input-area { padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 1rem; }
+        .input-area textarea { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 0.75rem; color: white; resize: none; }
+        .input-area button { background: linear-gradient(135deg, #7c5fe6, #2fd4ff); border: none; padding: 0 1.5rem; border-radius: 40px; font-weight: 600; cursor: pointer; color: #0a0d1a; }
+        .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .error-message { background: rgba(252,129,129,0.2); border: 1px solid #fc8181; border-radius: 12px; padding: 0.75rem; color: #fc8181; margin: 0.5rem 0; }
       `}</style>
     </div>
   );
