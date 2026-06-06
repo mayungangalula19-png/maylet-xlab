@@ -92,7 +92,7 @@ const Sidebar = () => {
         </div>
         <nav className="sidebar-nav">
           {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className={`sidebar-link ${item.active ? 'active' : ''}`} title={collapsed ? item.label : undefined}>
+            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
             </Link>
@@ -258,10 +258,10 @@ const Messages = () => {
 
   const fetchConversations = useCallback(async () => {
     if (!currentUserId) return;
-    // Get all conversations where current user is participant
+    // Get all conversations where current user is participant, include created_at
     const { data: convData, error } = await supabase
       .from('conversations')
-      .select('id, user1_id, user2_id')
+      .select('id, user1_id, user2_id, created_at')
       .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
     if (error) return;
 
@@ -300,6 +300,7 @@ const Messages = () => {
     }));
     convList.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
     setConversations(convList);
+    setLoading(false);
   }, [currentUserId]);
 
   const fetchMessages = useCallback(async () => {
@@ -480,9 +481,9 @@ const Messages = () => {
         {showNewModal && (
           <NewConversationModal
             onClose={() => setShowNewModal(false)}
-            onConversationCreated={(convId, otherUserId) => {
+            onConversationCreated={(_convId, _otherUserId) => {
               fetchConversations();
-              setActiveConversationId(convId);
+              setActiveConversationId(_convId);
             }}
           />
         )}
