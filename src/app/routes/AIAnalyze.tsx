@@ -1,8 +1,8 @@
-// C:\Users\user\maylet-xlab\src\app\routes\AIAnalyze.tsx
+// src/app/routes/AIAnalyze.tsx
 // PROFESSIONAL AI IDEA ANALYZER – Get feasibility score, market insights, and recommendations
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
 
 // ============================================================
@@ -18,12 +18,13 @@ interface AnalysisResult {
 }
 
 // ============================================================
-// SIDEBAR (consistent with other pages)
+// SIDEBAR (with active link detection)
 // ============================================================
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // <-- for active link
 
   const mainMenu = [
     { icon: '📊', label: 'Dashboard', route: '/dashboard' },
@@ -56,6 +57,9 @@ const Sidebar = () => {
     navigate('/login');
   };
 
+  // Helper to check if a route is active
+  const isActive = (route: string) => location.pathname === route;
+
   return (
     <>
       {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
@@ -75,7 +79,12 @@ const Sidebar = () => {
         </div>
         <nav className="sidebar-nav">
           {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className={`sidebar-link ${item.active ? 'active' : ''}`} title={collapsed ? item.label : undefined}>
+            <Link
+              key={item.label}
+              to={item.route}
+              className={`sidebar-link ${isActive(item.route) ? 'active' : ''}`}
+              title={collapsed ? item.label : undefined}
+            >
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
             </Link>
@@ -84,7 +93,12 @@ const Sidebar = () => {
         <div className="sidebar-divider"></div>
         <nav className="sidebar-nav user-nav">
           {userMenu.map((item) => (
-            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
+            <Link
+              key={item.label}
+              to={item.route}
+              className={`sidebar-link ${isActive(item.route) ? 'active' : ''}`}
+              title={collapsed ? item.label : undefined}
+            >
               <span className="sidebar-icon">{item.icon}</span>
               {!collapsed && <span className="sidebar-label">{item.label}</span>}
             </Link>
@@ -124,7 +138,7 @@ const Sidebar = () => {
 };
 
 // ============================================================
-// AI ANALYZE PAGE
+// AI ANALYZE PAGE (main component)
 // ============================================================
 const AIAnalyze = () => {
   const [loading, setLoading] = useState(false);
@@ -157,7 +171,6 @@ const AIAnalyze = () => {
     setResult(null);
 
     try {
-      // Get API key from environment
       const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
       if (!apiKey) throw new Error('Missing OpenRouter API key. Please add VITE_OPENROUTER_API_KEY to .env');
 
@@ -203,7 +216,6 @@ Only output valid JSON. No extra text.
       const parsed = JSON.parse(content) as AnalysisResult;
       setResult(parsed);
 
-      // Save analysis to Supabase (optional)
       if (userId) {
         await supabase.from('ai_analyses').insert({
           user_id: userId,
