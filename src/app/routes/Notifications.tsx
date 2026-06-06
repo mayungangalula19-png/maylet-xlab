@@ -183,7 +183,7 @@ const NotificationItem = ({ notification, onRead }: { notification: Notification
 const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread' | 'ai' | 'team' | 'funding' | 'mentorship'>('all');
-  const [loading] = useState(true); // setLoading removed because it was unused
+  // loading state removed – not used
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -204,7 +204,6 @@ const Notifications = () => {
     if (!error) {
       setNotifications(data || []);
     }
-    // No setLoading(false) because loading is constant true (not used)
   }, [userId]);
 
   const markAsRead = async (notificationId: string) => {
