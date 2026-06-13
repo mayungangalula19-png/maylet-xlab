@@ -354,6 +354,67 @@ const INTEGRATIONS = [
   { label: 'Teams', desc: 'Collaboration hub', to: '/teams' },
 ];
 
+/** Innovation OS module tree under each project */
+const PROJECT_MODULES = [
+  { label: 'Research', route: (projectId: string) => `/research/${projectId}` },
+  { label: 'Prototype', route: (projectId: string) => `/prototypes?projectId=${projectId}` },
+  { label: 'Experiment', route: (projectId: string) => `/experiments?projectId=${projectId}` },
+  { label: 'Validation', route: (projectId: string) => `/validation/new?projectId=${projectId}` },
+  { label: 'Funding', route: (projectId: string) => `/funding/create?projectId=${projectId}` },
+  {
+    label: 'Commercialization',
+    route: (projectId: string) => `/commercialization?projectId=${projectId}`,
+  },
+] as const;
+
+function ProjectPipelineTree({
+  project,
+  compact = false,
+}: {
+  project: Project;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`eco-pipeline-tree ${compact ? 'eco-pipeline-tree--compact' : ''}`}>
+      <div className="eco-pipeline-tree__root">
+        <Link to={`/projects/${project.id}`}>Project · {project.name}</Link>
+        <span className="eco-muted">
+          {project.sector} · {project.progress}%
+        </span>
+      </div>
+      <ul className="eco-pipeline-tree__modules">
+        {PROJECT_MODULES.map((mod, index) => {
+          const branch = index === PROJECT_MODULES.length - 1 ? '└' : '├';
+          return (
+            <li key={mod.label}>
+              <span className="eco-pipeline-tree__branch" aria-hidden>
+                {branch}
+              </span>
+              <Link to={mod.route(project.id)}>{mod.label}</Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function StaticPipelineDiagram() {
+  return (
+    <div className="eco-pipeline-diagram" aria-label="Project pipeline structure">
+      <div className="eco-pipeline-diagram__root">Project</div>
+      <ul>
+        {PROJECT_MODULES.map((mod, index) => (
+          <li key={mod.label}>
+            <span aria-hidden>{index === PROJECT_MODULES.length - 1 ? '└' : '├'}</span>
+            {mod.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /* ─── MAYA stubs ────────────────────────────────────────────────────────── */
 
 function mayaMentorMatches(sector: string, projects: Project[]): string[] {
@@ -601,6 +662,20 @@ export default function Ecosystem() {
               <Link to="/login">Sign in</Link> to personalize matches with your projects.
             </p>
           )}
+
+          <div className="eco-maya__block eco-maya__pipeline">
+            <h3>Project pipeline</h3>
+            <StaticPipelineDiagram />
+          </div>
+
+          {userProjects.length > 0 && (
+            <div className="eco-maya__block">
+              <h3>Your projects</h3>
+              {userProjects.slice(0, 2).map((p) => (
+                <ProjectPipelineTree key={p.id} project={p} compact />
+              ))}
+            </div>
+          )}
         </aside>
 
         <main className="eco-main">
@@ -629,6 +704,24 @@ export default function Ecosystem() {
                   </Link>
                 ))}
               </div>
+
+              <h3>Project module map</h3>
+              <p className="eco-muted">
+                Every innovation project runs through the same operating system modules.
+              </p>
+              <StaticPipelineDiagram />
+
+              {userProjects.length > 0 ? (
+                <div className="eco-project-trees">
+                  {userProjects.slice(0, 4).map((p) => (
+                    <ProjectPipelineTree key={p.id} project={p} />
+                  ))}
+                </div>
+              ) : (
+                <p className="eco-muted">
+                  <Link to="/projects/create">Create a project</Link> to open module workspaces.
+                </p>
+              )}
             </section>
           )}
 
@@ -656,15 +749,26 @@ export default function Ecosystem() {
                   <strong>Document center</strong>
                   <span>Share evidence with partners</span>
                 </Link>
-                {userProjects.slice(0, 3).map((p) => (
-                  <Link key={p.id} to={`/projects/${p.id}`} className="eco-collab-card">
-                    <strong>{p.name}</strong>
-                    <span>
-                      {p.sector} · {p.progress}% progress
-                    </span>
-                  </Link>
-                ))}
               </div>
+
+              <h3>Project pipeline workspaces</h3>
+              <p className="eco-muted">
+                Jump directly into Research, Prototype, Experiment, Validation, Funding, or
+                Commercialization for each active project.
+              </p>
+              {userProjects.length > 0 ? (
+                <div className="eco-project-trees">
+                  {userProjects.map((p) => (
+                    <ProjectPipelineTree key={p.id} project={p} />
+                  ))}
+                </div>
+              ) : (
+                <p className="eco-muted">
+                  <Link to="/login">Sign in</Link> or{' '}
+                  <Link to="/projects/create">create a project</Link> to link ecosystem collaboration
+                  to pipeline modules.
+                </p>
+              )}
             </section>
           )}
 
@@ -948,6 +1052,63 @@ export default function Ecosystem() {
         }
         .eco-int-card strong { display: block; font-size: 0.85rem; color: #c7d0ff; }
         .eco-int-card span { font-size: 0.72rem; opacity: 0.65; }
+        .eco-pipeline-diagram,
+        .eco-pipeline-tree {
+          background: rgba(0,0,0,0.28);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          padding: 0.75rem 0.85rem;
+          font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+          font-size: 0.78rem;
+        }
+        .eco-pipeline-diagram__root,
+        .eco-pipeline-tree__root {
+          font-weight: 700;
+          color: #c7d0ff;
+          margin-bottom: 0.35rem;
+        }
+        .eco-pipeline-tree__root {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
+        .eco-pipeline-tree__root a {
+          color: #c7d0ff;
+          text-decoration: none;
+          font-family: inherit;
+        }
+        .eco-pipeline-diagram ul,
+        .eco-pipeline-tree__modules {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        .eco-pipeline-diagram li,
+        .eco-pipeline-tree__modules li {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+          padding: 0.18rem 0;
+          opacity: 0.88;
+        }
+        .eco-pipeline-tree__modules a {
+          color: #2fd4ff;
+          text-decoration: none;
+          font-family: inherit;
+        }
+        .eco-pipeline-tree__modules a:hover { text-decoration: underline; }
+        .eco-pipeline-tree__branch { opacity: 0.45; width: 1rem; }
+        .eco-pipeline-tree--compact {
+          margin-bottom: 0.55rem;
+          font-size: 0.7rem;
+        }
+        .eco-project-trees {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          gap: 0.65rem;
+          margin-top: 0.75rem;
+        }
+        .eco-maya__pipeline { margin-top: 0.5rem; }
         .eco-collab-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
