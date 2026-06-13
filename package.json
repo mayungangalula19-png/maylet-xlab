@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:metadata": "node --env-file=.env scripts/verify-project-metadata.mjs",
+    "verify:realtime": "node --env-file=.env scripts/verify-realtime.mjs",
+    "verify:db": "node --env-file=.env scripts/verify-project-metadata.mjs && node --env-file=.env scripts/verify-realtime.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.1",
