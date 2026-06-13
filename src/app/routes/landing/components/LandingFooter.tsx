@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../../../../components/common/BrandLogo';
-import { LandingFaq } from './LandingFaq';
-import type { FaqItem, FooterColumn } from '../landing.types';
+import type { FooterColumn } from '../landing.types';
 
 interface Props {
   columns: FooterColumn[];
-  faqItems: FaqItem[];
 }
 
-export function LandingFooter({ columns, faqItems }: Props) {
+export function LandingFooter({ columns }: Props) {
   const year = new Date().getFullYear();
 
   return (
@@ -33,19 +31,13 @@ export function LandingFooter({ columns, faqItems }: Props) {
             <ul>
               {column.links.map((link) => (
                 <li key={link.label}>
-                  {link.route.startsWith('#') ? (
-                    <a href={link.route}>{link.label}</a>
-                  ) : (
-                    <Link to={link.route}>{link.label}</Link>
-                  )}
+                  <Link to={link.route}>{link.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
-
-      <LandingFaq items={faqItems} inFooter />
 
       <div className="lp-footer__bottom">
         <span>© {year} Maylet XLab. All rights reserved.</span>

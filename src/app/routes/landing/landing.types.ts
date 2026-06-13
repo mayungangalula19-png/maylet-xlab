@@ -73,12 +73,6 @@ export interface ResourceLink {
   type: string;
 }
 
-export interface FaqItem {
-  id: string;
-  question: string;
-  answer: string;
-}
-
 export interface FooterColumn {
   title: string;
   links: { label: string; route: string }[];

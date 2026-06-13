@@ -168,6 +168,8 @@ const AdminBackup = lazy(() => import('./routes/admin/system/AdminBackup'));
 const AdminSecurity = lazy(() => import('./routes/admin/system/AdminSecurity'));
 const AdminNotifications = lazy(() => import('./routes/admin/notifications/AdminNotifications'));
 const AdminBroadcast = lazy(() => import('./routes/admin/notifications/AdminBroadcast'));
+const AdminCareers = lazy(() => import('./routes/admin/careers/AdminCareers'));
+const AdminCareerDetail = lazy(() => import('./routes/admin/careers/AdminCareerDetail'));
 
 // ============================================================
 // ADMIN ROUTE GUARD COMPONENT
@@ -436,6 +438,9 @@ export const Router = () => {
             {/* Notifications */}
             <Route path="/admin/notifications" element={<AdminNotifications />} />
             <Route path="/admin/notifications/broadcast" element={<AdminBroadcast />} />
+
+            <Route path="/admin/careers" element={<AdminCareers />} />
+            <Route path="/admin/careers/:id" element={<AdminCareerDetail />} />
           </Route>
         </Route>
 

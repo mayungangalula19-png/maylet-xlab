@@ -4,7 +4,6 @@ import {
   BLOG_PREVIEWS,
   CORE_FEATURES,
   ECOSYSTEM_PROGRAMS,
-  FAQ_ITEMS,
   FOOTER_NAV,
   INNOVATION_FLOW,
   PLATFORM_STATS,
@@ -86,7 +85,7 @@ export default function LandingPage() {
       <LandingPricing plans={PRICING_PLANS} />
       <LandingBlogResources blogPosts={BLOG_PREVIEWS} resources={RESOURCE_LINKS} />
       <LandingFinalCta isAuthenticated={!!user} />
-      <LandingFooter columns={FOOTER_NAV} faqItems={FAQ_ITEMS} />
+      <LandingFooter columns={FOOTER_NAV} />
     </div>
   );
 }

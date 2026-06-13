@@ -1,7 +1,6 @@
 import type {
   BlogPreview,
   EcosystemProgram,
-  FaqItem,
   FeatureModule,
   FlowStep,
   FooterColumn,
@@ -226,29 +225,6 @@ export const RESOURCE_LINKS: ResourceLink[] = [
   { id: 'newsletter', title: 'Newsletter', description: 'Innovation insights delivered', icon: '📧', route: '/resources/newsletter', type: 'Updates' },
 ];
 
-export const FAQ_ITEMS: FaqItem[] = [
-  {
-    id: 'faq1',
-    question: 'What is Maylet XLab?',
-    answer: 'An innovation operating system that takes you from Idea through Research, Prototype, Experiment, Validation, Funding, and Commercialization — in one workspace.',
-  },
-  {
-    id: 'faq2',
-    question: 'How does the validation gate work?',
-    answer: 'Validation aggregates evidence from your research, prototypes, and experiments, scores readiness, and produces a PASS/HOLD/FAIL decision before funding.',
-  },
-  {
-    id: 'faq3',
-    question: 'Can I collaborate with a team?',
-    answer: 'Yes. Create teams, invite members, and link teams to projects for shared workspaces and collaboration.',
-  },
-  {
-    id: 'faq4',
-    question: 'Is my intellectual property protected?',
-    answer: 'The Innovation Vault timestamps and stores your ideas and documents so you maintain a defensible record of invention.',
-  },
-];
-
 export const FOOTER_COLUMNS = {
   product: [
     { label: 'Features', route: '/features' },
@@ -269,7 +245,7 @@ export const FOOTER_COLUMNS = {
     { label: 'Cookie Policy', route: '/cookies' },
   ],
   support: [
-    { label: 'FAQ', route: '#faq' },
+    { label: 'FAQ', route: '/faq' },
     { label: 'Help Center', route: '/help' },
     { label: 'Contact Us', route: '/contact' },
     { label: 'System Status', route: '/status' },

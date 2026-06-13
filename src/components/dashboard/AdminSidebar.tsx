@@ -9,6 +9,7 @@ const adminMenu = [
   { icon: '🏠', label: 'Home', route: '/' },
   { icon: '📊', label: 'Dashboard', route: '/admin' },
   { icon: '👥', label: 'Users', route: '/admin/users' },
+  { icon: '💼', label: 'Careers', route: '/admin/careers' },
   { icon: '💡', label: 'Innovators', route: '/admin/innovators' },
   { icon: '🎓', label: 'Mentors', route: '/admin/mentors' },
   { icon: '💰', label: 'Investors', route: '/admin/investors' },
