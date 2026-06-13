@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
+import { BrandLogo } from '../../components/common/BrandLogo';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -101,7 +102,9 @@ const VerifyEmail = () => {
       <div className="verify-email-container">
         {/* Logo */}
         <div className="logo-section">
-          <div className="logo-icon">✉️</div>
+          <div className="logo-icon">
+            <BrandLogo to="/" size="lg" />
+          </div>
           <h1>Email Verification</h1>
         </div>
 
@@ -168,7 +171,8 @@ const VerifyEmail = () => {
           margin-bottom: 2rem;
         }
         .logo-icon {
-          font-size: 3rem;
+          display: flex;
+          justify-content: center;
           margin-bottom: 0.5rem;
         }
         .verify-email-container h1 {

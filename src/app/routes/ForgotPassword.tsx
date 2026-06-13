@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
+import { BrandLogo } from '../../components/common/BrandLogo';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -27,7 +28,9 @@ const ForgotPassword = () => {
   return (
     <div className="forgot-password-page">
       <div className="forgot-password-container">
-        <div className="logo-icon">🔐</div>
+        <div className="logo-icon">
+          <BrandLogo to="/" size="lg" />
+        </div>
         <h1>Forgot Password?</h1>
         <p>Enter your email address and we'll send you a link to reset your password.</p>
         
@@ -73,7 +76,8 @@ const ForgotPassword = () => {
           text-align: center;
         }
         .logo-icon {
-          font-size: 3rem;
+          display: flex;
+          justify-content: center;
           margin-bottom: 1rem;
         }
         h1 {

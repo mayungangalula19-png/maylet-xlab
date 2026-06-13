@@ -1,9 +1,9 @@
-﻿// C:\Users\user\maylet-xlab\src\app\routes\admin\reports\AdminReports.tsx
+// C:\Users\user\maylet-xlab\src\app\routes\admin\reports\AdminReports.tsx
 // FULL ADMIN REPORTS PAGE - GENERATE AND EXPORT REPORTS
 // WITH PDF, CSV, EXCEL EXPORT AND ANALYTICS DASHBOARD
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../../lib/supabase/client';
 
 // ============================================================
@@ -28,114 +28,6 @@ interface ReportData {
   projectsBySector: Record<string, number>;
   revenueByMonth: { month: string; amount: number }[];
 }
-
-// ============================================================
-// SIDEBAR COMPONENT
-// ============================================================
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const mainMenu = [
-    { icon: '📊', label: 'Dashboard', route: '/admin' },
-    { icon: '👥', label: 'Users', route: '/admin/users' },
-    { icon: '💡', label: 'Innovators', route: '/admin/innovators' },
-    { icon: '🎓', label: 'Mentors', route: '/admin/mentors' },
-    { icon: '💰', label: 'Investors', route: '/admin/investors' },
-    { icon: '📁', label: 'Projects', route: '/admin/projects' },
-    { icon: '🧪', label: 'Experiments', route: '/admin/experiments' },
-    { icon: '📦', label: 'Prototypes', route: '/admin/prototypes' },
-    { icon: '🔐', label: 'Innovation Vault', route: '/admin/vault' },
-    { icon: '📊', label: 'Subscriptions', route: '/admin/subscriptions' },
-    { icon: '💵', label: 'Payments', route: '/admin/payments' },
-    { icon: '📈', label: 'Analytics', route: '/admin/analytics' },
-    { icon: '🤖', label: 'AI Monitor', route: '/admin/ai-monitor' },
-    { icon: '📄', label: 'Reports', route: '/admin/reports', active: true },
-    { icon: '🔔', label: 'Notifications', route: '/admin/notifications' },
-    { icon: '🛡️', label: 'Security', route: '/admin/security' },
-    { icon: '⚖️', label: 'Moderation', route: '/admin/moderation' },
-    { icon: '📡', label: 'System Monitor', route: '/admin/system-monitor' },
-    { icon: '⚙️', label: 'Settings', route: '/admin/settings' },
-  ];
-
-  const userMenu = [
-    { icon: '🔔', label: 'Notifications', route: '/notifications' },
-    { icon: '⚙️', label: 'Settings', route: '/settings' },
-    { icon: '👤', label: 'Profile', route: '/profile' },
-  ];
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
-
-  return (
-    <>
-      {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
-      <button className="mobile-sidebar-toggle" onClick={() => setMobileOpen(!mobileOpen)}>☰</button>
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-logo">
-          <div className="logo-icon">✦</div>
-          {!collapsed && (
-            <div className="logo-text">
-              <div className="logo-title">MAYLET X LAB</div>
-              <div className="logo-tagline">Admin Portal</div>
-            </div>
-          )}
-          <button className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? '▶' : '◀'}
-          </button>
-        </div>
-        <nav className="sidebar-nav">
-          {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className={`sidebar-link ${item.active ? 'active' : ''}`} title={collapsed ? item.label : undefined}>
-              <span className="sidebar-icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar-label">{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
-        <div className="sidebar-divider"></div>
-        <nav className="sidebar-nav user-nav">
-          {userMenu.map((item) => (
-            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
-              <span className="sidebar-icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar-label">{item.label}</span>}
-            </Link>
-          ))}
-          <button onClick={handleLogout} className="sidebar-link logout-link">
-            <span className="sidebar-icon">🚪</span>
-            {!collapsed && <span className="sidebar-label">Sign Out</span>}
-          </button>
-        </nav>
-      </aside>
-      <style>{`
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
-        .mobile-sidebar-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 100; background: #7c5fe6; border: none; color: white; font-size: 1.5rem; width: 48px; height: 48px; border-radius: 12px; cursor: pointer; }
-        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; background: #0a0d1a; color: rgba(255,255,255,0.7); display: flex; flex-direction: column; z-index: 99; transition: width 0.3s ease; overflow-y: auto; overflow-x: hidden; width: 280px; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
-        .sidebar.collapsed { width: 80px; }
-        .sidebar-logo { padding: 1.5rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .logo-icon { font-size: 2rem; font-weight: bold; background: linear-gradient(135deg, #7c5fe6, #2fd4ff); -webkit-background-clip: text; background-clip: text; color: transparent; min-width: 40px; text-align: center; }
-        .logo-title { font-weight: 700; font-size: 1rem; color: white; }
-        .logo-tagline { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
-        .sidebar-toggle { position: absolute; right: 0.5rem; background: rgba(255,255,255,0.1); border: none; color: white; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; }
-        .sidebar-nav { flex: 1; padding: 1rem 0; }
-        .sidebar-link { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.2s; margin: 0.25rem 0.5rem; border-radius: 12px; background: none; border: none; width: calc(100% - 1rem); cursor: pointer; font-size: 0.9rem; }
-        .sidebar-link:hover { background: rgba(124,95,230,0.2); color: white; }
-        .sidebar-link.active { background: #7c5fe6; color: white; }
-        .sidebar-icon { font-size: 1.25rem; min-width: 24px; text-align: center; }
-        .sidebar-label { font-size: 0.85rem; white-space: nowrap; }
-        .sidebar.collapsed .sidebar-label { display: none; }
-        .sidebar.collapsed .sidebar-link { justify-content: center; padding: 0.75rem; }
-        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem; }
-        .user-nav { margin-bottom: 1rem; }
-        .logout-link { color: #fc8181; }
-        .logout-link:hover { background: rgba(252,129,129,0.2); color: #fc8181; }
-        @media (max-width: 768px) { .mobile-sidebar-toggle { display: block; } .sidebar { transform: translateX(-100%); width: 280px; } .sidebar.mobile-open { transform: translateX(0); } .sidebar-overlay { display: block; } }
-      `}</style>
-    </>
-  );
-};
 
 // ============================================================
 // REPORT CARD COMPONENT
@@ -198,77 +90,49 @@ const AdminReports = () => {
       const now = new Date();
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-      // Total Users
-      const { count: totalUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      // Total Projects
-      const { count: totalProjects } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true });
+      // All report queries run in parallel instead of sequentially
+      const [
+        { count: totalUsers },
+        { count: totalProjects },
+        { count: totalExperiments },
+        { count: totalPrototypes },
+        { data: payments },
+        { count: newUsersThisMonth },
+        { count: newProjectsThisMonth },
+        { count: activeUsers },
+        { data: projectsMetaData },
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('projects').select('*', { count: 'exact', head: true }),
+        supabase.from('experiments').select('*', { count: 'exact', head: true }),
+        supabase.from('prototypes').select('*', { count: 'exact', head: true }),
+        supabase.from('payments').select('amount, created_at'),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
+        supabase.from('projects').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', sevenDaysAgo.toISOString()),
+        supabase.from('projects').select('status, sector'),
+      ]);
 
-      // Total Experiments
-      const { count: totalExperiments } = await supabase
-        .from('experiments')
-        .select('*', { count: 'exact', head: true });
-
-      // Total Prototypes
-      const { count: totalPrototypes } = await supabase
-        .from('prototypes')
-        .select('*', { count: 'exact', head: true });
-
-      // Total Revenue
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('amount, created_at');
-      
       const totalRevenue = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
 
       // Monthly Revenue
       const monthlyRevenue = payments?.filter(p => new Date(p.created_at) >= firstDayOfMonth)
         .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
 
-      // New Users This Month
-      const { count: newUsersThisMonth } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', firstDayOfMonth.toISOString());
-
-      // New Projects This Month
-      const { count: newProjectsThisMonth } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', firstDayOfMonth.toISOString());
-
-      // Active Users (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
-      const { count: activeUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_active', sevenDaysAgo.toISOString());
-
-      // Projects by Status
-      const { data: projectsByStatusData } = await supabase
-        .from('projects')
-        .select('status');
-      
+      // Projects by Status (single status+sector query shared by both breakdowns)
       const projectsByStatus = {
-        idea: projectsByStatusData?.filter(p => p.status === 'Idea').length || 0,
-        experiment: projectsByStatusData?.filter(p => p.status === 'Experiment').length || 0,
-        prototype: projectsByStatusData?.filter(p => p.status === 'Prototype').length || 0,
-        launched: projectsByStatusData?.filter(p => p.status === 'Launched').length || 0,
+        idea: projectsMetaData?.filter(p => p.status === 'Idea').length || 0,
+        experiment: projectsMetaData?.filter(p => p.status === 'Experiment').length || 0,
+        prototype: projectsMetaData?.filter(p => p.status === 'Prototype').length || 0,
+        launched: projectsMetaData?.filter(p => p.status === 'Launched').length || 0,
       };
 
       // Projects by Sector
-      const { data: projectsBySectorData } = await supabase
-        .from('projects')
-        .select('sector');
-      
       const projectsBySector: Record<string, number> = {};
-      projectsBySectorData?.forEach(p => {
+      projectsMetaData?.forEach(p => {
         if (p.sector) {
           projectsBySector[p.sector] = (projectsBySector[p.sector] || 0) + 1;
         }
@@ -449,7 +313,6 @@ const AdminReports = () => {
   if (loading) {
     return (
       <div className="admin-reports-container">
-        <Sidebar />
         <main className="admin-reports-main">
           <div className="loading-container">
             <div className="loading-spinner"></div>
@@ -462,7 +325,6 @@ const AdminReports = () => {
 
   return (
     <div className="admin-reports-container">
-      <Sidebar />
       
       <main className="admin-reports-main">
         {/* Header */}
@@ -692,7 +554,7 @@ const AdminReports = () => {
         
         .admin-reports-main {
           flex: 1;
-          margin-left: 280px;
+          margin-left: 0;
           padding: 2rem;
           transition: margin-left 0.3s ease;
         }

@@ -3,6 +3,7 @@
 
 import { Link } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
+import { BrandLogo } from '../../components/common/BrandLogo';
 
 // ============================================================
 // TYPES
@@ -218,8 +219,7 @@ const LandingPage = () => {
       {/* ========== NAVIGATION ========== */}
       <header className={`landing-header ${scrolled ? 'scrolled' : ''}`}>
         <Link to="/" className="landing-brand">
-          {/* Logo image added here */}
-          <img src="/images/logo.jpeg" alt="Maylet XLab Logo" className="brand-logo-img" />
+          <BrandLogo size="md" eager className="brand-logo-img" />
           <div className="brand-copy">
             <div className="brand-title">Maylet <span>XLab</span></div>
             <div className="brand-note">Innovation OS</div>
@@ -509,7 +509,10 @@ const LandingPage = () => {
       <footer className="footer">
         <div className="footer-top">
           <div className="footer-brand">
-            <div className="footer-logo">Maylet XLab</div>
+            <div className="footer-logo-row">
+              <BrandLogo to="/" size="sm" />
+              <div className="footer-logo">Maylet XLab</div>
+            </div>
             <p>Innovation Operating System<br />for Africa and beyond.</p>
             <div className="footer-social">
               <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -771,6 +774,7 @@ const LandingPage = () => {
         
         .footer { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
         .footer-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem; margin-bottom: 2rem; }
+        .footer-logo-row { display: flex; align-items: center; gap: 0.6rem; }
         .footer-brand p { color: rgba(255,255,255,0.6); font-size: 0.75rem; margin-top: 0.5rem; }
         .footer-social { display: flex; gap: 1rem; margin-top: 1rem; }
         .footer-social a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.8rem; }

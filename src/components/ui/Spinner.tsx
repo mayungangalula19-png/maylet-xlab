@@ -1,1 +1,1 @@
-export const Spinner = () => { return <div>Loading...</div>; };
+export { Spinner } from '../../modules/shared/components/ui/Spinner';

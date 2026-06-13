@@ -1,1 +1,1 @@
-export const LoadingSpinner = () => { return <div style={{ textAlign: 'center', padding: '2rem' }}>Loading...</div>; };
+export { LoadingSpinner } from '../../modules/shared/components/common/LoadingSpinner';

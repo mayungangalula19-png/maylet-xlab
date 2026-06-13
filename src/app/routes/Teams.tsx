@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
+import { fetchProjectNames, fetchUserTeamIds } from '../../lib/supabase/dbHelpers';
 
 // ============================================================
 // TYPES
@@ -15,8 +16,8 @@ interface Team {
   description: string;
   project_id: string | null;
   project_name?: string;
-  created_by: string;
-  created_by_name: string;
+  owner_id: string;
+  owner_name: string;
   member_count: number;
   created_at: string;
   updated_at: string;
@@ -46,112 +47,6 @@ interface Project {
   name: string;
   user_id: string;
 }
-
-// ============================================================
-// SIDEBAR COMPONENT
-// ============================================================
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const mainMenu = [
-    { icon: '📊', label: 'Dashboard', route: '/dashboard' },
-    { icon: '📁', label: 'Projects', route: '/projects' },
-    { icon: '🧪', label: 'Experiments', route: '/experiments' },
-    { icon: '🤖', label: 'AI Assistant', route: '/ai-assistant' },
-    { icon: '📦', label: 'Prototypes', route: '/prototypes' },
-    { icon: '👥', label: 'Teams', route: '/teams', active: true },
-    { icon: '📄', label: 'Documents', route: '/documents' },
-    { icon: '🔐', label: 'Innovation Vault', route: '/vault' },
-    { icon: '💰', label: 'Funding Hub', route: '/funding' },
-    { icon: '🎓', label: 'Mentorship', route: '/mentorship' },
-    { icon: '🏢', label: 'Enterprise', route: '/enterprise' },
-    { icon: '🏆', label: 'Hackathons', route: '/hackathons' },
-    { icon: '📚', label: 'Learning Hub', route: '/learning' },
-    { icon: '📈', label: 'Analytics', route: '/analytics' },
-    { icon: '🛒', label: 'Marketplace', route: '/marketplace' },
-    { icon: '💬', label: 'Feedback', route: '/feedback' },
-    { icon: '🛠️', label: 'Help & Support', route: '/help' },
-  ];
-
-  const userMenu = [
-    { icon: '🔔', label: 'Notifications', route: '/notifications' },
-    { icon: '⚙️', label: 'Settings', route: '/settings' },
-    { icon: '👤', label: 'Profile', route: '/profile' },
-  ];
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
-
-  return (
-    <>
-      {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
-      <button className="mobile-sidebar-toggle" onClick={() => setMobileOpen(!mobileOpen)}>☰</button>
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-logo">
-          <div className="logo-icon">✦</div>
-          {!collapsed && (
-            <div className="logo-text">
-              <div className="logo-title">MAYLET X LAB</div>
-              <div className="logo-tagline">Innovate. Build. Scale.</div>
-            </div>
-          )}
-          <button className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? '▶' : '◀'}
-          </button>
-        </div>
-        <nav className="sidebar-nav">
-          {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className={`sidebar-link ${item.active ? 'active' : ''}`} title={collapsed ? item.label : undefined}>
-              <span className="sidebar-icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar-label">{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
-        <div className="sidebar-divider"></div>
-        <nav className="sidebar-nav user-nav">
-          {userMenu.map((item) => (
-            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
-              <span className="sidebar-icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar-label">{item.label}</span>}
-            </Link>
-          ))}
-          <button onClick={handleLogout} className="sidebar-link logout-link">
-            <span className="sidebar-icon">🚪</span>
-            {!collapsed && <span className="sidebar-label">Sign Out</span>}
-          </button>
-        </nav>
-      </aside>
-      <style>{`
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
-        .mobile-sidebar-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 100; background: #7c5fe6; border: none; color: white; font-size: 1.5rem; width: 48px; height: 48px; border-radius: 12px; cursor: pointer; }
-        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; background: #0a0d1a; color: rgba(255,255,255,0.7); display: flex; flex-direction: column; z-index: 99; transition: width 0.3s ease; overflow-y: auto; overflow-x: hidden; width: 280px; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
-        .sidebar.collapsed { width: 80px; }
-        .sidebar-logo { padding: 1.5rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .logo-icon { font-size: 2rem; font-weight: bold; background: linear-gradient(135deg, #7c5fe6, #2fd4ff); -webkit-background-clip: text; background-clip: text; color: transparent; min-width: 40px; text-align: center; }
-        .logo-title { font-weight: 700; font-size: 1rem; color: white; }
-        .logo-tagline { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
-        .sidebar-toggle { position: absolute; right: 0.5rem; background: rgba(255,255,255,0.1); border: none; color: white; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; }
-        .sidebar-nav { flex: 1; padding: 1rem 0; }
-        .sidebar-link { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.2s; margin: 0.25rem 0.5rem; border-radius: 12px; background: none; border: none; width: calc(100% - 1rem); cursor: pointer; font-size: 0.9rem; }
-        .sidebar-link:hover { background: rgba(124,95,230,0.2); color: white; }
-        .sidebar-link.active { background: #7c5fe6; color: white; }
-        .sidebar-icon { font-size: 1.25rem; min-width: 24px; text-align: center; }
-        .sidebar-label { font-size: 0.85rem; white-space: nowrap; }
-        .sidebar.collapsed .sidebar-label { display: none; }
-        .sidebar.collapsed .sidebar-link { justify-content: center; padding: 0.75rem; }
-        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem; }
-        .user-nav { margin-bottom: 1rem; }
-        .logout-link { color: #fc8181; }
-        .logout-link:hover { background: rgba(252,129,129,0.2); color: #fc8181; }
-        @media (max-width: 768px) { .mobile-sidebar-toggle { display: block; } .sidebar { transform: translateX(-100%); width: 280px; } .sidebar.mobile-open { transform: translateX(0); } .sidebar-overlay { display: block; } }
-      `}</style>
-    </>
-  );
-};
 
 // ============================================================
 // TEAM CARD COMPONENT
@@ -245,7 +140,7 @@ const TeamDetailModal = ({ team, members, activities, onClose, onInvite, onRemov
               </div>
             )}
             <div className="team-meta">
-              <span>Created by {team.created_by_name}</span>
+              <span>Created by {team.owner_name}</span>
               <span>on {new Date(team.created_at).toLocaleDateString()}</span>
             </div>
           </div>
@@ -482,7 +377,6 @@ const Teams = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState('');
-  const [currentUserName, setCurrentUserName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
@@ -492,7 +386,6 @@ const Teams = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setCurrentUserId(session.user.id);
-        setCurrentUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User');
       } else {
         navigate('/login');
       }
@@ -507,12 +400,7 @@ const Teams = () => {
 
     try {
       // Get teams where user is a member
-      const { data: teamMemberships } = await supabase
-        .from('team_members')
-        .select('team_id')
-        .eq('user_id', currentUserId);
-
-      const teamIds = teamMemberships?.map(tm => tm.team_id) || [];
+      const teamIds = await fetchUserTeamIds(currentUserId);
 
       if (teamIds.length === 0) {
         setTeams([]);
@@ -523,18 +411,34 @@ const Teams = () => {
       // Get team details
       const { data: teamsData } = await supabase
         .from('teams')
-        .select('*, projects(name)')
+        .select('*')
         .in('id', teamIds)
         .order('created_at', { ascending: false });
 
-      const formattedTeams: Team[] = (teamsData || []).map(team => ({
+      const projectIds = (teamsData ?? [])
+        .map((team) => team.project_id as string | null)
+        .filter(Boolean) as string[];
+      const projectNames = await fetchProjectNames(projectIds);
+
+      const ownerIds = [...new Set((teamsData ?? []).map((t) => t.owner_id as string))];
+      const { data: owners } = ownerIds.length
+        ? await supabase.from('profiles').select('id, full_name, email').in('id', ownerIds)
+        : { data: [] };
+      const ownerMap = new Map(
+        (owners ?? []).map((o) => [
+          o.id as string,
+          (o.full_name as string) || (o.email as string)?.split('@')[0] || 'Unknown',
+        ])
+      );
+
+      const formattedTeams: Team[] = (teamsData || []).map((team) => ({
         id: team.id,
         name: team.name,
         description: team.description,
         project_id: team.project_id,
-        project_name: team.projects?.name,
-        created_by: team.created_by,
-        created_by_name: team.created_by_name,
+        project_name: team.project_id ? projectNames.get(team.project_id as string) : undefined,
+        owner_id: team.owner_id,
+        owner_name: ownerMap.get(team.owner_id as string) ?? 'Unknown',
         member_count: 0,
         created_at: team.created_at,
         updated_at: team.updated_at,
@@ -582,12 +486,26 @@ const Teams = () => {
       // Fetch activities
       const { data: activitiesData } = await supabase
         .from('team_activities')
-        .select('*')
+        .select('*, profiles(full_name, email)')
         .eq('team_id', teamId)
         .order('created_at', { ascending: false })
         .limit(20);
 
-      setTeamActivities(activitiesData || []);
+      const formattedActivities: TeamActivity[] = (activitiesData ?? []).map((row) => {
+        const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        return {
+          id: row.id,
+          team_id: row.team_id,
+          user_name:
+            (profile as { full_name?: string; email?: string } | null)?.full_name ||
+            (profile as { email?: string } | null)?.email?.split('@')[0] ||
+            'Team member',
+          action: row.action,
+          created_at: row.created_at,
+        };
+      });
+
+      setTeamActivities(formattedActivities);
     } catch (error) {
       console.error('Error fetching team details:', error);
     }
@@ -605,30 +523,23 @@ const Teams = () => {
           name,
           description,
           project_id: projectId,
-          created_by: session.user.id,
-          created_by_name: currentUserName,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          owner_id: session.user.id,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Add creator as owner
       await supabase.from('team_members').insert({
         team_id: teamData.id,
         user_id: session.user.id,
         role: 'owner',
-        joined_at: new Date().toISOString(),
       });
 
-      // Log activity
       await supabase.from('team_activities').insert({
         team_id: teamData.id,
-        user_name: currentUserName,
+        user_id: session.user.id,
         action: 'created the team',
-        created_at: new Date().toISOString(),
       });
 
       await fetchTeams();
@@ -672,15 +583,14 @@ const Teams = () => {
         team_id: teamId,
         user_id: userData.id,
         role: role,
-        joined_at: new Date().toISOString(),
       });
 
-      // Log activity
+      const { data: { session } } = await supabase.auth.getSession();
       await supabase.from('team_activities').insert({
         team_id: teamId,
-        user_name: currentUserName,
+        user_id: session?.user.id ?? null,
         action: `invited ${userData.full_name || email} as ${role}`,
-        created_at: new Date().toISOString(),
+        details: { invited_user_id: userData.id, role },
       });
 
       // Refresh team details
@@ -698,11 +608,11 @@ const Teams = () => {
       await supabase.from('team_members').delete().eq('id', memberId);
 
       // Log activity
+      const { data: { session } } = await supabase.auth.getSession();
       await supabase.from('team_activities').insert({
         team_id: teamId,
-        user_name: currentUserName,
+        user_id: session?.user.id ?? null,
         action: `removed ${memberName} from the team`,
-        created_at: new Date().toISOString(),
       });
 
       await fetchTeamDetails(teamId);
@@ -718,11 +628,12 @@ const Teams = () => {
       await supabase.from('team_members').update({ role: newRole }).eq('id', memberId);
 
       // Log activity
+      const { data: { session } } = await supabase.auth.getSession();
       await supabase.from('team_activities').insert({
         team_id: teamId,
-        user_name: currentUserName,
+        user_id: session?.user.id ?? null,
         action: `changed ${memberName}'s role to ${newRole}`,
-        created_at: new Date().toISOString(),
+        details: { role: newRole },
       });
 
       await fetchTeamDetails(teamId);
@@ -771,7 +682,6 @@ const Teams = () => {
   if (loading) {
     return (
       <div className="teams-container">
-        <Sidebar />
         <main className="teams-main">
           <div className="loading-container">
             <div className="loading-spinner"></div>
@@ -784,7 +694,6 @@ const Teams = () => {
 
   return (
     <div className="teams-container">
-      <Sidebar />
       
       <main className="teams-main">
         {/* Header */}
@@ -829,7 +738,7 @@ const Teams = () => {
                 team={team}
                 onView={handleViewTeam}
                 onDelete={(id) => setShowDeleteModal(id)}
-                isOwner={team.created_by === currentUserId}
+                isOwner={team.owner_id === currentUserId}
               />
             ))}
           </div>
@@ -886,7 +795,7 @@ const Teams = () => {
         
         .teams-main {
           flex: 1;
-          margin-left: 280px;
+          margin-left: 0;
           padding: 2rem;
           transition: margin-left 0.3s ease;
         }

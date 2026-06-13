@@ -1,1 +1,9 @@
-export interface Project { id: string; user_id: string; name: string; description: string | null; progress_score: number; status: 'idea' | 'experiment' | 'prototype' | 'launched'; created_at: string; }
+export type {
+  ProjectViewModel as Project,
+  ProjectStatus,
+  ProjectStatusDb,
+  ProjectRecord,
+  ProjectStats,
+  ProjectPriority,
+  ProjectViewModel,
+} from '../modules/projects/types';

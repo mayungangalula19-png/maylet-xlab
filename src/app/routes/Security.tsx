@@ -444,7 +444,7 @@ const Security = () => {
               <>
                 <p>Scan the QR code below with your authenticator app (Google Authenticator, Microsoft Authenticator, or Authy).</p>
                 <div className="qr-code">
-                  <img src={qrCode} alt="2FA QR Code" />
+                  <img loading="lazy" decoding="async" src={qrCode} alt="2FA QR Code" />
                 </div>
                 <p>Or enter this code manually: <code>ABCD EFGH IJKL MNOP</code></p>
                 <div className="form-group">

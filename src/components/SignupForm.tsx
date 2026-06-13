@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase/client';
+import { BrandLogo } from './common/BrandLogo';
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -12,16 +13,31 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [organizationName, setOrganizationName] = useState('');
   const [userType, setUserType] = useState('student');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizePhone = (value: string) => value.replace(/[\s\-()]/g, '').trim();
+
   const handleEmailSignup = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const phoneNormalized = normalizePhone(phone);
+    if (!phoneNormalized) {
+      setError('Phone number is required');
+      return;
+    }
+    if (!/^\+?\d{8,15}$/.test(phoneNormalized)) {
+      setError('Enter a valid phone number (8–15 digits, optional + prefix)');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -47,6 +63,7 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
             full_name: fullName,
             user_type: userType,
             organization_name: organizationName,
+            phone: phoneNormalized,
           },
         },
       });
@@ -62,12 +79,21 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
             full_name: fullName,
             organization_name: organizationName,
             user_type: userType,
+            phone: phoneNormalized,
             is_student: userType === 'student',
             created_at: new Date().toISOString(),
           });
         if (profileError) {
           console.warn('Profile insert warning:', profileError);
         }
+
+        await supabase
+          .from('profiles')
+          .update({ phone: phoneNormalized, updated_at: new Date().toISOString() })
+          .eq('id', authData.user.id)
+          .then(({ error: phoneErr }) => {
+            if (phoneErr) console.warn('Phone profile update:', phoneErr.message);
+          });
       }
 
       alert('Registration successful! Please check your email for confirmation.');
@@ -101,6 +127,9 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
   return (
     <div className="signup-form-container">
       <form onSubmit={handleEmailSignup} className="signup-form">
+        <div className="form-brand">
+          <BrandLogo to="/" size="lg" />
+        </div>
         <h2 className="form-title">Create account</h2>
         <p className="form-subtitle">Join Maylet XLab's innovation ecosystem</p>
 
@@ -132,6 +161,20 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
         </div>
 
         <div className="input-group">
+          <label htmlFor="phone">Phone number</label>
+          <input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            placeholder="+255 712 345 678"
+            autoComplete="tel"
+          />
+          <p className="hint">Include country code if outside Tanzania (e.g. +255...)</p>
+        </div>
+
+        <div className="input-group">
           <label htmlFor="organizationName">Organization / University (optional)</label>
           <input
             id="organizationName"
@@ -160,28 +203,50 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
 
         <div className="input-group">
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-            minLength={6}
-          />
+          <div className="password-input-wrapper">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              minLength={6}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
           <p className="hint">At least 6 characters</p>
         </div>
 
         <div className="input-group">
           <label htmlFor="confirmPassword">Confirm password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-          />
+          <div className="password-input-wrapper">
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
         </div>
 
         <div className="checkbox-group">
@@ -275,6 +340,11 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
           box-shadow: 0 8px 24px rgba(0,0,0,0.3);
           color: #ffffff;
         }
+        .form-brand {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1.25rem;
+        }
         .form-title {
           font-size: 1.8rem;
           font-weight: 700;
@@ -319,6 +389,29 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
         .select-input:focus {
           outline: none;
           border-color: #7c5fe6;
+        }
+        .password-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .password-input-wrapper input {
+          padding-right: 4.5rem;
+        }
+        .password-toggle {
+          position: absolute;
+          right: 0.5rem;
+          background: none;
+          border: none;
+          color: #9b7ff0;
+          font-size: 0.75rem;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 0.35rem 0.5rem;
+          border-radius: 0.35rem;
+        }
+        .password-toggle:hover {
+          background: rgba(124, 95, 230, 0.15);
         }
         .hint {
           font-size: 0.7rem;

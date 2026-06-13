@@ -1,1 +1,7 @@
-export const config = { appName: 'Maylet XLab', version: '1.0.0' };
+import { BRAND } from './branding';
+
+export const config = {
+  appName: BRAND.name,
+  version: '1.0.0',
+  logoSrc: BRAND.logoSrc,
+};

@@ -2,7 +2,7 @@
 // PROFESSIONAL DIRECT MESSAGING – Conversations, real-time, unread counts
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
 
 // ============================================================
@@ -33,112 +33,6 @@ interface Message {
   read: boolean;
   created_at: string;
 }
-
-// ============================================================
-// SIDEBAR (consistent with other pages)
-// ============================================================
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const mainMenu = [
-    { icon: '📊', label: 'Dashboard', route: '/dashboard' },
-    { icon: '📁', label: 'Projects', route: '/projects' },
-    { icon: '🧪', label: 'Experiments', route: '/experiments' },
-    { icon: '🤖', label: 'AI Assistant', route: '/ai-assistant' },
-    { icon: '📦', label: 'Prototypes', route: '/prototypes' },
-    { icon: '👥', label: 'Teams', route: '/teams' },
-    { icon: '📄', label: 'Documents', route: '/documents' },
-    { icon: '🔐', label: 'Innovation Vault', route: '/vault' },
-    { icon: '💰', label: 'Funding Hub', route: '/funding' },
-    { icon: '🎓', label: 'Mentorship', route: '/mentorship' },
-    { icon: '🏢', label: 'Enterprise', route: '/enterprise' },
-    { icon: '🏆', label: 'Hackathons', route: '/hackathons' },
-    { icon: '📚', label: 'Learning Hub', route: '/learning' },
-    { icon: '📈', label: 'Analytics', route: '/analytics' },
-    { icon: '🛒', label: 'Marketplace', route: '/marketplace' },
-    { icon: '💬', label: 'Feedback', route: '/feedback' },
-    { icon: '🛠️', label: 'Help & Support', route: '/help' },
-  ];
-
-  const userMenu = [
-    { icon: '🔔', label: 'Notifications', route: '/notifications' },
-    { icon: '⚙️', label: 'Settings', route: '/settings' },
-    { icon: '👤', label: 'Profile', route: '/profile' },
-  ];
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
-
-  return (
-    <>
-      {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
-      <button className="mobile-sidebar-toggle" onClick={() => setMobileOpen(!mobileOpen)}>☰</button>
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-logo">
-          <div className="logo-icon">✦</div>
-          {!collapsed && (
-            <div className="logo-text">
-              <div className="logo-title">MAYLET X LAB</div>
-              <div className="logo-tagline">Innovate. Build. Scale.</div>
-            </div>
-          )}
-          <button className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? '▶' : '◀'}
-          </button>
-        </div>
-        <nav className="sidebar-nav">
-          {mainMenu.map((item) => (
-            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
-              <span className="sidebar-icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar-label">{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
-        <div className="sidebar-divider"></div>
-        <nav className="sidebar-nav user-nav">
-          {userMenu.map((item) => (
-            <Link key={item.label} to={item.route} className="sidebar-link" title={collapsed ? item.label : undefined}>
-              <span className="sidebar-icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar-label">{item.label}</span>}
-            </Link>
-          ))}
-          <button onClick={handleLogout} className="sidebar-link logout-link">
-            <span className="sidebar-icon">🚪</span>
-            {!collapsed && <span className="sidebar-label">Sign Out</span>}
-          </button>
-        </nav>
-      </aside>
-      <style>{`
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
-        .mobile-sidebar-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 100; background: #7c5fe6; border: none; color: white; font-size: 1.5rem; width: 48px; height: 48px; border-radius: 12px; cursor: pointer; }
-        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; background: #0a0d1a; color: rgba(255,255,255,0.7); display: flex; flex-direction: column; z-index: 99; transition: width 0.3s ease; overflow-y: auto; overflow-x: hidden; width: 280px; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
-        .sidebar.collapsed { width: 80px; }
-        .sidebar-logo { padding: 1.5rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .logo-icon { font-size: 2rem; font-weight: bold; background: linear-gradient(135deg, #7c5fe6, #2fd4ff); -webkit-background-clip: text; background-clip: text; color: transparent; min-width: 40px; text-align: center; }
-        .logo-title { font-weight: 700; font-size: 1rem; color: white; }
-        .logo-tagline { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
-        .sidebar-toggle { position: absolute; right: 0.5rem; background: rgba(255,255,255,0.1); border: none; color: white; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; }
-        .sidebar-nav { flex: 1; padding: 1rem 0; }
-        .sidebar-link { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.2s; margin: 0.25rem 0.5rem; border-radius: 12px; background: none; border: none; width: calc(100% - 1rem); cursor: pointer; font-size: 0.9rem; }
-        .sidebar-link:hover { background: rgba(124,95,230,0.2); color: white; }
-        .sidebar-link.active { background: #7c5fe6; color: white; }
-        .sidebar-icon { font-size: 1.25rem; min-width: 24px; text-align: center; }
-        .sidebar-label { font-size: 0.85rem; white-space: nowrap; }
-        .sidebar.collapsed .sidebar-label { display: none; }
-        .sidebar.collapsed .sidebar-link { justify-content: center; padding: 0.75rem; }
-        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem; }
-        .user-nav { margin-bottom: 1rem; }
-        .logout-link { color: #fc8181; }
-        .logout-link:hover { background: rgba(252,129,129,0.2); color: #fc8181; }
-        @media (max-width: 768px) { .mobile-sidebar-toggle { display: block; } .sidebar { transform: translateX(-100%); width: 280px; } .sidebar.mobile-open { transform: translateX(0); } .sidebar-overlay { display: block; } }
-      `}</style>
-    </>
-  );
-};
 
 // ============================================================
 // HELPER: fetch or create conversation between two users
@@ -221,7 +115,7 @@ const NewConversationModal = ({ onClose, onConversationCreated }: { onClose: () 
             {users.map(user => (
               <div key={user.id} className="user-item" onClick={() => startConversation(user)}>
                 <div className="user-avatar">
-                  {user.avatar_url ? <img src={user.avatar_url} alt="" /> : <span>{user.full_name?.[0] || '?'}</span>}
+                  {user.avatar_url ? <img loading="lazy" decoding="async" src={user.avatar_url} alt="" /> : <span>{user.full_name?.[0] || '?'}</span>}
                 </div>
                 <div className="user-name">{user.full_name}</div>
               </div>
@@ -391,7 +285,6 @@ const Messages = () => {
   if (loading && conversations.length === 0) {
     return (
       <div className="messages-container">
-        <Sidebar />
         <main className="messages-main"><div className="loading-spinner"></div></main>
       </div>
     );
@@ -399,7 +292,6 @@ const Messages = () => {
 
   return (
     <div className="messages-container">
-      <Sidebar />
       <main className="messages-main">
         <div className="messages-header">
           <h1>💬 Messages</h1>
@@ -422,7 +314,7 @@ const Messages = () => {
                   onClick={() => handleConversationClick(conv.id)}
                 >
                   <div className="conv-avatar">
-                    {conv.other_user_avatar ? <img src={conv.other_user_avatar} alt="" /> : <span>{conv.other_user_name?.[0] || '?'}</span>}
+                    {conv.other_user_avatar ? <img loading="lazy" decoding="async" src={conv.other_user_avatar} alt="" /> : <span>{conv.other_user_name?.[0] || '?'}</span>}
                   </div>
                   <div className="conv-details">
                     <div className="conv-name">{conv.other_user_name}</div>
@@ -441,7 +333,7 @@ const Messages = () => {
               <>
                 <div className="chat-header">
                   <div className="chat-avatar">
-                    {activeConversation.other_user_avatar ? <img src={activeConversation.other_user_avatar} alt="" /> : <span>{activeConversation.other_user_name?.[0] || '?'}</span>}
+                    {activeConversation.other_user_avatar ? <img loading="lazy" decoding="async" src={activeConversation.other_user_avatar} alt="" /> : <span>{activeConversation.other_user_name?.[0] || '?'}</span>}
                   </div>
                   <div className="chat-user-info">
                     <strong>{activeConversation.other_user_name}</strong>
@@ -497,7 +389,7 @@ const Messages = () => {
         }
         .messages-main {
           flex: 1;
-          margin-left: 280px;
+          margin-left: 0;
           padding: 2rem;
           transition: margin-left 0.3s ease;
         }

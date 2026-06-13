@@ -1,6 +1,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase/client';
+import { BrandLogo } from './common/BrandLogo';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -11,6 +12,7 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +95,9 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
   return (
     <div className="login-form-container">
       <form onSubmit={handleEmailLogin} className="login-form">
+        <div className="form-brand">
+          <BrandLogo to="/" size="lg" />
+        </div>
         <h2 className="form-title">Welcome back</h2>
         <p className="form-subtitle">Sign in to your Maylet XLab account</p>
 
@@ -113,15 +118,25 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
 
         <div className="input-group">
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-            autoComplete="current-password"
-          />
+          <div className="password-input-wrapper">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
         </div>
 
         <div className="form-options">
@@ -220,6 +235,11 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
           box-shadow: 0 8px 24px rgba(0,0,0,0.3);
           color: #ffffff;
         }
+        .form-brand {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1.25rem;
+        }
         .form-title {
           font-size: 1.8rem;
           font-weight: 700;
@@ -262,6 +282,29 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
         .input-group input:focus {
           outline: none;
           border-color: #7c5fe6;
+        }
+        .password-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .password-input-wrapper input {
+          padding-right: 4.5rem;
+        }
+        .password-toggle {
+          position: absolute;
+          right: 0.5rem;
+          background: none;
+          border: none;
+          color: #9b7ff0;
+          font-size: 0.75rem;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 0.35rem 0.5rem;
+          border-radius: 0.35rem;
+        }
+        .password-toggle:hover {
+          background: rgba(124, 95, 230, 0.15);
         }
         .form-options {
           display: flex;

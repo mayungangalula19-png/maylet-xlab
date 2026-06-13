@@ -1,1 +1,1 @@
-export const Button = ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => { return <button onClick={onClick} style={{ padding: '0.5rem 1rem', background: '#7c5fe6', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer' }}>{children}</button>; };
+export { Button } from '../../modules/shared/components/ui/Button';

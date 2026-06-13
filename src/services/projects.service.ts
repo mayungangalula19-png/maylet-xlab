@@ -1,5 +1,13 @@
 import { supabase } from '../lib/supabase/client';
 
+export {
+  fetchAccessibleProjects,
+  fetchUserProjects,
+  listProjects,
+  deleteProjectById,
+  subscribeToProjectChanges,
+} from '../modules/projects/services/projectService';
+
 export async function listProjectsByUser(userId: string) {
   const { data, error } = await supabase
     .from('projects')

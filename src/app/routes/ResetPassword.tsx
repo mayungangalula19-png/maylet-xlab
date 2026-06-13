@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
+import { BrandLogo } from '../../components/common/BrandLogo';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -49,7 +50,9 @@ const ResetPassword = () => {
   return (
     <div className="reset-password-page">
       <div className="reset-password-container">
-        <div className="logo-icon">🔐</div>
+        <div className="logo-icon">
+          <BrandLogo to="/" size="lg" />
+        </div>
         <h1>Create New Password</h1>
         <p>Enter your new password below.</p>
         
@@ -105,7 +108,8 @@ const ResetPassword = () => {
           text-align: center;
         }
         .logo-icon {
-          font-size: 3rem;
+          display: flex;
+          justify-content: center;
           margin-bottom: 1rem;
         }
         h1 {

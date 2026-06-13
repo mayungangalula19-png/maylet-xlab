@@ -233,7 +233,7 @@ const Settings = () => {
         <div className="profile-summary">
           <div className="avatar-wrapper">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.full_name} className="avatar" />
+              <img loading="lazy" decoding="async" src={profile.avatar_url} alt={profile.full_name} className="avatar" />
             ) : (
               <div className="avatar-placeholder">{profile.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}</div>
             )}

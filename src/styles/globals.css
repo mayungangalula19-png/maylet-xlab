@@ -1,1 +1,11 @@
 body { margin: 0; padding: 0; font-family: sans-serif; background: #0a0a0f; color: white; }
+
+/* Layout shell — sidebar is fixed 280px; content area offset here (not per-page). */
+.layout-content {
+  margin-left: 280px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+@media (max-width: 768px) {
+  .layout-content { margin-left: 0; }
+}
