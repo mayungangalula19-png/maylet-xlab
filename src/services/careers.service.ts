@@ -131,6 +131,41 @@ async function invokeCareerEmailNotify(payload: Record<string, unknown>): Promis
   }
 }
 
+export function formatCareerSubmitError(message: string): string {
+  const lower = message.toLowerCase();
+
+  if (
+    lower.includes('career_applications') &&
+    (lower.includes('does not exist') ||
+      lower.includes('could not find the table') ||
+      lower.includes('schema cache') ||
+      lower.includes('relation') && lower.includes('not exist'))
+  ) {
+    return 'Database table missing. Open Supabase → SQL Editor, run scripts/create-career-applications-table.sql, then try again.';
+  }
+
+  if (lower.includes('resume_path') || lower.includes('resume_file_name')) {
+    return 'Database needs an update. Run scripts/create-career-applications-table.sql in Supabase SQL Editor (it adds resume columns), then try again.';
+  }
+
+  if (lower.includes('bucket') && lower.includes('career-resumes')) {
+    return 'Resume storage is not set up. Run scripts/create-career-applications-table.sql in Supabase SQL Editor, then try again.';
+  }
+
+  if (lower.includes('check constraint') && lower.includes('portfolio')) {
+    return 'Please add a portfolio link (at least 2 characters) or leave the field blank.';
+  }
+
+  if (lower.includes('row-level security') || lower.includes('permission denied')) {
+    if (lower.includes('storage') || lower.includes('objects') || lower.includes('bucket')) {
+      return 'Resume upload was blocked. Re-run scripts/create-career-applications-table.sql in Supabase SQL Editor (storage section), then try again.';
+    }
+    return 'Application was blocked by database permissions. Re-run scripts/create-career-applications-table.sql in Supabase SQL Editor, then try again.';
+  }
+
+  return message;
+}
+
 export async function submitCareerApplication(
   input: CareerApplicationInput
 ): Promise<{ data: CareerApplicationRow | null; error: string | null }> {
@@ -138,45 +173,54 @@ export async function submitCareerApplication(
   let resumePath: string | null = null;
   let resumeFileName: string | null = null;
 
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  // Only link user_id when a live session exists — avoids RLS mismatch from stale client state
+  const userId = authUser?.id ?? null;
+
   try {
     if (input.resumeFile) {
       resumePath = await uploadCareerResume(applicationId, input.resumeFile);
       resumeFileName = input.resumeFile.name;
     }
   } catch (uploadError) {
+    const msg = uploadError instanceof Error ? uploadError.message : 'Resume upload failed';
     return {
       data: null,
-      error: uploadError instanceof Error ? uploadError.message : 'Resume upload failed',
+      error: formatCareerSubmitError(msg),
     };
   }
 
+  const now = new Date().toISOString();
   const payload = {
     id: applicationId,
-    user_id: input.userId ?? null,
+    user_id: userId,
     full_name: input.fullName.trim(),
     email: input.email.trim().toLowerCase(),
     role_interest: input.roleInterest.trim(),
     skills: input.skills.trim(),
-    portfolio: input.portfolio.trim(),
+    portfolio: input.portfolio.trim() || 'N/A',
     resume_path: resumePath,
     resume_file_name: resumeFileName,
     maya_match_snapshot: input.mayaMatchSnapshot ?? null,
     status: 'pending' as const,
-    updated_at: new Date().toISOString(),
+    updated_at: now,
   };
 
-  const { data, error } = await supabase
-    .from('career_applications')
-    .insert(payload)
-    .select()
-    .single();
+  // No .select() — anon applicants have no SELECT policy; returning the row would fail RLS
+  const { error } = await supabase.from('career_applications').insert(payload);
 
   if (error) {
     if (resumePath) await removeCareerResume(resumePath);
-    return { data: null, error: error.message };
+    return { data: null, error: formatCareerSubmitError(error.message) };
   }
 
-  const row = data as CareerApplicationRow;
+  const row: CareerApplicationRow = {
+    ...payload,
+    reviewer_notes: null,
+    created_at: now,
+  };
 
   void invokeCareerEmailNotify({
     type: 'new_application',

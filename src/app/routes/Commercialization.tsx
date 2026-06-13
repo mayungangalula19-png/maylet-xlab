@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getProjects } from '../../lib/supabase/projects.queries';
@@ -6,55 +6,29 @@ import { getInnovationStage } from '../../lib/innovation/lifecycle';
 import { getCommercializationBreakdown } from '../../lib/innovation/recommendations';
 import { getFundingReadiness } from '../../lib/innovation/lifecycle';
 import type { Project } from '../../types/project.types';
+import {
+  type CommercializationWorkspaceState,
+  fetchCommercializationWorkspace,
+  upsertCommercializationWorkspace,
+  readLocalCommercializationWorkspace,
+  writeLocalCommercializationWorkspace,
+  rowToWorkspaceState,
+} from '../../services/commercialization.service';
 import '../../modules/projects/components/command-center.css';
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
 type FundingStatus = 'none' | 'seeking' | 'committed' | 'secured';
-type RevenueModel = 'saas' | 'subscription' | 'licensing' | 'api';
-type LaunchStatus = 'draft' | 'preparing' | 'scheduled' | 'launched';
-type RiskLevel = 'low' | 'medium' | 'high';
-
-interface MarketStrategy {
-  targetUsers: string;
-  marketSize: string;
-  competitors: string;
-  positioning: string;
-}
-
-interface ProductPackaging {
-  productName: string;
-  pricingModel: string;
-  distributionPlan: string;
-}
-
-interface MayaInsights {
-  marketPrediction: string;
-  pricingSuggestion: string;
-  riskLevel: RiskLevel;
-  riskNote: string;
-  launchRecommendation: string;
-}
-
-interface LaunchState {
-  status: LaunchStatus;
-  checklist: Record<string, boolean>;
-  launchedAt?: string;
-}
+type RevenueModel = CommercializationWorkspaceState['revenueModel'];
+type LaunchStatus = CommercializationWorkspaceState['launch']['status'];
+type RiskLevel = CommercializationWorkspaceState['mayaInsights']['riskLevel'];
+type WorkspaceState = CommercializationWorkspaceState;
 
 interface ReadyProject {
   project: Project;
   breakdown: ReturnType<typeof getCommercializationBreakdown>;
   fundingStatus: FundingStatus;
   validated: boolean;
-}
-
-interface WorkspaceState {
-  marketStrategy: MarketStrategy;
-  packaging: ProductPackaging;
-  revenueModel: RevenueModel;
-  mayaInsights: MayaInsights;
-  launch: LaunchState;
 }
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
@@ -88,8 +62,6 @@ const LAUNCH_CHECKLIST = [
   { id: 'revenue', label: 'Revenue model selected' },
   { id: 'maya', label: 'MAYA risk review completed' },
 ] as const;
-
-const STORAGE_PREFIX = 'maylet:comm:v1:';
 
 const FUNDING_LABELS: Record<FundingStatus, string> = {
   none: 'Not funded',
@@ -140,7 +112,7 @@ function isEligibleForCommercialization(project: Project): boolean {
   return isValidated(project) && stageOk && (funding === 'committed' || funding === 'secured');
 }
 
-function defaultMarketStrategy(project: Project | null): MarketStrategy {
+function defaultMarketStrategy(project: Project | null): WorkspaceState['marketStrategy'] {
   const sector = project?.sector || 'innovation';
   return {
     targetUsers: project
@@ -154,7 +126,7 @@ function defaultMarketStrategy(project: Project | null): MarketStrategy {
   };
 }
 
-function defaultPackaging(project: Project | null): ProductPackaging {
+function defaultPackaging(project: Project | null): WorkspaceState['packaging'] {
   return {
     productName: project?.name ?? '',
     pricingModel: 'tiered',
@@ -186,11 +158,11 @@ function pickRecommendedRevenueModel(project: Project): RevenueModel {
 function generateMayaInsights(
   project: Project,
   breakdown: ReturnType<typeof getCommercializationBreakdown>,
-  strategy: MarketStrategy,
-  packaging: ProductPackaging,
+  strategy: WorkspaceState['marketStrategy'],
+  packaging: WorkspaceState['packaging'],
   revenueModel: RevenueModel,
   fundingStatus: FundingStatus
-): MayaInsights {
+): WorkspaceState['mayaInsights'] {
   const score = breakdown.commercializationScore;
   const sector = project.sector || 'your sector';
 
@@ -223,39 +195,14 @@ function generateMayaInsights(
   };
 }
 
-function defaultLaunchState(): LaunchState {
+function defaultLaunchState(): WorkspaceState['launch'] {
   return {
     status: 'draft',
     checklist: Object.fromEntries(LAUNCH_CHECKLIST.map((c) => [c.id, false])),
   };
 }
 
-function loadWorkspace(projectId: string, project: Project): WorkspaceState {
-  try {
-    const raw = localStorage.getItem(`${STORAGE_PREFIX}${projectId}`);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<WorkspaceState>;
-      return {
-        marketStrategy: { ...defaultMarketStrategy(project), ...parsed.marketStrategy },
-        packaging: { ...defaultPackaging(project), ...parsed.packaging },
-        revenueModel: parsed.revenueModel ?? pickRecommendedRevenueModel(project),
-        mayaInsights:
-          parsed.mayaInsights ??
-          generateMayaInsights(
-            project,
-            getCommercializationBreakdown(project),
-            defaultMarketStrategy(project),
-            defaultPackaging(project),
-            pickRecommendedRevenueModel(project),
-            deriveFundingStatus(project)
-          ),
-        launch: { ...defaultLaunchState(), ...parsed.launch },
-      };
-    }
-  } catch {
-    /* ignore corrupt storage */
-  }
-
+function buildDefaultWorkspaceState(project: Project): WorkspaceState {
   const breakdown = getCommercializationBreakdown(project);
   const strategy = defaultMarketStrategy(project);
   const packaging = defaultPackaging(project);
@@ -266,17 +213,29 @@ function loadWorkspace(projectId: string, project: Project): WorkspaceState {
     marketStrategy: strategy,
     packaging,
     revenueModel,
-    mayaInsights: generateMayaInsights(project, breakdown, strategy, packaging, revenueModel, fundingStatus),
+    mayaInsights: generateMayaInsights(
+      project,
+      breakdown,
+      strategy,
+      packaging,
+      revenueModel,
+      fundingStatus
+    ),
     launch: defaultLaunchState(),
   };
 }
 
-function saveWorkspace(projectId: string, workspace: WorkspaceState): void {
-  try {
-    localStorage.setItem(`${STORAGE_PREFIX}${projectId}`, JSON.stringify(workspace));
-  } catch {
-    /* quota exceeded — silent */
-  }
+function mergeWorkspaceState(
+  defaults: WorkspaceState,
+  partial: Partial<WorkspaceState>
+): WorkspaceState {
+  return {
+    marketStrategy: { ...defaults.marketStrategy, ...partial.marketStrategy },
+    packaging: { ...defaults.packaging, ...partial.packaging },
+    revenueModel: partial.revenueModel ?? defaults.revenueModel,
+    mayaInsights: partial.mayaInsights ?? defaults.mayaInsights,
+    launch: { ...defaults.launch, ...partial.launch },
+  };
 }
 
 function checklistProgress(checklist: Record<string, boolean>): number {
@@ -360,6 +319,9 @@ export default function Commercialization() {
   const [selectedId, setSelectedId] = useState('');
   const [workspaces, setWorkspaces] = useState<Record<string, WorkspaceState>>({});
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
+  const [persistError, setPersistError] = useState<string | null>(null);
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
     if (!user?.id) {
@@ -400,7 +362,7 @@ export default function Commercialization() {
     let systemTotal = 0;
     let systemCount = 0;
     for (const r of readyProjects) {
-      const ws = workspaces[r.project.id] ?? loadWorkspace(r.project.id, r.project);
+      const ws = workspaces[r.project.id] ?? buildDefaultWorkspaceState(r.project);
       const checklistPct = checklistProgress(ws.launch.checklist);
       systemTotal +=
         (r.breakdown.commercializationScore + getFundingReadiness(r.project) + checklistPct) / 3;
@@ -414,12 +376,37 @@ export default function Commercialization() {
   const selected = readyProjects.find((r) => r.project.id === selectedId) ?? null;
 
   useEffect(() => {
-    if (!selected) return;
-    setWorkspaces((prev) => {
-      if (prev[selected.project.id]) return prev;
-      return { ...prev, [selected.project.id]: loadWorkspace(selected.project.id, selected.project) };
-    });
-  }, [selected]);
+    if (!selected || !user?.id) return;
+    const projectId = selected.project.id;
+
+    let cancelled = false;
+    setWorkspaceLoading(true);
+    setPersistError(null);
+
+    (async () => {
+      const defaults = buildDefaultWorkspaceState(selected.project);
+      const { data: row, error } = await fetchCommercializationWorkspace(projectId);
+
+      if (cancelled) return;
+
+      let state: WorkspaceState;
+      if (row) {
+        state = rowToWorkspaceState(row);
+      } else {
+        const local = readLocalCommercializationWorkspace(projectId);
+        state = local ? mergeWorkspaceState(defaults, local) : defaults;
+      }
+
+      writeLocalCommercializationWorkspace(projectId, state);
+      setWorkspaces((prev) => ({ ...prev, [projectId]: state }));
+      if (error) setPersistError(error);
+      setWorkspaceLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selected?.project.id, user?.id]);
 
   const workspace = selected ? workspaces[selected.project.id] : null;
 
@@ -428,12 +415,28 @@ export default function Commercialization() {
       setWorkspaces((prev) => {
         const base = prev[projectId];
         if (!base) return prev;
-        const next = { ...base, ...patch };
-        saveWorkspace(projectId, next);
+        const next: WorkspaceState = {
+          marketStrategy: patch.marketStrategy ?? base.marketStrategy,
+          packaging: patch.packaging ?? base.packaging,
+          revenueModel: patch.revenueModel ?? base.revenueModel,
+          mayaInsights: patch.mayaInsights ?? base.mayaInsights,
+          launch: patch.launch ?? base.launch,
+        };
+        writeLocalCommercializationWorkspace(projectId, next);
+
+        if (user?.id) {
+          clearTimeout(saveTimers.current[projectId]);
+          saveTimers.current[projectId] = setTimeout(() => {
+            void upsertCommercializationWorkspace(projectId, user.id, next).then(({ error }) => {
+              if (error) setPersistError(error);
+            });
+          }, 600);
+        }
+
         return { ...prev, [projectId]: next };
       });
     },
-    []
+    [user?.id]
   );
 
   const regenerateMaya = useCallback(() => {
@@ -449,18 +452,29 @@ export default function Commercialization() {
     updateWorkspace(selected.project.id, { mayaInsights: insights });
   }, [selected, workspace, updateWorkspace]);
 
-  const handleLaunch = useCallback(() => {
-    if (!selected || !workspace) return;
+  const handleLaunch = useCallback(async () => {
+    if (!selected || !workspace || !user?.id) return;
     if (!canLaunch(selected.breakdown, workspace)) return;
 
     const launchedAt = new Date().toISOString();
-    updateWorkspace(selected.project.id, {
+    const nextWorkspace: WorkspaceState = {
+      ...workspace,
       launch: { ...workspace.launch, status: 'launched', launchedAt },
-    });
-    setLaunchMessage(`${workspace.packaging.productName || selected.project.name} marked as launched.`);
-    // BACKEND: await commercializationService.launchProduct(selected.project.id, payload)
+    };
+
+    writeLocalCommercializationWorkspace(selected.project.id, nextWorkspace);
+    setWorkspaces((prev) => ({ ...prev, [selected.project.id]: nextWorkspace }));
+
+    const { error } = await upsertCommercializationWorkspace(
+      selected.project.id,
+      user.id,
+      nextWorkspace
+    );
+    if (error) setPersistError(error);
+
+    setLaunchMessage(`${nextWorkspace.packaging.productName || selected.project.name} marked as launched.`);
     window.setTimeout(() => setLaunchMessage(null), 5000);
-  }, [selected, workspace, updateWorkspace]);
+  }, [selected, workspace, user?.id]);
 
   return (
     <div className="icc-page">
@@ -527,6 +541,8 @@ export default function Commercialization() {
             <h3>No projects ready for commercialization</h3>
             <p className="icc-widget-empty-text">
               Projects must complete validation and secure funding before entering this stage.
+              Run <code>scripts/seed-commercialization-eligible-project.sql</code> in Supabase to
+              bump a test project, or advance work in Validation and Funding.
             </p>
             <div className="icc-quick-actions" style={{ padding: 0 }}>
               <Link to="/validation" className="icc-quick-btn icc-quick-btn--primary">Validation center</Link>
@@ -595,6 +611,14 @@ export default function Commercialization() {
       {/* Selected project workspace */}
       {selected && workspace && (
         <>
+          {persistError && (
+            <div className="icc-glass icc-widget" style={{ marginBottom: '1rem', borderColor: 'rgba(252,129,129,0.4)' }}>
+              <p style={{ margin: 0, color: '#fc8181', fontSize: '0.85rem' }}>{persistError}</p>
+            </div>
+          )}
+          {workspaceLoading && (
+            <p style={{ opacity: 0.7, marginBottom: '1rem' }}>Loading workspace…</p>
+          )}
           <div className="icc-glass icc-widget" style={{ marginBottom: '1.5rem' }}>
             <div className="icc-widget-header">
               <h3>Workspace: {selected.project.name}</h3>

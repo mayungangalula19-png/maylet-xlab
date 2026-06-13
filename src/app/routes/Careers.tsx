@@ -411,9 +411,7 @@ export default function Careers() {
               )}
               {error && (
                 <div className="careers-form__error" role="alert">
-                  {error.includes('career_applications')
-                    ? 'Could not save application. Run scripts/create-career-applications-table.sql in Supabase SQL Editor, then try again.'
-                    : error}
+                  {error}
                 </div>
               )}
               <div className="careers-form__row">

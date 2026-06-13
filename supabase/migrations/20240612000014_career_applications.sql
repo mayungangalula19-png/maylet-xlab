@@ -15,9 +15,12 @@ CREATE TABLE IF NOT EXISTS public.career_applications (
   email TEXT NOT NULL CHECK (char_length(trim(email)) >= 5),
   role_interest TEXT NOT NULL CHECK (char_length(trim(role_interest)) >= 2),
   skills TEXT NOT NULL CHECK (char_length(trim(skills)) >= 2),
-  portfolio TEXT NOT NULL CHECK (char_length(trim(portfolio)) >= 4),
+  portfolio TEXT NOT NULL DEFAULT 'N/A' CHECK (char_length(trim(portfolio)) >= 2),
   status public.career_application_status NOT NULL DEFAULT 'pending',
   maya_match_snapshot JSONB,
+  resume_path TEXT,
+  resume_file_name TEXT,
+  reviewer_notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -34,15 +37,18 @@ CREATE POLICY "career_applications_insert" ON public.career_applications
   FOR INSERT
   TO anon, authenticated
   WITH CHECK (
-    (auth.uid() IS NULL AND user_id IS NULL)
-    OR (auth.uid() IS NOT NULL AND (user_id IS NULL OR user_id = auth.uid()))
+    user_id IS NULL
+    OR user_id = (SELECT auth.uid())
   );
 
 DROP POLICY IF EXISTS "career_applications_select" ON public.career_applications;
 CREATE POLICY "career_applications_select" ON public.career_applications
   FOR SELECT
   TO authenticated
-  USING (user_id = auth.uid() OR public.is_admin());
+  USING (
+    (user_id IS NOT NULL AND user_id = (SELECT auth.uid()))
+    OR public.is_admin()
+  );
 
 DROP POLICY IF EXISTS "career_applications_admin_update" ON public.career_applications;
 CREATE POLICY "career_applications_admin_update" ON public.career_applications
