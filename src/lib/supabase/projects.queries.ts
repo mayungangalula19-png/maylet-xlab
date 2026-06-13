@@ -22,9 +22,14 @@ interface RawProject {
   progress?: number | null;
   progress_score?: number | null;
   status: string;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
   user_id: string;
+}
+
+export interface ProjectRecord extends Project {
+  metadata: Record<string, unknown>;
 }
 
 function mapViewModelToProject(vm: ProjectViewModel): Project {
@@ -43,6 +48,30 @@ function mapViewModelToProject(vm: ProjectViewModel): Project {
     tasks_total: vm.tasks_total,
     ai_score: vm.ai_score,
   };
+}
+
+function mapRawProjectRecord(raw: RawProject): ProjectRecord {
+  return {
+    ...mapRawProject(raw),
+    metadata: (raw.metadata as Record<string, unknown>) ?? {},
+  };
+}
+
+/** Fetch single project — owner only via RLS */
+export async function fetchProjectById(
+  projectId: string,
+  userId: string
+): Promise<ProjectRecord | null> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', projectId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  return mapRawProjectRecord(data as RawProject);
 }
 
 function mapRawProject(raw: RawProject): Project {
@@ -187,6 +216,7 @@ export async function updateProjectRecord(
     sector?: string;
     status?: ProjectStatus | string;
     progress?: number;
+    metadata?: Record<string, unknown>;
   }
 ): Promise<Project> {
   const dbPatch: Record<string, unknown> = {
@@ -200,6 +230,7 @@ export async function updateProjectRecord(
     dbPatch.progress = patch.progress;
     dbPatch.progress_score = patch.progress;
   }
+  if (patch.metadata != null) dbPatch.metadata = patch.metadata;
 
   const { data, error } = await supabase
     .from('projects')
