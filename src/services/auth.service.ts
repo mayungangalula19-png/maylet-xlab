@@ -26,7 +26,10 @@ export async function syncProfileOnLogin(userId: string, email: string, metadata
   if (error) console.warn('[auth.service] profile upsert:', error.message);
 }
 
-export async function signOut() {
+export async function signOut(redirectTo = '/') {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+  if (typeof window !== 'undefined') {
+    window.location.assign(redirectTo);
+  }
 }

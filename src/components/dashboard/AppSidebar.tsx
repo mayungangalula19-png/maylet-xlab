@@ -1,11 +1,12 @@
 // Single source of truth for the user-app sidebar.
 // Rendered ONLY by DashboardLayout — pages must never render their own sidebar.
 import { memo, useCallback, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { signOut } from '../../services/auth.service';
 import { BrandLogo } from '../common/BrandLogo';
 
 const mainMenu = [
+  { icon: '🏠', label: 'Home', route: '/' },
   { icon: '📊', label: 'Dashboard', route: '/dashboard' },
   { icon: '📁', label: 'Projects', route: '/projects' },
   { icon: '🧪', label: 'Experiments', route: '/experiments' },
@@ -40,15 +41,15 @@ export const AppSidebar = memo(function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
-  const isActive = (route: string) =>
-    location.pathname === route || (route !== '/dashboard' && location.pathname.startsWith(route + '/'));
+  const isActive = (route: string) => {
+    if (route === '/') return location.pathname === '/';
+    return location.pathname === route || (route !== '/dashboard' && location.pathname.startsWith(route + '/'));
+  };
 
   const handleLogout = useCallback(async () => {
-    await signOut();
-    navigate('/login');
-  }, [navigate]);
+    await signOut('/');
+  }, []);
 
   return (
     <>

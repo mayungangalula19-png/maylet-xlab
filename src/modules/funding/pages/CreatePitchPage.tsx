@@ -1,25 +1,61 @@
-// C:\Users\user\maylet-xlab\src\app\routes\CreatePitch.tsx
 // PROFESSIONAL CREATE PITCH PAGE – Standalone form for new funding pitches
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { getProjects } from '../../../lib/supabase/projects.queries';
+import type { Project } from '../../../types/project.types';
 
 // ============================================================
 // TYPES
 // ============================================================
 type PitchStage = 'idea' | 'prototype' | 'mvp' | 'growth';
 
+const INDUSTRIES = [
+  'Technology', 'AgriTech', 'HealthTech', 'EdTech',
+  'FinTech', 'CleanTech', 'E-commerce', 'Other',
+];
+
+const STAGES: PitchStage[] = ['idea', 'prototype', 'mvp', 'growth'];
+
+function sectorToIndustry(sector: string): string {
+  if (INDUSTRIES.includes(sector)) return sector;
+  const lower = sector.toLowerCase();
+  const match = INDUSTRIES.find((i) => lower.includes(i.toLowerCase()) || i.toLowerCase().includes(lower));
+  return match ?? 'Technology';
+}
+
+function stageFromProgress(progress: number): PitchStage {
+  if (progress >= 85) return 'mvp';
+  if (progress >= 50) return 'prototype';
+  return 'idea';
+}
+
+function prefillFromProject(project: Project) {
+  return {
+    project_id: project.id,
+    title: project.name,
+    description: project.description ?? '',
+    industry: sectorToIndustry(project.sector ?? 'Technology'),
+    stage: stageFromProgress(project.progress ?? 0),
+  };
+}
+
 // ============================================================
 // CREATE PITCH PAGE
 // ============================================================
 const CreatePitch = () => {
+  const [searchParams] = useSearchParams();
+  const projectIdParam = searchParams.get('projectId');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [linkedProject, setLinkedProject] = useState<Project | null>(null);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    project_id: '',
     title: '',
     description: '',
     amount: 50000,
@@ -29,24 +65,42 @@ const CreatePitch = () => {
     stage: 'idea' as PitchStage,
   });
 
-  const industries = [
-    'Technology', 'AgriTech', 'HealthTech', 'EdTech',
-    'FinTech', 'CleanTech', 'E-commerce', 'Other'
-  ];
-
-  const stages: PitchStage[] = ['idea', 'prototype', 'mvp', 'growth'];
-
   useEffect(() => {
-    const checkAuth = async () => {
+    const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/login');
         return;
       }
-      setLoading(false);
+
+      try {
+        const list = await getProjects(session.user.id);
+        setProjects(list);
+
+        const linked = projectIdParam ? list.find((p) => p.id === projectIdParam) ?? null : null;
+        setLinkedProject(linked);
+
+        if (linked) {
+          setFormData((prev) => ({ ...prev, ...prefillFromProject(linked) }));
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
     };
-    checkAuth();
-  }, [navigate]);
+    init();
+  }, [navigate, projectIdParam]);
+
+  const handleProjectChange = (projectId: string) => {
+    const project = projects.find((p) => p.id === projectId);
+    if (project) {
+      setFormData((prev) => ({ ...prev, ...prefillFromProject(project) }));
+      setLinkedProject(projectIdParam === projectId ? project : null);
+    } else {
+      setFormData((prev) => ({ ...prev, project_id: projectId }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +115,7 @@ const CreatePitch = () => {
       if (!session) throw new Error('Not logged in');
       const { error } = await supabase.from('funding_pitches').insert({
         user_id: session.user.id,
+        project_id: formData.project_id || null,
         title: formData.title,
         description: formData.description,
         amount: formData.amount,
@@ -99,8 +154,32 @@ const CreatePitch = () => {
         </div>
 
         <div className="form-card">
+          {linkedProject && (
+            <div className="linked-project-banner">
+              <strong>Promoted from Validation</strong>
+              <p>
+                Pitch linked to <em>{linkedProject.name}</em>. Title and description were pre-filled from your project.
+              </p>
+            </div>
+          )}
           {error && <div className="error-banner">{error}</div>}
           <form onSubmit={handleSubmit}>
+            {projects.length > 0 && (
+              <div className="form-group">
+                <label>Project</label>
+                <select
+                  value={formData.project_id}
+                  onChange={(e) => handleProjectChange(e.target.value)}
+                >
+                  <option value="">No project (standalone pitch)</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <p className="hint">Link this pitch to an innovation project for tracking in the Funding Hub</p>
+              </div>
+            )}
+
             {/* Title */}
             <div className="form-group">
               <label>Pitch Title *</label>
@@ -160,7 +239,7 @@ const CreatePitch = () => {
                   value={formData.industry}
                   onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                 >
-                  {industries.map(i => <option key={i} value={i}>{i}</option>)}
+                  {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>
               </div>
               <div className="form-group">
@@ -169,7 +248,7 @@ const CreatePitch = () => {
                   value={formData.stage}
                   onChange={(e) => setFormData({ ...formData, stage: e.target.value as PitchStage })}
                 >
-                  {stages.map(s => (
+                  {STAGES.map(s => (
                     <option key={s} value={s}>{s.toUpperCase()}</option>
                   ))}
                 </select>
@@ -338,6 +417,24 @@ const CreatePitch = () => {
           padding: 0.75rem;
           margin-bottom: 1.5rem;
           color: #fc8181;
+        }
+        .linked-project-banner {
+          background: linear-gradient(135deg, rgba(72,187,120,0.15), rgba(124,95,230,0.1));
+          border: 1px solid rgba(72,187,120,0.35);
+          border-radius: 12px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        .linked-project-banner strong {
+          display: block;
+          color: #48bb78;
+          font-size: 0.85rem;
+          margin-bottom: 0.35rem;
+        }
+        .linked-project-banner p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: rgba(255,255,255,0.8);
         }
         .loading-spinner {
           width: 50px;

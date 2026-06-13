@@ -1,1 +1,1 @@
-export { default } from '../../modules/validation/pages/ValidationHubPage';
+export { default } from '../../modules/validation/pages/ValidationPage';

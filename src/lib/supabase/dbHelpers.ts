@@ -111,9 +111,7 @@ export async function linkTeamToProject(
 export async function fetchUserTeamIds(userId: string): Promise<string[]> {
   const { data, error } = await supabase.rpc('get_user_team_ids', { p_user_id: userId });
   if (!error && Array.isArray(data)) {
-    return data.map((row: { team_id?: string } | string) =>
-      typeof row === 'string' ? row : String(row.team_id ?? row)
-    ).filter(Boolean);
+    return mapTeamIdRows(data);
   }
 
   if (error) {
@@ -123,11 +121,35 @@ export async function fetchUserTeamIds(userId: string): Promise<string[]> {
   return fetchOwnedTeamIds(userId);
 }
 
-/** Teams owned by user (owner_id) — no team_members read */
+function mapTeamIdRows(data: unknown): string[] {
+  if (!Array.isArray(data)) return [];
+  return data
+    .map((row: { team_id?: string } | string) =>
+      typeof row === 'string' ? row : String(row.team_id ?? row)
+    )
+    .filter(Boolean);
+}
+
+/** Teams owned by user — prefers security-definer RPC to avoid RLS recursion */
 export async function fetchOwnedTeamIds(userId: string): Promise<string[]> {
+  const { data: rpcData, error: rpcError } = await supabase.rpc('get_owned_team_ids', {
+    p_user_id: userId,
+  });
+  if (!rpcError && Array.isArray(rpcData)) {
+    return mapTeamIdRows(rpcData);
+  }
+
+  if (rpcError && !/Could not find the function/i.test(rpcError.message)) {
+    console.warn('[db] get_owned_team_ids RPC failed:', rpcError.message);
+  }
+
   const { data, error } = await supabase.from('teams').select('id').eq('owner_id', userId);
   if (error) {
-    console.warn('[db] owned teams lookup failed:', error.message);
+    console.warn(
+      '[db] owned teams lookup failed:',
+      error.message,
+      '— run scripts/fix-teams-rls-recursion.sql in Supabase SQL Editor'
+    );
     return [];
   }
   return (data ?? []).map((row) => row.id as string);

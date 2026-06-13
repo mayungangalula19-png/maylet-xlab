@@ -51,9 +51,8 @@ const CreateTeam = () => {
           name: formData.name.trim(),
           description: formData.description.trim(),
           purpose: formData.purpose.trim(),
+          owner_id: session.user.id,
           user_id: session.user.id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
         })
         .select()
         .single();

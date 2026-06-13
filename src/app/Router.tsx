@@ -36,6 +36,23 @@ const Contact = lazy(() => import('./routes/Contact'));
 const Privacy = lazy(() => import('./routes/Privacy'));
 const Terms = lazy(() => import('./routes/Terms'));
 const NotFound = lazy(() => import('./routes/NotFound'));
+const Demo = lazy(() => import('./routes/Demo'));
+const Careers = lazy(() => import('./routes/Careers'));
+const Press = lazy(() => import('./routes/Press'));
+const Cookies = lazy(() => import('./routes/Cookies'));
+const SystemStatus = lazy(() => import('./routes/SystemStatus'));
+const Community = lazy(() => import('./routes/Community'));
+const SecurityOverview = lazy(() => import('./routes/SecurityOverview'));
+const Help = lazy(() => import('./routes/Help'));
+const EcosystemIncubator = lazy(() => import('./routes/ecosystem/Incubator'));
+const EcosystemAcademy = lazy(() => import('./routes/ecosystem/Academy'));
+const EcosystemCommunity = lazy(() => import('./routes/ecosystem/Community'));
+const ResourceGuide = lazy(() => import('./routes/resources/Guide'));
+const ResourceVideos = lazy(() => import('./routes/resources/Videos'));
+const ResourceCaseStudies = lazy(() => import('./routes/resources/CaseStudies'));
+const ResourcePrompts = lazy(() => import('./routes/resources/Prompts'));
+const ResourceWebinars = lazy(() => import('./routes/resources/Webinars'));
+const ResourceNewsletter = lazy(() => import('./routes/resources/Newsletter'));
 
 // ============================================================
 // PROTECTED PAGES (rendered inside DashboardLayout)
@@ -85,7 +102,6 @@ const Documents = lazy(() => import('./routes/Documents'));
 const EnterpriseVault = lazy(() => import('./routes/enterprise/EnterpriseVault'));
 const MarketplaceListing = lazy(() => import('./routes/marketplace/MarketplaceListing'));
 const Feedback = lazy(() => import('./routes/Feedback'));
-const Help = lazy(() => import('./routes/Help'));
 const CoFounderWizard = lazy(() => import('./routes/co-founder/CoFounderWizard'));
 const InnovationDNA = lazy(() => import('./routes/dna/InnovationDNA'));
 const InvestorConnect = lazy(() => import('./routes/investor/InvestorConnect'));
@@ -99,6 +115,8 @@ const SaveIdea = lazy(() => import('./routes/SaveIdea'));
 const UploadPrototype = lazy(() => import('./routes/UploadPrototype'));
 const AIDashboard = lazy(() => import('./routes/AIDashboard'));
 const Validation = lazy(() => import('./routes/Validation'));
+const CreateValidation = lazy(() => import('./routes/CreateValidation'));
+const ValidationDetail = lazy(() => import('./routes/ValidationDetail'));
 const Commercialization = lazy(() => import('./routes/Commercialization'));
 
 // ============================================================
@@ -230,6 +248,23 @@ export const Router = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/demo" element={<Demo />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/press" element={<Press />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/status" element={<SystemStatus />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/security" element={<SecurityOverview />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/ecosystem/incubator" element={<EcosystemIncubator />} />
+        <Route path="/ecosystem/academy" element={<EcosystemAcademy />} />
+        <Route path="/ecosystem/community" element={<EcosystemCommunity />} />
+        <Route path="/resources/guide" element={<ResourceGuide />} />
+        <Route path="/resources/videos" element={<ResourceVideos />} />
+        <Route path="/resources/case-studies" element={<ResourceCaseStudies />} />
+        <Route path="/resources/prompts" element={<ResourcePrompts />} />
+        <Route path="/resources/webinars" element={<ResourceWebinars />} />
+        <Route path="/resources/newsletter" element={<ResourceNewsletter />} />
         </Route>
 
         {/* ========== PROTECTED ROUTES – require authentication ========== */}
@@ -271,6 +306,8 @@ export const Router = () => {
 
           {/* Validation & Commercialization */}
           <Route path="/validation" element={<Validation />} />
+          <Route path="/validation/new" element={<CreateValidation />} />
+          <Route path="/validation/:id" element={<ValidationDetail />} />
           <Route path="/commercialization" element={<Commercialization />} />
 
           {/* Innovation Vault */}
@@ -315,7 +352,6 @@ export const Router = () => {
             <Route path="/enterprise/vault" element={<EnterpriseVault />} />
             <Route path="/marketplace/:id" element={<MarketplaceListing />} />
             <Route path="/feedback" element={<Feedback />} />
-            <Route path="/help" element={<Help />} />
             <Route path="/co-founder" element={<CoFounderWizard />} />
             <Route path="/profile/dna" element={<InnovationDNA />} />
             <Route path="/investors" element={<InvestorConnect />} />

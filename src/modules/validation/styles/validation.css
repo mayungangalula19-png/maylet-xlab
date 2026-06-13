@@ -1,0 +1,328 @@
+.val-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.val-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.val-stat {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.val-stat strong {
+  display: block;
+  font-size: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.val-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.val-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: border-color 0.2s;
+}
+
+.val-card:hover {
+  border-color: rgba(124, 95, 230, 0.5);
+}
+
+.val-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.val-card__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.val-card__score {
+  margin: 0 0 0.5rem;
+  opacity: 0.85;
+}
+
+.val-card__dims {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.val-card__promoted {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #48bb78;
+}
+
+.val-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.val-badge--pass { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+.val-badge--hold { background: rgba(246, 173, 85, 0.2); color: #f6ad55; }
+.val-badge--fail { background: rgba(245, 101, 101, 0.2); color: #f56565; }
+.val-badge--pending { background: rgba(160, 174, 192, 0.2); color: #a0aec0; }
+
+.val-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .val-detail-grid { grid-template-columns: 1fr; }
+}
+
+.val-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.val-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.val-panel__sub,
+.val-panel__hint {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.val-panel__head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.val-panel__head-row h2 {
+  margin: 0;
+}
+
+.val-overall {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.val-overall strong {
+  font-size: 1.75rem;
+  color: #7c5fe6;
+}
+
+.val-bar-row {
+  margin-bottom: 0.75rem;
+}
+
+.val-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.val-bar-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.val-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.val-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.val-evidence-block h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.val-evidence-block ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+
+.val-evidence-block a {
+  font-size: 0.85rem;
+  color: #7c5fe6;
+}
+
+.val-decision-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.val-decision-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.val-decision-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.val-decision-btn--pass.is-active { background: rgba(72, 187, 120, 0.25); border-color: #48bb78; }
+.val-decision-btn--hold.is-active { background: rgba(246, 173, 85, 0.25); border-color: #f6ad55; }
+.val-decision-btn--fail.is-active { background: rgba(245, 101, 101, 0.25); border-color: #f56565; }
+
+.val-notes {
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.val-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.val-checklist li {
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+}
+
+.val-checklist li.ok::before { content: '✓ '; color: #48bb78; }
+.val-checklist li.warn::before { content: '○ '; color: #f6ad55; }
+
+.val-insights {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.val-insight {
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.val-insight strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.val-insight p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.val-insight--critical { border-left: 3px solid #f56565; }
+.val-insight--warning { border-left: 3px solid #f6ad55; }
+.val-insight--info { border-left: 3px solid #7c5fe6; }
+
+.val-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.val-btn--primary {
+  background: linear-gradient(135deg, #7c5fe6, #5b3fd4);
+  color: #fff;
+}
+
+.val-btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.val-btn--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.val-btn--ghost {
+  background: transparent;
+  color: #7c5fe6;
+  border: 1px solid rgba(124, 95, 230, 0.4);
+}
+
+.val-create-form {
+  max-width: 480px;
+}
+
+.val-create-form select {
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+}
+
+.val-error {
+  color: #f56565;
+  margin: 0.5rem 0;
+}
+
+.val-promoted-msg {
+  color: #48bb78;
+  font-size: 0.9rem;
+}

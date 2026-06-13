@@ -1,11 +1,12 @@
 // Single source of truth for the admin sidebar.
 // Rendered ONLY by AdminLayout — admin pages must never render their own sidebar.
 import { memo, useCallback, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { signOut } from '../../services/auth.service';
 import { BrandLogo } from '../common/BrandLogo';
 
 const adminMenu = [
+  { icon: '🏠', label: 'Home', route: '/' },
   { icon: '📊', label: 'Dashboard', route: '/admin' },
   { icon: '👥', label: 'Users', route: '/admin/users' },
   { icon: '💡', label: 'Innovators', route: '/admin/innovators' },
@@ -33,15 +34,15 @@ export const AdminSidebar = memo(function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
-  const isActive = (route: string) =>
-    location.pathname === route || (route !== '/admin' && location.pathname.startsWith(route + '/'));
+  const isActive = (route: string) => {
+    if (route === '/') return location.pathname === '/';
+    return location.pathname === route || (route !== '/admin' && location.pathname.startsWith(route + '/'));
+  };
 
   const handleLogout = useCallback(async () => {
-    await signOut();
-    navigate('/login');
-  }, [navigate]);
+    await signOut('/');
+  }, []);
 
   return (
     <>

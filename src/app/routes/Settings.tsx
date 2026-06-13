@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
+import { signOut } from '../../services/auth.service';
 
 interface UserProfile {
   id: string;
@@ -24,7 +25,6 @@ interface UserProfile {
 }
 
 const Settings = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'account' | 'api' | 'billing'>('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -173,8 +173,7 @@ const Settings = () => {
     if (error) {
       setMessage({ type: 'error', text: error.message });
     } else {
-      await supabase.auth.signOut();
-      navigate('/');
+      await signOut('/');
     }
     setShowDeleteModal(false);
   };
@@ -214,8 +213,7 @@ const Settings = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    await signOut('/');
   };
 
   if (loading) {
