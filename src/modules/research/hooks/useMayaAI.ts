@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useMayaChat } from '../../../hooks/useMayaChat';
+import { useMayaChat } from '../../maya/hooks/useMayaChat';
 import {
   buildMayaApiPayload,
   detectKnowledgeGaps,

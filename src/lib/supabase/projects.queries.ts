@@ -1,8 +1,8 @@
 import { supabase } from './client';
 import { deleteProjectRelations, linkTeamToProject, logActivity } from './dbHelpers';
-import { fetchAccessibleProjects } from '../../features/projects/services/projectService';
+import { fetchAccessibleProjects } from '../../modules/projects/services/projectService';
 import { invalidateCache } from '../../lib/utils/queryCache';
-import type { ProjectViewModel } from '../../features/projects/types';
+import type { ProjectViewModel } from '../../modules/projects/types';
 import type {
   CreateProjectInput,
   Project,

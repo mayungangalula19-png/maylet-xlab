@@ -1,1 +1,1 @@
-export { default } from './landing/LandingPage';
+export { default } from '../../modules/marketing/pages/landing/LandingPage';

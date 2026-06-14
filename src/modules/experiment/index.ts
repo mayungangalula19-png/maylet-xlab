@@ -1,5 +1,10 @@
 export { default as ExperimentsPage } from './pages/ExperimentsPage';
 export { default as CreateExperimentPage } from './pages/CreateExperimentPage';
 export { default as ExperimentDetailPage } from './pages/ExperimentDetailPage';
-export * from './services/experiment.service';
-export * from './types/experiment.types';
+export { ExperimentCenter } from './components/ExperimentCenter';
+export * from './components/ExpViews';
+export * from './components/ExpPrimitives';
+export { EXP_STYLES, EXP_DETAIL_STYLES } from './components/expStyles';
+export * from '../../lib/experiment/experiment.service';
+export * from '../../lib/experiment/experimentOps';
+export type { ExperimentRecord as Experiment } from '../../lib/experiment/experimentOps';

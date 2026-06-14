@@ -1,470 +1,765 @@
-// C:\Users\user\maylet-xlab\src\app\routes\ExperimentDetail.tsx
-// PROFESSIONAL GRADE – Single Experiment View with Real AI (OpenRouter), Full CRUD, Optimistic UI
-
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { useAuth } from '../../../hooks/useAuth';
+import {
+  PIPELINE_STAGES,
+  type ExperimentConfig,
+  type ExperimentRecord,
+  type PipelineStage,
+  buildExperimentDetailMaya,
+  computeExperimentConfidence,
+  formatExperimentTimeAgo,
+  getExperimentPipelineStage,
+  normalizeExperimentRow,
+} from '../../../lib/experiment/experimentOps';
+import { fetchProjectsByIds } from '../../../lib/experiment/experimentOps.service';
+import { EXP_DETAIL_STYLES, EXP_STYLES } from '../components/expStyles';
 
-// ============================================================
-// TYPES (aligned with Supabase schema)
-// ============================================================
-type ExperimentType = 'market' | 'pricing' | 'feature' | 'competitor' | 'usability';
-type ExperimentStatus = 'draft' | 'active' | 'completed' | 'archived';
+const NAV = [
+  { id: 'overview', label: 'Overview', group: 'Workspace' },
+  { id: 'hypothesis', label: 'Hypothesis', group: 'Science' },
+  { id: 'design', label: 'Test Design', group: 'Science' },
+  { id: 'data', label: 'Data Collection', group: 'Evidence' },
+  { id: 'results', label: 'Results Analysis', group: 'Evidence' },
+  { id: 'integrations', label: 'Integrations', group: 'Platform' },
+] as const;
 
-interface Experiment {
-  id: string;
-  project_id: string;
-  project_name?: string;
-  project_sector?: string;
-  type: ExperimentType;
+type ViewId = (typeof NAV)[number]['id'];
+
+interface EditState {
+  title: string;
   hypothesis: string;
-  result: string | null;
-  feasibility_score: number | null;
-  recommendations: string[] | null;
-  status: ExperimentStatus;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
+  type: string;
+  status: string;
+  results: string;
+  config: ExperimentConfig;
 }
 
-interface AIAnalysisResult {
-  score: number;
-  risk_level: 'low' | 'medium' | 'high';
-  market_potential: number;
-  recommendations: string[];
-  competitor_insights: string;
+function stageIndex(stage: PipelineStage): number {
+  return PIPELINE_STAGES.indexOf(stage);
 }
 
-// ============================================================
-// AI ANALYSIS MODAL – REAL OPENROUTER API (FREE TIER)
-// ============================================================
-const AIAnalysisModal = ({
-  experiment,
-  onClose,
-  onUpdate,
+function stageClass(stage: PipelineStage): string {
+  return `exp-stage exp-stage--${stage.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  multiline = false,
+  placeholder,
 }: {
-  experiment: Experiment;
-  onClose: () => void;
-  onUpdate: () => void;
-}) => {
-  const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  multiline?: boolean;
+  placeholder?: string;
+}) {
+  const shared = {
+    value,
+    onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange(e.target.value),
+    placeholder,
+    className: 'expd-field__input',
+  };
+  return (
+    <label className="expd-field">
+      <span>{label}</span>
+      {multiline ? <textarea rows={4} {...shared} /> : <input type="text" {...shared} />}
+    </label>
+  );
+}
+
+function PipelineStepper({ stage }: { stage: PipelineStage }) {
+  const current = stageIndex(stage);
+  return (
+    <div className="expd-stepper" aria-label="Experiment pipeline progress">
+      {PIPELINE_STAGES.map((s, i) => {
+        const done = i < current;
+        const active = i === current;
+        return (
+          <div
+            key={s}
+            className={`expd-step ${done ? 'expd-step--done' : ''} ${active ? 'expd-step--active' : ''}`}
+          >
+            <div className="expd-step__dot">{done ? '✓' : i + 1}</div>
+            <span>{s}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function ExperimentDetail() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<ViewId>('overview');
+  const [record, setRecord] = useState<ExperimentRecord | null>(null);
+  const [edit, setEdit] = useState<EditState | null>(null);
+  const [dirty, setDirty] = useState(false);
 
-  const runRealAIAnalysis = async () => {
-    setLoading(true);
+  const load = useCallback(async () => {
+    if (!id || !user) return;
     setError(null);
-    try {
-      // Use OpenRouter free endpoint (you can replace with your own key)
-      const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-      if (!API_KEY) {
-        throw new Error('OpenRouter API key missing. Add VITE_OPENROUTER_API_KEY to .env');
-      }
-
-      const prompt = `
-You are an expert innovation advisor. Analyze the following experiment:
-
-Project type: ${experiment.type}
-Hypothesis: "${experiment.hypothesis}"
-
-Return a JSON object with:
-- score (0-100 feasibility)
-- risk_level ("low", "medium", "high")
-- market_potential (0-100)
-- recommendations (array of 3-5 strings)
-- competitor_insights (string)
-
-Only output valid JSON. No extra text.
-      `;
-
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek/deepseek-r1:free',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.7,
-        }),
-      });
-
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      const parsed = JSON.parse(content) as AIAnalysisResult;
-      setAnalysis(parsed);
-    } catch (err) {
-      console.error('AI analysis failed:', err);
-      setError(err instanceof Error ? err.message : 'Analysis failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveAnalysisToSupabase = async () => {
-    if (!analysis) return;
-    setSaving(true);
-    try {
-      const { error: updateError } = await supabase
-        .from('experiments')
-        .update({
-          feasibility_score: analysis.score,
-          recommendations: analysis.recommendations,
-          result: JSON.stringify({
-            risk_level: analysis.risk_level,
-            market_potential: analysis.market_potential,
-            competitor_insights: analysis.competitor_insights,
-          }),
-          status: 'completed',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', experiment.id);
-      if (updateError) throw updateError;
-      onUpdate();
-      onClose();
-    } catch (err) {
-      console.error('Save failed:', err);
-      setError('Failed to save analysis');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  useEffect(() => {
-    runRealAIAnalysis();
-  }, []);
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content large">
-        <div className="modal-header">
-          <h3>🤖 AI Analysis: {experiment.type.toUpperCase()}</h3>
-          <button onClick={onClose} className="modal-close">×</button>
-        </div>
-        <div className="modal-body">
-          {loading && (
-            <div className="ai-loading">
-              <div className="loading-spinner-small"></div>
-              <p>Contacting OpenRouter AI (DeepSeek‑R1) – please wait...</p>
-            </div>
-          )}
-          {error && (
-            <div className="ai-error">
-              ❌ {error}<br />
-              <button onClick={runRealAIAnalysis} className="btn-retry">Retry</button>
-            </div>
-          )}
-          {analysis && !loading && (
-            <div className="ai-results">
-              <div className="ai-score-section">
-                <div className="ai-score-circle" style={{ background: `conic-gradient(#2fd4ff 0deg ${analysis.score * 3.6}deg, #1a1a2e ${analysis.score * 3.6}deg 360deg)` }}>
-                  <span>{analysis.score}%</span>
-                </div>
-                <div className="ai-score-details">
-                  <div className="detail-item"><span>Risk Level:</span><strong style={{ color: analysis.risk_level === 'low' ? '#48bb78' : analysis.risk_level === 'medium' ? '#f6c90e' : '#fc8181' }}>{analysis.risk_level.toUpperCase()}</strong></div>
-                  <div className="detail-item"><span>Market Potential:</span><strong>{analysis.market_potential}%</strong></div>
-                </div>
-              </div>
-              <div className="ai-recommendations"><h4>📝 Recommendations</h4><ul>{analysis.recommendations.map((rec, i) => <li key={i}>💡 {rec}</li>)}</ul></div>
-              <div className="ai-insights"><h4>🔍 Competitor Insights</h4><p>{analysis.competitor_insights}</p></div>
-            </div>
-          )}
-        </div>
-        <div className="modal-footer">
-          <button onClick={onClose} className="btn-cancel">Cancel</button>
-          <button onClick={saveAnalysisToSupabase} disabled={loading || saving || !analysis} className="btn-save">
-            {saving ? 'Saving...' : 'Save Analysis Results'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================================
-// MAIN EXPERIMENT DETAIL PAGE
-// ============================================================
-const ExperimentDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [experiment, setExperiment] = useState<Experiment | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    type: 'market' as ExperimentType,
-    hypothesis: '',
-    status: 'active' as ExperimentStatus,
-    result: '',
-  });
-  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchExperiment = useCallback(async () => {
-    if (!id) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/login');
-      return;
-    }
-    const { data, error: expError } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('experiments')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
-    if (expError || !data) {
+
+    if (fetchError || !data) {
+      setError(fetchError?.message ?? 'Experiment not found');
       navigate('/experiments');
       return;
     }
-    const { data: projectData } = await supabase
-      .from('projects')
-      .select('name, sector')
-      .eq('id', data.project_id)
-      .single();
-    setExperiment({
-      ...data,
-      project_name: projectData?.name || 'Unknown',
-      project_sector: projectData?.sector || 'Unknown',
+
+    const row = data as Record<string, unknown>;
+    let project: { name?: string; sector?: string } | null = null;
+    if (row.project_id) {
+      const projectMap = await fetchProjectsByIds([String(row.project_id)]);
+      project = projectMap[String(row.project_id)] ?? null;
+    }
+
+    const normalized = normalizeExperimentRow(row, project);
+    setRecord(normalized);
+    setEdit({
+      title: normalized.title,
+      hypothesis: normalized.hypothesis,
+      type: normalized.type,
+      status: normalized.status,
+      results: normalized.results ?? '',
+      config: { ...normalized.config },
     });
-    setFormData({
-      type: data.type,
-      hypothesis: data.hypothesis,
-      status: data.status,
-      result: data.result || '',
-    });
+    setDirty(false);
     setLoading(false);
-  }, [id, navigate]);
+  }, [id, user, navigate]);
 
   useEffect(() => {
-    fetchExperiment();
-  }, [fetchExperiment]);
+    if (authLoading) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setLoading(true);
+    load();
+  }, [authLoading, user, load, navigate]);
 
-  const handleSave = async () => {
-    if (!experiment) return;
+  const patch = useCallback((partial: Partial<EditState> & { config?: Partial<ExperimentConfig> }) => {
+    setEdit((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...partial };
+      if (partial.config) {
+        next.config = { ...prev.config, ...partial.config };
+      }
+      return next;
+    });
+    setDirty(true);
+  }, []);
+
+  const derived = useMemo(() => {
+    if (!edit) return null;
+    const confidenceScore = computeExperimentConfidence({
+      status: edit.status,
+      results: edit.results || null,
+      config: edit.config,
+    });
+    const pipelineStage = getExperimentPipelineStage(
+      edit.status,
+      edit.results || null,
+      edit.config,
+      confidenceScore
+    );
+    return { confidenceScore, pipelineStage, validationReady: pipelineStage === 'Validation Ready' };
+  }, [edit]);
+
+  const maya = useMemo(() => {
+    if (!record || !edit || !derived) return null;
+    const snapshot: ExperimentRecord = {
+      ...record,
+      title: edit.title,
+      hypothesis: edit.hypothesis,
+      type: edit.type,
+      status: edit.status,
+      results: edit.results || null,
+      config: edit.config,
+      confidenceScore: derived.confidenceScore,
+      pipelineStage: derived.pipelineStage,
+      validationReady: derived.validationReady,
+    };
+    return buildExperimentDetailMaya(snapshot);
+  }, [record, edit, derived]);
+
+  const save = async () => {
+    if (!id || !edit) return;
     setSaving(true);
-    setError('');
+    setError(null);
+    const auditEntry = {
+      at: new Date().toISOString(),
+      action: 'Updated experiment fields',
+    };
+    const configWithAudit = {
+      ...edit.config,
+      audit_log: [...(edit.config.audit_log ?? []), auditEntry],
+      version: (edit.config.version ?? 1) + 1,
+    };
+    const findings = JSON.stringify(configWithAudit);
     const { error: updateError } = await supabase
       .from('experiments')
       .update({
-        type: formData.type,
-        hypothesis: formData.hypothesis,
-        status: formData.status,
-        result: formData.result,
+        title: edit.title.trim() || 'Untitled experiment',
+        hypothesis: edit.hypothesis,
+        type: edit.type,
+        status: edit.status,
+        results: edit.results.trim() || null,
+        findings,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', experiment.id);
+      .eq('id', id);
+
     if (updateError) {
       setError(updateError.message);
-    } else {
-      setExperiment(prev => prev ? { ...prev, ...formData, updated_at: new Date().toISOString() } : null);
-      setEditing(false);
+      setSaving(false);
+      return;
     }
+    setDirty(false);
     setSaving(false);
+    await load();
+  };
+
+  const setStatus = async (status: string, configPatch?: Partial<ExperimentConfig>) => {
+    if (configPatch) patch({ status, config: configPatch });
+    else patch({ status });
+    if (!id || !edit) return;
+    setSaving(true);
+    const nextConfig = configPatch ? { ...edit.config, ...configPatch } : edit.config;
+    const { error: updateError } = await supabase
+      .from('experiments')
+      .update({
+        status,
+        findings: JSON.stringify(nextConfig),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+    setSaving(false);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    await load();
   };
 
   const handleDelete = async () => {
-    if (!experiment) return;
-    if (window.confirm('⚠️ Permanently delete this experiment? This cannot be undone.')) {
-      const { error } = await supabase.from('experiments').delete().eq('id', experiment.id);
-      if (!error) navigate('/experiments');
-      else alert('Delete failed');
+    if (!id || !record) return;
+    if (!window.confirm(`Delete "${record.title}"? This cannot be undone.`)) return;
+    const { error: deleteError } = await supabase.from('experiments').delete().eq('id', id);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
     }
+    navigate('/experiments');
   };
 
-  const getTypeLabel = (type: ExperimentType) => {
-    const map = {
-      market: '📊 Market Validation',
-      pricing: '💰 Pricing Test',
-      feature: '⚙️ Feature Test',
-      competitor: '🔍 Competitor Analysis',
-      usability: '👥 Usability Test',
-    };
-    return map[type] || '🧪 Experiment';
-  };
+  const navGroups = useMemo(() => {
+    const groups = new Map<string, (typeof NAV)[number][]>();
+    for (const item of NAV) {
+      const list = groups.get(item.group) ?? [];
+      list.push(item);
+      groups.set(item.group, list);
+    }
+    return [...groups.entries()];
+  }, []);
 
-  const getScoreColor = (score: number) => {
-    if (score >= 70) return '#48bb78';
-    if (score >= 40) return '#f6c90e';
-    return '#fc8181';
-  };
-
-  if (loading) {
+  if (loading || !edit || !record || !derived || !maya) {
     return (
-      <div className="experiment-detail-container">
-        <main className="detail-main"><div className="loading-spinner"></div></main>
+      <div className="exp-page">
+        <div className="exp-loading" aria-label="Loading experiment" />
+        <style>{EXP_STYLES}{EXP_DETAIL_STYLES}</style>
       </div>
     );
   }
 
-  if (!experiment) return null;
+  const renderView = () => {
+    switch (view) {
+      case 'overview':
+        return (
+          <>
+            <div className="exp-section-head">
+              <h2>Experiment overview</h2>
+              <span className={stageClass(derived.pipelineStage)}>{derived.pipelineStage}</span>
+            </div>
+            <PipelineStepper stage={derived.pipelineStage} />
+            <div className="exp-kpi-grid">
+              <div className="exp-kpi exp-kpi--accent">
+                <span>Confidence</span>
+                <strong>{derived.confidenceScore}%</strong>
+              </div>
+              <div className="exp-kpi">
+                <span>Evidence quality</span>
+                <strong>{record.evidenceQuality}%</strong>
+              </div>
+              <div className="exp-kpi">
+                <span>Data quality</span>
+                <strong>{record.dataQuality}%</strong>
+              </div>
+              <div className="exp-kpi">
+                <span>Status</span>
+                <strong>{edit.status}</strong>
+              </div>
+              <div className="exp-kpi">
+                <span>Category</span>
+                <strong>{edit.config.category ?? edit.type}</strong>
+              </div>
+              <div className="exp-kpi">
+                <span>Updated</span>
+                <strong>{formatExperimentTimeAgo(record.updated_at)}</strong>
+              </div>
+            </div>
+            <div className="exp-split">
+              <div className="exp-panel">
+                <h3>Project context</h3>
+                {record.project_name ? (
+                  <>
+                    <p>
+                      <Link to={`/projects/${record.project_id}`} className="exp-link">
+                        {record.project_name}
+                      </Link>
+                    </p>
+                    {record.project_sector && (
+                      <span className="exp-muted">Sector: {record.project_sector}</span>
+                    )}
+                  </>
+                ) : (
+                  <p className="exp-muted">No project linked</p>
+                )}
+              </div>
+              <div className="exp-panel">
+                <h3>Schedule</h3>
+                <div className="exp-mini">
+                  <div>
+                    <span>Start</span>
+                    <strong>{edit.config.start_date || '—'}</strong>
+                  </div>
+                  <div>
+                    <span>End</span>
+                    <strong>{edit.config.end_date || '—'}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <Field
+              label="Title"
+              value={edit.title}
+              onChange={(v) => patch({ title: v })}
+            />
+            {edit.config.description && (
+              <div className="exp-panel" style={{ marginTop: '0.75rem' }}>
+                <h3>Description</h3>
+                <p>{edit.config.description}</p>
+              </div>
+            )}
+          </>
+        );
+      case 'hypothesis':
+        return (
+          <>
+            <div className="exp-section-head">
+              <h2>Hypothesis Lab</h2>
+            </div>
+            <p className="exp-lead">
+              State the testable claim and assumptions that drive this experiment.
+            </p>
+            <Field
+              label="Hypothesis"
+              value={edit.hypothesis}
+              onChange={(v) => patch({ hypothesis: v })}
+              multiline
+              placeholder="If we [change], then [outcome], because [rationale]."
+            />
+            <Field
+              label="Objectives"
+              value={edit.config.objectives ?? ''}
+              onChange={(v) => patch({ config: { objectives: v } })}
+              multiline
+            />
+            <Field
+              label="Assumptions"
+              value={edit.config.assumptions ?? ''}
+              onChange={(v) => patch({ config: { assumptions: v } })}
+              multiline
+            />
+            <Field
+              label="Secondary hypotheses"
+              value={edit.config.secondary_hypotheses ?? ''}
+              onChange={(v) => patch({ config: { secondary_hypotheses: v } })}
+              multiline
+            />
+            <Field
+              label="Failure criteria"
+              value={edit.config.failure_criteria ?? ''}
+              onChange={(v) => patch({ config: { failure_criteria: v } })}
+              multiline
+            />
+          </>
+        );
+      case 'design':
+        return (
+          <>
+            <div className="exp-section-head">
+              <h2>Test Design</h2>
+            </div>
+            <p className="exp-lead">
+              Define variables, success criteria, and protocol attachments.
+            </p>
+            <div className="exp-split">
+              <Field
+                label="Independent variables"
+                value={edit.config.independent_variables ?? ''}
+                onChange={(v) => patch({ config: { independent_variables: v } })}
+                multiline
+              />
+              <Field
+                label="Dependent variables"
+                value={edit.config.dependent_variables ?? ''}
+                onChange={(v) => patch({ config: { dependent_variables: v } })}
+                multiline
+              />
+            </div>
+            <Field
+              label="Expected outcomes"
+              value={edit.config.expected_outcomes ?? ''}
+              onChange={(v) => patch({ config: { expected_outcomes: v } })}
+              multiline
+            />
+            <Field
+              label="Methodology"
+              value={edit.config.methodology ?? ''}
+              onChange={(v) => patch({ config: { methodology: v } })}
+              multiline
+            />
+            <div className="exp-split">
+              <Field
+                label="Constraints"
+                value={edit.config.constraints ?? ''}
+                onChange={(v) => patch({ config: { constraints: v } })}
+                multiline
+              />
+              <Field
+                label="Resources"
+                value={edit.config.resources ?? ''}
+                onChange={(v) => patch({ config: { resources: v } })}
+                multiline
+              />
+            </div>
+            <Field
+              label="Risks"
+              value={edit.config.risks ?? ''}
+              onChange={(v) => patch({ config: { risks: v } })}
+              multiline
+            />
+            <Field
+              label="Success criteria"
+              value={edit.config.success_criteria ?? ''}
+              onChange={(v) => patch({ config: { success_criteria: v } })}
+              multiline
+            />
+            <Field
+              label="Attachment notes"
+              value={edit.config.attachment_notes ?? ''}
+              onChange={(v) => patch({ config: { attachment_notes: v } })}
+              multiline
+            />
+            {edit.config.prototype_id && (
+              <p style={{ marginTop: '0.75rem' }}>
+                Linked prototype:{' '}
+                <Link to={`/prototypes/${edit.config.prototype_id}`} className="exp-link">
+                  View prototype
+                </Link>
+              </p>
+            )}
+            {edit.config.document_ids && edit.config.document_ids.length > 0 && (
+              <p className="exp-muted">
+                {edit.config.document_ids.length} document(s) attached in create flow
+              </p>
+            )}
+          </>
+        );
+      case 'data':
+        return (
+          <>
+            <div className="exp-section-head">
+              <h2>Data Collection</h2>
+            </div>
+            <p className="exp-lead">Record observations and metrics during the test run.</p>
+            <Field
+              label="Observations"
+              value={edit.config.observations ?? ''}
+              onChange={(v) => patch({ config: { observations: v } })}
+              multiline
+              placeholder="Qualitative notes, session logs, participant feedback…"
+            />
+            <Field
+              label="Success criteria"
+              value={edit.config.success_criteria ?? ''}
+              onChange={(v) => patch({ config: { success_criteria: v } })}
+              multiline
+            />
+            <Field
+              label="Metrics"
+              value={edit.config.metrics ?? ''}
+              onChange={(v) => patch({ config: { metrics: v } })}
+              multiline
+              placeholder="KPI values, sample sizes, significance thresholds…"
+            />
+            <Field
+              label="CSV imports"
+              value={edit.config.csv_imports ?? ''}
+              onChange={(v) => patch({ config: { csv_imports: v } })}
+              multiline
+              placeholder="Imported dataset references or notes…"
+            />
+          </>
+        );
+      case 'results':
+        return (
+          <>
+            <div className="exp-section-head">
+              <h2>Results Analysis</h2>
+            </div>
+            <p className="exp-lead">Compare actual outcomes against success criteria.</p>
+            <Field
+              label="Actual results"
+              value={edit.config.actual_results ?? edit.results}
+              onChange={(v) => patch({ results: v, config: { actual_results: v } })}
+              multiline
+            />
+            <Field
+              label="Key findings"
+              value={edit.config.key_findings ?? ''}
+              onChange={(v) => patch({ config: { key_findings: v } })}
+              multiline
+            />
+            {edit.config.success_criteria && (
+              <div className="exp-panel" style={{ marginTop: '0.75rem' }}>
+                <h3>Success criteria (reference)</h3>
+                <p>{edit.config.success_criteria}</p>
+              </div>
+            )}
+          </>
+        );
+      case 'integrations':
+        return (
+          <>
+            <div className="exp-section-head">
+              <h2>Lifecycle Integrations</h2>
+            </div>
+            <div className="exp-links-grid">
+              {(
+                [
+                  {
+                    label: 'Operations Center',
+                    to: '/experiments',
+                    desc: 'Portfolio pipeline and registry',
+                  },
+                  record.project_id
+                    ? {
+                        label: 'Project',
+                        to: `/projects/${record.project_id}`,
+                        desc: record.project_name ?? 'Parent innovation project',
+                      }
+                    : null,
+                  edit.config.prototype_id
+                    ? {
+                        label: 'Prototype',
+                        to: `/prototypes/${edit.config.prototype_id}`,
+                        desc: 'Artifact under test',
+                      }
+                    : null,
+                  {
+                    label: 'Validation Gate',
+                    to: '/validation/new',
+                    desc: 'Submit evidence after analysis',
+                  },
+                  {
+                    label: 'Documents',
+                    to: record.project_id
+                      ? `/projects/${record.project_id}/documents`
+                      : '/documents',
+                    desc: 'Protocols and datasets',
+                  },
+                  { label: 'Enterprise', to: '/enterprise', desc: 'Org-wide experiment analytics' },
+                ] as Array<{ label: string; to: string; desc: string } | null>
+              )
+                .filter((l): l is { label: string; to: string; desc: string } => l !== null)
+                .map((l) => (
+                  <Link key={l.to} to={l.to} className="exp-link-card">
+                    <strong>{l.label}</strong>
+                    <span>{l.desc}</span>
+                  </Link>
+                ))}
+            </div>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const statusActions: { label: string; status: string; config?: Partial<ExperimentConfig>; show: boolean }[] = [
+    { label: 'Mark planned', status: 'planned', show: edit.status === 'draft' },
+    {
+      label: 'Approve test',
+      status: 'approved',
+      config: { approved: true },
+      show: ['draft', 'planned'].includes(edit.status),
+    },
+    {
+      label: 'Start running',
+      status: 'active',
+      show: ['draft', 'planned', 'approved'].includes(edit.status),
+    },
+    {
+      label: 'Complete test',
+      status: 'completed',
+      show: ['active', 'running', 'in_progress'].includes(edit.status),
+    },
+    {
+      label: 'Mark reviewed',
+      status: edit.status,
+      config: { results_reviewed: true },
+      show: ['completed', 'done', 'analyzed'].includes(edit.status) && !edit.config.results_reviewed,
+    },
+    {
+      label: 'Approve evidence',
+      status: edit.status,
+      config: { evidence_approved: true },
+      show: Boolean(edit.config.results_reviewed) && !edit.config.evidence_approved,
+    },
+    {
+      label: 'Mark failed',
+      status: 'failed',
+      show: !['completed', 'failed', 'archived'].includes(edit.status),
+    },
+  ];
 
   return (
-    <div className="experiment-detail-container">
-      <main className="detail-main">
-        <div className="detail-header">
-          <div className="header-left">
-            <Link to="/experiments" className="back-link">← Back to Experiments</Link>
-            <h1>{editing ? 'Edit Experiment' : getTypeLabel(experiment.type)}</h1>
+    <div className="exp-page">
+      <header className="exp-header">
+        <div className="exp-header__top">
+          <div>
+            <Link to="/experiments" className="exp-back">
+              ← Experiment Operations
+            </Link>
+            <h1>{edit.title || 'Experiment workspace'}</h1>
+            <p className="exp-header__sub">
+              {record.project_name ? `${record.project_name} · ` : ''}
+              {derived.pipelineStage} · {derived.confidenceScore}% confidence
+            </p>
           </div>
-          <div className="header-actions">
-            {!editing && (
-              <>
-                <button onClick={() => setEditing(true)} className="btn-edit">✏️ Edit</button>
-                {!experiment.feasibility_score && <button onClick={() => setShowAIAnalysis(true)} className="btn-ai">🤖 Run AI Analysis (OpenRouter)</button>}
-                <button onClick={handleDelete} className="btn-delete">🗑️ Delete</button>
-              </>
+          <div className="exp-header__actions">
+            {statusActions
+              .filter((a) => a.show)
+              .map((a) => (
+                <button
+                  key={`${a.label}-${a.status}`}
+                  type="button"
+                  className="exp-btn exp-btn--ghost"
+                  disabled={saving}
+                  onClick={() => setStatus(a.status, a.config)}
+                >
+                  {a.label}
+                </button>
+              ))}
+            <button
+              type="button"
+              className="exp-btn exp-btn--ghost"
+              disabled={saving || !dirty}
+              onClick={() => save()}
+            >
+              {saving ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
+            </button>
+            {derived.validationReady && (
+              <Link to="/validation/new" className="exp-btn exp-btn--primary">
+                → Validation gate
+              </Link>
             )}
+            <button
+              type="button"
+              className="exp-btn exp-btn--ghost"
+              onClick={handleDelete}
+              style={{ color: '#fc8181' }}
+            >
+              Delete
+            </button>
           </div>
         </div>
+      </header>
 
-        <div className="detail-content">
-          {error && <div className="error-banner">{error}</div>}
-          {editing ? (
-            <div className="edit-form">
-              <div className="form-group">
-                <label>Experiment Type</label>
-                <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as ExperimentType })}>
-                  <option value="market">📊 Market Validation</option>
-                  <option value="pricing">💰 Pricing Test</option>
-                  <option value="feature">⚙️ Feature Test</option>
-                  <option value="competitor">🔍 Competitor Analysis</option>
-                  <option value="usability">👥 Usability Test</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Hypothesis (testable statement)</label>
-                <textarea value={formData.hypothesis} onChange={(e) => setFormData({ ...formData, hypothesis: e.target.value })} rows={4} required />
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as ExperimentStatus })}>
-                  <option value="active">🟢 Active</option>
-                  <option value="completed">✅ Completed</option>
-                  <option value="draft">📝 Draft</option>
-                  <option value="archived">📦 Archived</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Manual Results / Learnings</label>
-                <textarea value={formData.result} onChange={(e) => setFormData({ ...formData, result: e.target.value })} rows={6} placeholder="Document your findings, metrics, lessons..." />
-              </div>
-              <div className="form-actions">
-                <button onClick={() => setEditing(false)} className="btn-cancel">Cancel</button>
-                <button onClick={handleSave} disabled={saving} className="btn-save">{saving ? 'Saving...' : 'Save Changes'}</button>
-              </div>
+      {error && <div className="exp-banner exp-banner--error">{error}</div>}
+
+      <div className="exp-layout">
+        <nav className="exp-nav" aria-label="Experiment sections">
+          {navGroups.map(([group, items]) => (
+            <div key={group} className="exp-nav__group">
+              <span className="exp-nav__label">{group}</span>
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`exp-nav__item ${view === item.id ? 'exp-nav__item--active' : ''}`}
+                  onClick={() => setView(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
-          ) : (
-            <div className="view-mode">
-              <div className="detail-section">
-                <label>Project</label>
-                <p>{experiment.project_name} • {experiment.project_sector}</p>
-              </div>
-              <div className="detail-section">
-                <label>Hypothesis</label>
-                <div className="hypothesis-box">{experiment.hypothesis}</div>
-              </div>
-              <div className="detail-section">
-                <label>Status</label>
-                <span className={`status-badge status-${experiment.status}`}>
-                  {experiment.status === 'active' && '🟢 Active'}
-                  {experiment.status === 'completed' && '✅ Completed'}
-                  {experiment.status === 'draft' && '📝 Draft'}
-                  {experiment.status === 'archived' && '📦 Archived'}
-                </span>
-              </div>
-              {experiment.feasibility_score ? (
-                <>
-                  <div className="detail-section">
-                    <label>AI Feasibility Score</label>
-                    <div className="score-display">
-                      <div className="score-bar"><div className="score-fill" style={{ width: `${experiment.feasibility_score}%`, background: getScoreColor(experiment.feasibility_score) }}></div></div>
-                      <span className="score-value" style={{ color: getScoreColor(experiment.feasibility_score) }}>{experiment.feasibility_score}%</span>
-                    </div>
-                  </div>
-                  {experiment.recommendations && experiment.recommendations.length > 0 && (
-                    <div className="detail-section">
-                      <label>AI Recommendations</label>
-                      <ul className="recommendations-list">{experiment.recommendations.map((rec, i) => <li key={i}>💡 {rec}</li>)}</ul>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="detail-section">
-                  <button onClick={() => setShowAIAnalysis(true)} className="btn-ai-full">🤖 Run AI Analysis (DeepSeek‑R1 via OpenRouter)</button>
-                </div>
-              )}
-              <div className="detail-section">
-                <label>Manual Results / Learnings</label>
-                <div className="manual-results">{experiment.result || 'No manual results recorded yet.'}</div>
-              </div>
-              <div className="detail-section meta">
-                <div>Created: {new Date(experiment.created_at).toLocaleString()}</div>
-                <div>Last updated: {new Date(experiment.updated_at).toLocaleString()}</div>
-              </div>
+          ))}
+        </nav>
+
+        <main className="exp-main">
+          <section className="exp-section">{renderView()}</section>
+        </main>
+
+        <aside className="exp-maya" aria-label="MAYA experiment advisor">
+          <div className="exp-maya__head">
+            <strong>MAYA Experiment AI</strong>
+            <span>{derived.confidenceScore}%</span>
+          </div>
+          <p className="exp-maya__label">Confidence score</p>
+          <div className="exp-maya__block">
+            <label>Analysis</label>
+            <ul>
+              {maya.bullets.map((b) => (
+                <li key={b}>{b}</li>
+              ))}
+            </ul>
+          </div>
+          {maya.improvements.length > 0 && (
+            <div className="exp-maya__block">
+              <label>Improvements</label>
+              <ul>
+                {maya.improvements.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
             </div>
           )}
-        </div>
-      </main>
+          <p className="exp-maya__action">{maya.nextAction}</p>
+          <Link to="/experiments/create" className="exp-maya-btn exp-maya-btn--ghost">
+            + New experiment
+          </Link>
+        </aside>
+      </div>
 
-      {showAIAnalysis && <AIAnalysisModal experiment={experiment} onClose={() => setShowAIAnalysis(false)} onUpdate={fetchExperiment} />}
-
-      <style>{`
-        .experiment-detail-container { display: flex; min-height: 100vh; background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%); }
-        .detail-main { flex: 1; margin-left: 0; padding: 2rem; transition: margin-left 0.3s ease; }
-        @media (max-width: 768px) { .detail-main { margin-left: 0; padding: 1rem; padding-top: 5rem; } }
-        .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(124,95,230,0.3); border-top-color: #7c5fe6; border-radius: 50%; animation: spin 1s linear infinite; margin: 20% auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
-        .back-link { color: #7c5fe6; text-decoration: none; display: inline-block; margin-bottom: 0.5rem; }
-        .detail-header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, #9b7ff0); -webkit-background-clip: text; background-clip: text; color: transparent; margin-top: 0.2rem; }
-        .header-actions { display: flex; gap: 0.75rem; }
-        .btn-edit, .btn-ai, .btn-delete, .btn-ai-full { background: rgba(255,255,255,0.1); border: none; padding: 0.5rem 1rem; border-radius: 30px; cursor: pointer; color: white; transition: all 0.2s; }
-        .btn-edit:hover { background: #7c5fe6; }
-        .btn-ai:hover, .btn-ai-full:hover { background: linear-gradient(135deg, #7c5fe6, #2fd4ff); color: #0a0d1a; }
-        .btn-delete:hover { background: #fc8181; color: #0a0d1a; }
-        .detail-content { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 24px; padding: 2rem; }
-        .detail-section { margin-bottom: 1.5rem; }
-        .detail-section label { font-size: 0.7rem; text-transform: uppercase; color: #7c5fe6; letter-spacing: 1px; display: block; margin-bottom: 0.25rem; }
-        .hypothesis-box { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 12px; border-left: 3px solid #2fd4ff; }
-        .status-badge { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.75rem; }
-        .status-active { background: rgba(47,212,255,0.2); color: #2fd4ff; }
-        .status-completed { background: rgba(72,187,120,0.2); color: #48bb78; }
-        .status-draft { background: rgba(246,201,14,0.2); color: #f6c90e; }
-        .status-archived { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
-        .score-display { display: flex; align-items: center; gap: 1rem; }
-        .score-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
-        .score-fill { height: 100%; }
-        .recommendations-list { padding-left: 1.2rem; }
-        .manual-results { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; white-space: pre-wrap; font-size: 0.85rem; }
-        .meta { display: flex; gap: 1.5rem; font-size: 0.7rem; color: rgba(255,255,255,0.5); }
-        .edit-form .form-group { margin-bottom: 1rem; }
-        .edit-form input, .edit-form textarea, .edit-form select { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem; color: white; }
-        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
-        .btn-cancel, .btn-save { padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; }
-        .btn-cancel { background: rgba(255,255,255,0.1); color: white; }
-        .btn-save { background: linear-gradient(135deg, #7c5fe6, #2fd4ff); color: #0a0d1a; font-weight: 600; }
-        .error-banner { background: rgba(252,129,129,0.2); border: 1px solid #fc8181; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; color: #fc8181; }
-        .loading-spinner-small { width: 30px; height: 30px; border: 2px solid rgba(124,95,230,0.3); border-top-color: #7c5fe6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-        .ai-loading, .ai-error { text-align: center; padding: 2rem; }
-        .btn-retry { margin-top: 1rem; background: #7c5fe6; border: none; padding: 0.4rem 1rem; border-radius: 20px; color: white; cursor: pointer; }
-        .ai-results { display: flex; flex-direction: column; gap: 1.5rem; }
-        .ai-score-section { display: flex; align-items: center; gap: 2rem; justify-content: center; flex-wrap: wrap; }
-        .ai-score-circle { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
-        .ai-score-circle span { font-size: 1.5rem; font-weight: 700; color: white; }
-        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: #1a1a2e; border-radius: 20px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .modal-close { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .modal-body { padding: 1.5rem; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
-        .ai-score-details { flex: 1; }
-        .detail-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-      `}</style>
+      <style>{EXP_STYLES}{EXP_DETAIL_STYLES}</style>
     </div>
   );
-};
-
-export default ExperimentDetail;
+}

@@ -1,4 +1,1 @@
-import { AdminDetailShell } from '../../../../components/admin/AdminDetailShell';
-export default function AdminAppeals() {
-  return <AdminDetailShell title="Moderation appeals" backTo="/admin/moderation" />;
-}
+export { default } from '../../../../modules/admin/pages/moderation/AdminAppeals';

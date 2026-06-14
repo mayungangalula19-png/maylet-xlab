@@ -1,4 +1,1 @@
-import { AdminDetailShell } from '../../../../components/admin/AdminDetailShell';
-export default function AdminPaymentRefund() {
-  return <AdminDetailShell title="Refund payment" backTo="/admin/payments" />;
-}
+export { default } from '../../../../modules/admin/pages/payments/AdminPaymentRefund';

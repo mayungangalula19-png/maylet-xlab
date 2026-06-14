@@ -4,10 +4,9 @@ export {
   fetchUserProjects,
   listProjects,
   deleteProjectById,
-} from '../features/projects/services/projectService';
-export * from './experiments.service';
+} from '../modules/projects/services/projectService';
 export * from './teams.service';
 export * from './documents.service';
-export * from './funding.service';
 export * from './vault.service';
-export * from './maya.service';
+export * from './careers.service';
+export * from './commercialization.service';

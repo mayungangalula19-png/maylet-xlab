@@ -1,0 +1,363 @@
+/* Shared advanced marketing pages */
+
+.mkt-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+  color: #f7f9ff;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+.mkt-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #9b7ff0;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 1.25rem 2rem 0;
+  transition: color 0.2s;
+}
+.mkt-back:hover {
+  color: #fff;
+}
+
+.mkt-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+.mkt-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 3rem;
+}
+.mkt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(124, 95, 230, 0.12);
+  border: 1px solid rgba(124, 95, 230, 0.25);
+  border-radius: 40px;
+  padding: 0.35rem 1rem;
+  font-size: 0.75rem;
+  color: #9b7ff0;
+  margin-bottom: 1.25rem;
+}
+.mkt-hero h1 {
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  line-height: 1.1;
+  margin: 0 0 1rem;
+  font-weight: 800;
+}
+.mkt-hero h1 span {
+  background: linear-gradient(135deg, #9b7ff0, #2fd4ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.mkt-hero p {
+  max-width: 680px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.mkt-section {
+  margin-bottom: 3rem;
+}
+.mkt-section__head {
+  margin-bottom: 1.25rem;
+}
+.mkt-kicker {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9b7ff0;
+  margin-bottom: 0.35rem;
+}
+.mkt-section__head h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-weight: 700;
+}
+.mkt-section__head h2 span {
+  color: #2fd4ff;
+}
+.mkt-section__head p {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  max-width: 640px;
+}
+
+.mkt-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.mkt-stat {
+  padding: 1.15rem;
+  border-radius: 16px;
+  background: rgba(15, 20, 40, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+.mkt-stat strong {
+  display: block;
+  font-size: 1.75rem;
+  color: #2fd4ff;
+  margin-bottom: 0.25rem;
+}
+.mkt-stat span {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mkt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.mkt-card {
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: rgba(15, 20, 40, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.25s;
+}
+.mkt-card--clickable {
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  width: 100%;
+}
+.mkt-card--clickable:hover,
+.mkt-card--active {
+  border-color: rgba(124, 95, 230, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+.mkt-card__icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.mkt-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+.mkt-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+.mkt-card__meta {
+  margin-top: 0.65rem;
+  font-size: 0.72rem;
+  color: #9b7ff0;
+}
+
+.mkt-panel {
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  line-height: 1.6;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mkt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.mkt-tab {
+  padding: 0.45rem 1rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.mkt-tab:hover {
+  border-color: rgba(124, 95, 230, 0.5);
+}
+.mkt-tab--active {
+  background: rgba(124, 95, 230, 0.25);
+  border-color: rgba(124, 95, 230, 0.5);
+}
+
+.mkt-table-wrap {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 20, 40, 0.45);
+}
+.mkt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.mkt-table th,
+.mkt-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.mkt-table th {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mkt-table tr:last-child td {
+  border-bottom: none;
+}
+
+.mkt-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.mkt-badge--ok {
+  background: rgba(72, 187, 120, 0.2);
+  color: #68d391;
+}
+.mkt-badge--warn {
+  background: rgba(246, 201, 14, 0.2);
+  color: #f6c90e;
+}
+.mkt-badge--info {
+  background: rgba(124, 95, 230, 0.2);
+  color: #9b7ff0;
+}
+
+.mkt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mkt-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.mkt-list li:last-child {
+  border-bottom: none;
+}
+
+.mkt-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 420px;
+}
+.mkt-input {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+.mkt-input:focus {
+  outline: none;
+  border-color: rgba(124, 95, 230, 0.5);
+}
+
+.mkt-cta {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(124, 95, 230, 0.15), rgba(47, 212, 255, 0.08));
+  border: 1px solid rgba(124, 95, 230, 0.25);
+  margin-top: 2rem;
+}
+.mkt-cta h2 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+.mkt-cta p {
+  margin: 0 auto 1.25rem;
+  max-width: 520px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.95rem;
+}
+.mkt-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.mkt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.mkt-btn--primary {
+  background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
+  color: #0a0d1a;
+}
+.mkt-btn--primary:hover {
+  filter: brightness(1.08);
+}
+.mkt-btn--secondary {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.mkt-btn--secondary:hover {
+  border-color: #9b7ff0;
+  background: rgba(124, 95, 230, 0.15);
+}
+.mkt-btn--ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+}
+.mkt-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mkt-toast {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: #68d391;
+}
+
+.mkt-disclaimer {
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2rem;
+}

@@ -6,7 +6,7 @@ import type {
 } from './types';
 import { buildMessagesForApi, buildSystemPrompt } from './prompts';
 import { detectAgentFromMessage } from './context-builder';
-import { supabase } from '../../../lib/supabase/client';
+import { invokeMayaChat } from '../../../lib/maya/mayaChat.service';
 
 /**
  * All AI provider calls go through the `maya-chat` Supabase Edge Function.
@@ -17,16 +17,7 @@ async function callMayaChatFunction(
   messages: { role: string; content: string }[],
   modelId: MayaModelId
 ): Promise<string> {
-  const { data, error } = await supabase.functions.invoke('maya-chat', {
-    body: { messages, model: modelId },
-  });
-
-  if (error) throw new Error(`maya-chat function: ${error.message}`);
-  if (data?.error) throw new Error(`maya-chat function: ${data.error}`);
-
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error('maya-chat function returned no content');
-  return content;
+  return invokeMayaChat(messages, modelId);
 }
 
 function localFallback(agent: MayaAgentRole, message: string, context: MayaCompletionRequest['context']): string {

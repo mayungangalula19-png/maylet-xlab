@@ -1,4 +1,1 @@
-import { AdminDetailShell } from '../../../../components/admin/AdminDetailShell';
-export default function AdminPrototypeDetail() {
-  return <AdminDetailShell title="Prototype detail" backTo="/admin/prototypes" />;
-}
+export { default } from '../../../../modules/admin/pages/prototypes/AdminPrototypeDetail';

@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { invokeMayaChat } from '../../../lib/maya/mayaChat.service';
 import '../../../styles/maya.css';
 
 // ============================================================
@@ -176,17 +177,7 @@ const MayaAssistantPage = () => {
         ...updatedMessages.map(m => ({ role: m.role, content: m.content })),
       ];
 
-      // AI calls are proxied through the maya-chat Edge Function so that
-      // provider API keys never reach the browser.
-      const { data, error: fnError } = await supabase.functions.invoke('maya-chat', {
-        body: { messages: apiMessages, model: 'groq' },
-      });
-
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-
-      const assistantContent = data?.choices?.[0]?.message?.content;
-      if (!assistantContent) throw new Error('AI service returned no content');
+      const assistantContent = await invokeMayaChat(apiMessages, 'groq');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),

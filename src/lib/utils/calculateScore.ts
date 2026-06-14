@@ -1,1 +1,1 @@
-export const calculateScore = (progress: number): number => { return Math.min(100, Math.max(0, progress)); };
+export * from '../../modules/shared/utils/calculateScore.ts';

@@ -1,8 +1,1 @@
-import { LoginForm } from '../../components/LoginForm';
-
-export const Login = () => {
-  return <LoginForm redirectTo="/dashboard" />;
-};
-
-export default Login;
-
+export { default } from '../../modules/auth/pages/Login';
