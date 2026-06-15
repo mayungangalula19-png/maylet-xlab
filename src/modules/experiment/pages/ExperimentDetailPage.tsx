@@ -591,7 +591,7 @@ export default function ExperimentDetail() {
                   {
                     label: 'Documents',
                     to: record.project_id
-                      ? `/projects/${record.project_id}/documents`
+                      ? `/documents?projectId=${record.project_id}`
                       : '/documents',
                     desc: 'Protocols and datasets',
                   },

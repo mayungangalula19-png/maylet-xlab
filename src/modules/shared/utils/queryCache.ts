@@ -23,3 +23,16 @@ export function invalidateCache(prefix: string): void {
     if (key.startsWith(prefix)) store.delete(key);
   }
 }
+
+const inflight = new Map<string, Promise<unknown>>();
+
+/** Coalesce parallel identical reads (e.g. StrictMode double-mount, multiple widgets). */
+export function dedupeAsync<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const existing = inflight.get(key);
+  if (existing) return existing as Promise<T>;
+  const promise = fn().finally(() => {
+    inflight.delete(key);
+  });
+  inflight.set(key, promise);
+  return promise;
+}

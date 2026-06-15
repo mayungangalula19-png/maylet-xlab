@@ -78,7 +78,7 @@ export function ProjectCommandTable({ projects }: Props) {
                     <Link to={`/projects/${project.id}`} className="icc-table-btn">View</Link>
                     <Link to={`/projects/${project.id}/edit`} className="icc-table-btn">Edit</Link>
                     <Link to="/documents" className="icc-table-btn">Research</Link>
-                    <Link to={`/experiments/new?projectId=${project.id}`} className="icc-table-btn">Experiment</Link>
+                    <Link to={`/experiments/create?projectId=${project.id}`} className="icc-table-btn">Experiment</Link>
                     <Link to="/funding" className="icc-table-btn">Funding</Link>
                     <Link to={`/ai-assistant/analyze?projectId=${project.id}`} className="icc-table-btn icc-table-btn--maya">MAYA</Link>
                   </div>

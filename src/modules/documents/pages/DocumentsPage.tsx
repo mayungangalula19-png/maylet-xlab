@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { uploadProjectDocumentFile } from '../../../lib/supabase/document.queries';
 import { useAuth } from '../../../hooks/useAuth';
 import { getProjects } from '../../../lib/supabase/projects.queries';
 import type { ResearchDocument } from '../../../modules/research/types/research.types';
@@ -310,36 +311,13 @@ async function uploadEnterpriseDocument(
   const err = validateFile(file);
   if (err) throw new Error(err);
 
-  const fileName = `${Date.now()}_${file.name}`;
-  const { error: uploadError } = await supabase.storage
-    .from('project-documents')
-    .upload(`${projectId}/${fileName}`, file);
-  if (uploadError) throw uploadError;
-
-  const { data: urlData } = supabase.storage
-    .from('project-documents')
-    .getPublicUrl(`${projectId}/${fileName}`);
-
   const tagList = buildTags(meta.module, meta.version, meta.tags);
 
-  const { data, error } = await supabase
-    .from('documents')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      name: file.name,
-      file_url: urlData.publicUrl,
-      file_type: file.type,
-      size_bytes: file.size,
-      category: meta.module,
-      tags: tagList,
-      description: meta.description.trim() || null,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data as ResearchDocument;
+  return uploadProjectDocumentFile(projectId, userId, file, {
+    category: meta.module,
+    tags: tagList,
+    description: meta.description.trim() || undefined,
+  });
 }
 
 /* ─── Page ────────────────────────────────────────────────────────────────── */

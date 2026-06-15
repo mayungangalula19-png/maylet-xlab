@@ -8,7 +8,7 @@ import type {
 } from '../types/validation.types';
 import type { Project } from '../../../types/project.types';
 
-export function useValidationList(userId: string | undefined) {
+export function useValidationList(userId: string | undefined, projectId?: string | null) {
   const [records, setRecords] = useState<ValidationRecord[]>([]);
   const [stats, setStats] = useState<ValidationDashboardStats>({
     total: 0,
@@ -31,14 +31,15 @@ export function useValidationList(userId: string | undefined) {
     setError(null);
     try {
       const list = await validationService.listValidations(userId);
-      setRecords(list);
-      setStats(validationService.computeDashboardStats(list));
+      const filtered = projectId ? list.filter((r) => r.project_id === projectId) : list;
+      setRecords(filtered);
+      setStats(validationService.computeDashboardStats(filtered));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load validations');
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, projectId]);
 
   useEffect(() => {
     refresh();

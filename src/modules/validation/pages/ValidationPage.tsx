@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { useValidationList } from '../hooks/useValidation';
 import { ValidationCard } from '../components/ValidationCard';
@@ -7,7 +7,13 @@ import '../styles/validation.css';
 
 export default function ValidationPage() {
   const { user } = useAuth();
-  const { records, stats, loading, error } = useValidationList(user?.id);
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get('projectId');
+  const { records, stats, loading, error } = useValidationList(user?.id, projectId);
+
+  const newValidationHref = projectId
+    ? `/validation/new?projectId=${projectId}`
+    : '/validation/new';
 
   return (
     <div className="icc-page val-page">
@@ -15,10 +21,25 @@ export default function ValidationPage() {
         <div>
           <h1>Validation Center</h1>
           <p>Decision gate between Experiment and Funding — evidence-based readiness scoring.</p>
+          {projectId && (
+            <p className="val-filter-note">
+              Showing validations for project{' '}
+              <code>{projectId}</code>
+              {' · '}
+              <Link to="/validation">Clear filter</Link>
+            </p>
+          )}
         </div>
         <div className="icc-page-actions">
-          <Link to="/validation/new" className="val-btn val-btn--primary">New validation</Link>
-          <Link to="/experiments" className="val-btn val-btn--secondary">Experiments</Link>
+          <Link to={newValidationHref} className="val-btn val-btn--primary">
+            New validation
+          </Link>
+          <Link
+            to={projectId ? `/experiments?projectId=${projectId}` : '/experiments'}
+            className="val-btn val-btn--secondary"
+          >
+            Experiments
+          </Link>
         </div>
       </header>
 
@@ -36,9 +57,15 @@ export default function ValidationPage() {
         <p>Loading validations…</p>
       ) : records.length === 0 ? (
         <div className="icc-glass icc-widget">
-          <h3>No validations yet</h3>
-          <p>Run experiments, then create a validation review to score funding readiness.</p>
-          <Link to="/validation/new" className="val-btn val-btn--primary">Create validation</Link>
+          <h3>{projectId ? 'No validations for this project' : 'No validations yet'}</h3>
+          <p>
+            {projectId
+              ? 'Create a validation review for this project after experiments are complete.'
+              : 'Run experiments, then create a validation review to score funding readiness.'}
+          </p>
+          <Link to={newValidationHref} className="val-btn val-btn--primary">
+            Create validation
+          </Link>
         </div>
       ) : (
         <div className="val-grid">

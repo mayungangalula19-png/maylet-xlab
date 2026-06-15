@@ -15,7 +15,7 @@ export function getStageActionRoute(stage: InnovationStage, projectId: string): 
     case 'Prototype':
       return '/prototypes';
     case 'Experiment':
-      return `/experiments/new?projectId=${projectId}`;
+      return `/experiments/create?projectId=${projectId}`;
     case 'Validation':
       return `/projects/${projectId}`;
     case 'Funding':
@@ -30,7 +30,7 @@ export function getStageActionRoute(stage: InnovationStage, projectId: string): 
 /** Route for activity timeline items */
 export function getActivityRoute(type: string, projectId?: string): string {
   const t = type.toLowerCase();
-  if (t.includes('experiment')) return projectId ? `/experiments/new?projectId=${projectId}` : '/experiments';
+  if (t.includes('experiment')) return projectId ? `/experiments/create?projectId=${projectId}` : '/experiments';
   if (t.includes('document') || t.includes('research')) return projectId ? `/research/${projectId}` : '/research';
   if (t.includes('team')) return '/teams';
   if (t.includes('funding') || t.includes('pitch')) return '/funding';

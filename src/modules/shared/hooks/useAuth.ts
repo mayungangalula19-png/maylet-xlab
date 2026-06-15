@@ -1,27 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../../../lib/supabase/client';
+import { useContext } from 'react';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { useAuthState } from './useAuthState';
 
+/**
+ * Returns the app-wide auth session when inside AuthProvider (preferred).
+ * Falls back to a local listener only outside the provider (e.g. tests).
+ */
 export const useAuth = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => listener?.subscription.unsubscribe();
-  }, []);
-
-  const user: User | null = session?.user ?? null;
-
-  // Stable object reference — prevents every AuthContext consumer re-rendering
-  // when unrelated parent state changes.
-  return useMemo(() => ({ session, user, loading }), [session, user, loading]);
+  const ctx = useContext(AuthContext);
+  if (ctx) return ctx;
+  return useAuthState();
 };

@@ -7,17 +7,6 @@ export interface MayaChatMessage {
 
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-function isEdgeFunctionUnavailable(error: { message?: string } | null): boolean {
-  if (!error?.message) return false;
-  const msg = error.message.toLowerCase();
-  return (
-    msg.includes('edge function') ||
-    msg.includes('failed to send a request') ||
-    msg.includes('404') ||
-    msg.includes('not found')
-  );
-}
-
 async function callGroqDirect(messages: MayaChatMessage[]): Promise<string> {
   const apiKey = import.meta.env.VITE_GROQ_API_KEY;
   if (!apiKey?.trim()) {
@@ -59,34 +48,48 @@ export async function invokeMayaChat(
   messages: MayaChatMessage[],
   model = 'groq'
 ): Promise<string> {
-  const { data, error } = await supabase.functions.invoke('maya-chat', {
-    body: { messages, model },
-  });
+  const groqKey = import.meta.env.VITE_GROQ_API_KEY?.trim();
 
-  if (!error && data && !data.error) {
-    const content = data.choices?.[0]?.message?.content as string | undefined;
-    if (content) return content;
+  if (groqKey && import.meta.env.DEV) {
+    return callGroqDirect(messages);
   }
 
-  const edgeFailed = Boolean(error) || Boolean(data?.error);
-  const canFallback =
-    import.meta.env.VITE_GROQ_API_KEY?.trim() &&
-    (edgeFailed || isEdgeFunctionUnavailable(error));
+  let edgeError: Error | null = null;
+  let edgeData: { error?: string; choices?: Array<{ message?: { content?: string } }> } | null = null;
 
-  if (canFallback) {
+  try {
+    const { data, error } = await supabase.functions.invoke('maya-chat', {
+      body: { messages, model },
+    });
+    edgeData = data;
+    if (!error && data && !data.error) {
+      const content = data.choices?.[0]?.message?.content as string | undefined;
+      if (content) return content;
+    }
+    if (error) {
+      edgeError = new Error(error.message);
+    } else if (data?.error) {
+      edgeError = new Error(typeof data.error === 'string' ? data.error : 'Edge function error');
+    }
+  } catch (err) {
+    edgeError = err instanceof Error ? err : new Error(String(err));
+  }
+
+  if (groqKey) {
     try {
       return await callGroqDirect(messages);
     } catch (directErr) {
       const directMsg = directErr instanceof Error ? directErr.message : String(directErr);
+      const edgeMsg = edgeError?.message ?? 'maya-chat Edge Function is not deployed';
       throw new Error(
-        `MAYA Edge Function unavailable and Groq fallback failed: ${directMsg}`
+        `${edgeMsg}. Groq fallback failed: ${directMsg}`
       );
     }
   }
 
   const edgeMsg =
-    error?.message ??
-    (typeof data?.error === 'string' ? data.error : null) ??
+    edgeError?.message ??
+    (typeof edgeData?.error === 'string' ? edgeData.error : null) ??
     'maya-chat Edge Function is not deployed';
 
   throw new Error(

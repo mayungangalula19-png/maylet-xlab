@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase/client';
+import { documentInsert, formatUploadError } from '../../../lib/supabase/document.queries';
 
 export async function listDocumentsByProject(projectId: string) {
   const { data, error } = await supabase
@@ -18,7 +19,7 @@ export async function uploadDocumentMeta(payload: {
   file_type?: string;
   size_bytes?: number;
 }) {
-  const { data, error } = await supabase.from('documents').insert(payload).select().single();
-  if (error) throw error;
+  const { data, error } = await documentInsert(payload);
+  if (error) throw new Error(formatUploadError(error));
   return data;
 }

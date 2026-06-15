@@ -1,1 +1,1 @@
-export { default } from '../../modules/account/pages/Messages';
+export { default } from '../../modules/messages/pages/MessagesPage';

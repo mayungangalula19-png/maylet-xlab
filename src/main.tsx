@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './design-system/design-system.css';
 import './styles/globals.css';
 // maya.css is imported only by MayaAssistantPage (deferred from initial bundle)
 

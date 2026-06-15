@@ -1,8 +1,9 @@
-﻿// Innovation Command Center — production dashboard (database records only)
+// Innovation Command Center — production dashboard (database records only)
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { useAuthContext } from '../../../contexts/AuthContext';
 import {
   ActivityTimeline,
   InnovationPipelineOverview,
@@ -45,7 +46,8 @@ const Projects = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [pipelineFilter, setPipelineFilter] = useState<InnovationFilterStage>('All');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [userId, setUserId] = useState('');
+  const { user, loading: authLoading } = useAuthContext();
+  const userId = user?.id ?? '';
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -58,22 +60,13 @@ const Projects = () => {
   }, [projects, cc.operationalQueues]);
 
   const fetchProjects = useCallback(async () => {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    if (!userId) return;
 
-    if (authError || !user) {
-      navigate('/login');
-      return;
-    }
-
-    setUserId(user.id);
     setLoading(true);
     setFetchError(null);
 
     try {
-      const projectsData = await getProjects(user.id);
+      const projectsData = await getProjects(userId);
       setProjects(projectsData);
       setFilteredProjects(projectsData);
       if (projectsData.length === 0) {
@@ -88,7 +81,11 @@ const Projects = () => {
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, [userId]);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate('/login');
+  }, [authLoading, user, navigate]);
 
   const fetchActivities = useCallback(async () => {
     if (!userId) return;
@@ -168,8 +165,8 @@ const Projects = () => {
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    if (userId) fetchProjects();
+  }, [userId, fetchProjects]);
 
   useEffect(() => {
     if (!userId) return;

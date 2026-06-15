@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase/client';
+import { prototypeInsert } from '../../../lib/supabase/prototype.queries';
 import { logActivity } from '../../../lib/supabase/dbHelpers';
 import { createProject, updateProjectRecord } from '../../../lib/supabase/projects.queries';
 import {
@@ -237,30 +238,31 @@ export const prototypeService = {
   },
 
   async create(userId: string, input: CreatePrototypeInput): Promise<PrototypeRecord> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const sessionUserId = sessionData.session?.user?.id;
+    if (!sessionUserId) {
+      throw new Error('You must be signed in to create a prototype.');
+    }
+    if (sessionUserId !== userId) {
+      throw new Error('Session mismatch. Sign out and sign in again.');
+    }
+
     let file_url: string | null = null;
     let thumbnail_url: string | null = null;
     if (input.file) file_url = await uploadFile(userId, input.file, 'file');
     if (input.thumbnail) thumbnail_url = await uploadFile(userId, input.thumbnail, 'thumb');
 
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('prototypes')
-      .insert({
-        user_id: userId,
-        project_id: input.project_id ?? null,
-        research_id: input.research_id ?? null,
-        name: input.name,
-        description: input.description ?? '',
-        version: input.version ?? '1.0.0',
-        status: 'draft',
-        file_url,
-        thumbnail_url,
-        created_at: now,
-        updated_at: now,
-      })
-      .select()
-      .single();
-    if (error) throw error;
+    const { data } = await prototypeInsert({
+      user_id: userId,
+      project_id: input.project_id ?? null,
+      research_id: input.research_id ?? null,
+      name: input.name,
+      description: input.description ?? '',
+      version: input.version ?? '1.0.0',
+      status: 'draft',
+      file_url,
+      thumbnail_url,
+    });
     return mapRow(data as Record<string, unknown>);
   },
 

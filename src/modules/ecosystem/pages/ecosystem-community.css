@@ -1,0 +1,422 @@
+.mxl-comm {
+  --mxl-comm-bg: #0a0d1a;
+  --mxl-comm-panel: rgba(255, 255, 255, 0.03);
+  --mxl-comm-border: rgba(255, 255, 255, 0.08);
+  --mxl-comm-primary: #7c5fe6;
+  --mxl-comm-accent: #2fd4ff;
+  --mxl-comm-text: #e8e8f0;
+  --mxl-comm-muted: rgba(255, 255, 255, 0.55);
+  min-height: 100vh;
+  background: var(--mxl-comm-bg);
+  color: var(--mxl-comm-text);
+  padding: 1rem clamp(0.75rem, 3vw, 1.5rem) 2rem;
+}
+
+.mxl-comm__header {
+  max-width: 1200px;
+  margin: 0 auto 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mxl-comm__header h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+}
+
+.mxl-comm__header p {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--mxl-comm-muted);
+  max-width: 36rem;
+}
+
+.mxl-comm__grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .mxl-comm__grid {
+    grid-template-columns: 220px minmax(0, 1fr) 260px;
+    align-items: start;
+  }
+}
+
+.mxl-comm__panel {
+  border: 1px solid var(--mxl-comm-border);
+  border-radius: 14px;
+  background: var(--mxl-comm-panel);
+  padding: 0.85rem;
+}
+
+.mxl-comm__panel h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mxl-comm-muted);
+}
+
+.mxl-comm__section-gap {
+  margin-top: 1rem;
+}
+
+.mxl-comm__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mxl-comm__nav button,
+.mxl-comm__sort button {
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--mxl-comm-text);
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.mxl-comm__nav button:hover,
+.mxl-comm__sort button:hover {
+  background: rgba(124, 95, 230, 0.15);
+}
+
+.mxl-comm__nav button.is-active,
+.mxl-comm__sort button.is-active {
+  background: rgba(124, 95, 230, 0.28);
+  color: #fff;
+}
+
+.mxl-comm__sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.mxl-comm__composer {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--mxl-comm-border);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--mxl-comm-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mxl-comm__composer:hover {
+  border-color: rgba(124, 95, 230, 0.4);
+}
+
+.mxl-comm__feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mxl-comm__feed--virtual {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.mxl-comm__card {
+  border: 1px solid var(--mxl-comm-border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 1rem;
+}
+
+.mxl-comm__card-head {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin-bottom: 0.65rem;
+}
+
+.mxl-comm__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.mxl-comm__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.mxl-comm__meta strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.mxl-comm__meta span {
+  font-size: 0.72rem;
+  color: var(--mxl-comm-muted);
+}
+
+.mxl-comm__type {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(47, 212, 255, 0.12);
+  color: var(--mxl-comm-accent);
+}
+
+.mxl-comm__card h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.mxl-comm__card p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: pre-wrap;
+}
+
+.mxl-comm__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.mxl-comm__tags span {
+  font-size: 0.68rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  background: rgba(124, 95, 230, 0.15);
+  color: #c4b5fd;
+}
+
+.mxl-comm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--mxl-comm-border);
+}
+
+.mxl-comm__actions button,
+.mxl-comm__actions a {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--mxl-comm-border);
+  background: transparent;
+  color: var(--mxl-comm-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mxl-comm__actions button:hover,
+.mxl-comm__actions a:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mxl-comm__actions button.is-on {
+  border-color: rgba(124, 95, 230, 0.5);
+  color: #c4b5fd;
+}
+
+.mxl-comm__collab {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.mxl-comm__collab a {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(124, 95, 230, 0.18);
+  color: #ddd6fe;
+  text-decoration: none;
+}
+
+.mxl-comm__comments {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--mxl-comm-border);
+}
+
+.mxl-comm__comment {
+  font-size: 0.78rem;
+  margin-bottom: 0.45rem;
+}
+
+.mxl-comm__comment strong {
+  color: #fff;
+}
+
+.mxl-comm__comment-form {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.mxl-comm__comment-form input {
+  flex: 1;
+  min-height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--mxl-comm-border);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  padding: 0 0.65rem;
+  font-size: 0.78rem;
+}
+
+.mxl-comm__list-item {
+  display: block;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--mxl-comm-border);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mxl-comm__list-item:last-child {
+  border-bottom: none;
+}
+
+.mxl-comm__list-item strong {
+  display: block;
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.mxl-comm__list-item span {
+  color: var(--mxl-comm-muted);
+  font-size: 0.7rem;
+}
+
+.mxl-comm__skeleton {
+  height: 140px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: mxl-comm-shimmer 1.2s infinite;
+}
+
+@keyframes mxl-comm-shimmer {
+  to { background-position: -200% 0; }
+}
+
+.mxl-comm__empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--mxl-comm-muted);
+  font-size: 0.88rem;
+}
+
+.mxl-comm__btn-primary {
+  border: none;
+  border-radius: 10px;
+  padding: 0.55rem 1rem;
+  background: var(--mxl-comm-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.mxl-comm__btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mxl-comm__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: grid;
+  place-items: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.mxl-comm__modal {
+  width: min(520px, 100%);
+  border-radius: 14px;
+  border: 1px solid var(--mxl-comm-border);
+  background: #12121f;
+  padding: 1rem;
+}
+
+.mxl-comm__modal h3 {
+  margin: 0 0 0.75rem;
+}
+
+.mxl-comm__modal label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--mxl-comm-muted);
+  margin-bottom: 0.25rem;
+}
+
+.mxl-comm__modal input,
+.mxl-comm__modal select,
+.mxl-comm__modal textarea {
+  width: 100%;
+  margin-bottom: 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--mxl-comm-border);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.mxl-comm__modal textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.mxl-comm__modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.mxl-comm__error {
+  color: #fc8181;
+  font-size: 0.78rem;
+  margin-bottom: 0.5rem;
+}
+
+.mxl-comm__sentinel {
+  height: 1px;
+}
+
+@media (max-width: 899px) {
+  .mxl-comm__aside--left { order: 2; }
+  .mxl-comm__main { order: 1; }
+  .mxl-comm__aside--right { order: 3; }
+}

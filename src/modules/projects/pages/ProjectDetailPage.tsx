@@ -3,8 +3,9 @@
 // WITH TABS: OVERVIEW, TASKS, TEAM, DOCUMENTS, AI LAB, FUNDING, SETTINGS
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { uploadProjectDocumentFile } from '../../../lib/supabase/document.queries';
 import { buildProjectUpdate, fetchTeamMembersForProject } from '../../../lib/supabase/dbHelpers';
 import { normalizeProjectStatus } from '../../../types/project.types';
 
@@ -82,6 +83,22 @@ interface FundingPitch {
   created_at: string;
 }
 
+const PROJECT_DETAIL_TABS = [
+  'overview',
+  'tasks',
+  'team',
+  'documents',
+  'ai-lab',
+  'funding',
+  'settings',
+] as const;
+
+type ProjectDetailTab = (typeof PROJECT_DETAIL_TABS)[number];
+
+function isProjectDetailTab(value: string | null): value is ProjectDetailTab {
+  return value !== null && (PROJECT_DETAIL_TABS as readonly string[]).includes(value);
+}
+
 // ============================================================
 // TABS COMPONENT
 // ============================================================
@@ -155,7 +172,7 @@ const OverviewTab = ({ project, stats }: { project: Project; stats: any }) => {
           <Link to={`/research/${project.id}`} className="btn-edit-header">🔬 Research</Link>
           <Link to={`/research/${project.id}?tab=gate`} className="btn-edit-header">🚦 Gate</Link>
           <Link to={`/projects/${project.id}/edit`} className="btn-edit-header">✏️ Edit</Link>
-          <Link to={`/experiments/new?projectId=${project.id}`} className="btn-experiment-header">🧪 Run Experiment</Link>
+          <Link to={`/experiments/create?projectId=${project.id}`} className="btn-experiment-header">🧪 Run Experiment</Link>
         </div>
       </div>
 
@@ -181,14 +198,14 @@ const OverviewTab = ({ project, stats }: { project: Project; stats: any }) => {
 
       {/* Stats Grid */}
       <div className="stats-grid-detail">
-        <Link to={`/projects/${project.id}/team`} className="stat-card-detail">
+        <Link to={`/projects/${project.id}?tab=team`} className="stat-card-detail">
           <div className="stat-icon-detail">👥</div>
           <div className="stat-info-detail">
             <div className="stat-value-detail">{stats.teamSize}</div>
             <div className="stat-label-detail">Team Members</div>
           </div>
         </Link>
-        <Link to={`/projects/${project.id}/tasks`} className="stat-card-detail">
+        <Link to={`/projects/${project.id}?tab=tasks`} className="stat-card-detail">
           <div className="stat-icon-detail">✅</div>
           <div className="stat-info-detail">
             <div className="stat-value-detail">{stats.tasksCompleted}/{stats.tasksTotal}</div>
@@ -202,14 +219,14 @@ const OverviewTab = ({ project, stats }: { project: Project; stats: any }) => {
             <div className="stat-label-detail">Workspace</div>
           </div>
         </Link>
-        <Link to={`/projects/${project.id}/documents`} className="stat-card-detail">
+        <Link to={`/projects/${project.id}?tab=documents`} className="stat-card-detail">
           <div className="stat-icon-detail">📄</div>
           <div className="stat-info-detail">
             <div className="stat-value-detail">{stats.documents}</div>
             <div className="stat-label-detail">Documents</div>
           </div>
         </Link>
-        <Link to={`/projects/${project.id}/funding`} className="stat-card-detail">
+        <Link to={`/projects/${project.id}?tab=funding`} className="stat-card-detail">
           <div className="stat-icon-detail">💰</div>
           <div className="stat-info-detail">
             <div className="stat-value-detail">${stats.budgetUsed?.toLocaleString() || 0}</div>
@@ -620,32 +637,18 @@ const DocumentsTab = ({ documents, onDocumentUpload }: { documents: Document[]; 
     // Get current user
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user.id;
-    const userName = session?.user.user_metadata?.full_name || session?.user.email?.split('@')[0];
 
-    // Upload to Supabase Storage
-    const fileName = `${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('project-documents')
-      .upload(`${id}/${fileName}`, file);
+    if (!userId) {
+      setUploading(false);
+      return;
+    }
 
-    if (!uploadError) {
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('project-documents')
-        .getPublicUrl(`${id}/${fileName}`);
-
-      // Save to documents table
-      await supabase.from('documents').insert({
-        project_id: id,
-        name: file.name,
-        file_url: urlData.publicUrl,
-        file_type: file.type,
-        size: file.size,
-        uploaded_by: userId,
-        uploaded_by_name: userName,
-      });
-      
+    try {
+      await uploadProjectDocumentFile(id!, userId, file, { category: 'project' });
       onDocumentUpload();
+    } catch (e) {
+      console.error('[documents] upload:', e);
+      alert(e instanceof Error ? e.message : 'Upload failed');
     }
     
     setUploading(false);
@@ -1126,6 +1129,7 @@ const SettingsTab = ({ project, onUpdate }: { project: Project; onUpdate: () => 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -1133,8 +1137,32 @@ const ProjectDetail = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [fundingPitches, setFundingPitches] = useState<FundingPitch[]>([]);
-  const [activeTab, setActiveTab] = useState('overview');
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<ProjectDetailTab>(() =>
+    isProjectDetailTab(tabFromUrl) ? tabFromUrl : 'overview'
+  );
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isProjectDetailTab(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    } else if (!tabFromUrl) {
+      setActiveTab('overview');
+    }
+  }, [tabFromUrl]);
+
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      if (!isProjectDetailTab(tab)) return;
+      setActiveTab(tab);
+      if (tab === 'overview') {
+        setSearchParams({}, { replace: true });
+      } else {
+        setSearchParams({ tab }, { replace: true });
+      }
+    },
+    [setSearchParams]
+  );
 
   // Fetch all project data
   const fetchProjectData = useCallback(async () => {
@@ -1281,7 +1309,7 @@ const ProjectDetail = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Tabs activeTab={activeTab} setActiveTab={handleTabChange} />
 
         {/* Tab Content */}
         <div className="tab-content">

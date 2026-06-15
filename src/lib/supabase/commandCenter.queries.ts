@@ -1,5 +1,6 @@
 import { supabase } from './client';
 import { fetchOwnedTeamIds } from './dbHelpers';
+import { dedupeAsync, getCached, setCached } from '../utils/queryCache';
 import type { Project } from '../../types/project.types';
 import {
   computeInnovationStageCounts,
@@ -140,6 +141,23 @@ const RUNNING_STATUSES = new Set(['running', 'active', 'in_progress']);
 const COMPLETED_STATUSES = new Set(['completed', 'done', 'finished', 'launched']);
 
 export async function fetchRealDashboardSnapshot(
+  userId: string,
+  projects: Project[]
+): Promise<RealDashboardSnapshot> {
+  const projectKey = projects.map((p) => p.id).sort().join(',');
+  const cacheKey = `commandCenter:${userId}:${projectKey}`;
+
+  const cached = getCached<RealDashboardSnapshot>(cacheKey);
+  if (cached) return cached;
+
+  return dedupeAsync(cacheKey, async () => {
+    const snapshot = await fetchRealDashboardSnapshotUncached(userId, projects);
+    setCached(cacheKey, snapshot, 30_000);
+    return snapshot;
+  });
+}
+
+async function fetchRealDashboardSnapshotUncached(
   userId: string,
   projects: Project[]
 ): Promise<RealDashboardSnapshot> {

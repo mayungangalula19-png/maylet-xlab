@@ -140,7 +140,14 @@ export function CreatePrototypeForm({
         <select
           id="proto-research"
           value={researchId}
-          onChange={(e) => setResearchId(e.target.value)}
+          onChange={(e) => {
+            const id = e.target.value;
+            setResearchId(id);
+            if (id) {
+              const match = researchOptions.find((r) => r.id === id);
+              if (match) setProjectId(match.projectId);
+            }
+          }}
           disabled={loading}
         >
           <option value="">None</option>

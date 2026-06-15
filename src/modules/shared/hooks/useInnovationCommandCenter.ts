@@ -53,6 +53,11 @@ const EMPTY_SNAPSHOT: RealDashboardSnapshot = {
 };
 
 export function useInnovationCommandCenter(userId: string, projects: Project[]) {
+  const projectKey = useMemo(
+    () => projects.map((p) => p.id).sort().join(','),
+    [projects]
+  );
+
   const derived = useMemo(
     () => buildFromSnapshot({ ...EMPTY_SNAPSHOT, projectCount: projects.length }, projects),
     [projects]
@@ -83,7 +88,7 @@ export function useInnovationCommandCenter(userId: string, projects: Project[]) 
     return () => {
       cancelled = true;
     };
-  }, [userId, projects]);
+  }, [userId, projectKey, projects]);
 
   return { data, loading };
 }

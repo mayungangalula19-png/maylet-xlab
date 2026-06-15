@@ -1,44 +1,11 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Hackathons.tsx
 // PROFESSIONAL HACKATHON HUB – Browse, register, and track hackathons
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase/client';
+import { useHackathonsPage } from '../hooks/useHackathonsPage';
+import { Loader } from '../../../design-system';
+import type { HackathonRecord } from '../../../core';
 
-// ============================================================
-// TYPES
-// ============================================================
-type HackathonStatus = 'upcoming' | 'ongoing' | 'completed';
-type HackathonMode = 'online' | 'offline' | 'hybrid';
-
-interface Hackathon {
-  id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  mode: HackathonMode;
-  location: string | null;
-  prize_pool: number;
-  max_participants: number | null;
-  registered_count: number;
-  status: HackathonStatus;
-  image_url: string | null;
-  organizer: string;
-  created_at: string;
-}
-
-interface UserRegistration {
-  id: string;
-  hackathon_id: string;
-  user_id: string;
-  team_name: string | null;
-  registered_at: string;
-}
-
-// ============================================================
-// HACKATHON CARD COMPONENT
-// ============================================================
+type Hackathon = HackathonRecord;
 const HackathonCard = ({ hackathon, isRegistered, onRegister, onView }: {
   hackathon: Hackathon;
   isRegistered: boolean;
@@ -51,7 +18,7 @@ const HackathonCard = ({ hackathon, isRegistered, onRegister, onView }: {
     completed: '#48bb78',
   };
 
-  const getModeIcon = (mode: HackathonMode) => {
+  const getModeIcon = (mode: Hackathon['mode']) => {
     switch(mode) {
       case 'online': return '💻';
       case 'offline': return '📍';
@@ -158,86 +125,31 @@ const HackathonDetailModal = ({ hackathon, onClose, onRegister, isRegistered }: 
 // MAIN HACKATHONS PAGE
 // ============================================================
 const Hackathons = () => {
-  const [loading, setLoading] = useState(true);
-  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
-  const [myRegistrations, setMyRegistrations] = useState<UserRegistration[]>([]);
-  const [selectedHackathon, setSelectedHackathon] = useState<Hackathon | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [modeFilter, setModeFilter] = useState<string>('all');
-  const [userId, setUserId] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) navigate('/login');
-      else setUserId(data.user.id);
-    });
-  }, [navigate]);
-
-  const fetchHackathons = useCallback(async () => {
-    let query = supabase.from('hackathons').select('*');
-    if (statusFilter !== 'all') query = query.eq('status', statusFilter);
-    if (modeFilter !== 'all') query = query.eq('mode', modeFilter);
-    const { data, error } = await query.order('start_date', { ascending: true });
-    if (!error) setHackathons(data || []);
-    setLoading(false);
-  }, [statusFilter, modeFilter]);
-
-  const fetchMyRegistrations = useCallback(async () => {
-    if (!userId) return;
-    const { data, error } = await supabase
-      .from('hackathon_registrations')
-      .select('*')
-      .eq('user_id', userId);
-    if (!error) setMyRegistrations(data || []);
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId) {
-      fetchHackathons();
-      fetchMyRegistrations();
-    }
-  }, [userId, statusFilter, modeFilter, fetchHackathons, fetchMyRegistrations]);
-
-  // Real-time subscription for hackathon changes (e.g., registered_count updates)
-  useEffect(() => {
-    const channel = supabase
-      .channel('hackathons')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'hackathons' }, () => fetchHackathons())
-      .subscribe();
-    return () => { channel.unsubscribe(); };
-  }, [fetchHackathons]);
-
-  const handleRegister = async (hackathonId: string) => {
-    if (!userId) return;
-    const hackathon = hackathons.find(h => h.id === hackathonId);
-    if (!hackathon) return;
-    if (hackathon.max_participants && hackathon.registered_count >= hackathon.max_participants) {
-      alert('This hackathon has reached its maximum number of participants.');
-      return;
-    }
-    const { error } = await supabase.from('hackathon_registrations').insert({
-      hackathon_id: hackathonId,
-      user_id: userId,
-      registered_at: new Date().toISOString(),
-    });
-    if (error) {
-      alert('Registration failed: ' + error.message);
-    } else {
-      // Increment registered_count in hackathons table (best done via DB trigger, but manual for simplicity)
-      await supabase.rpc('increment_hackathon_registrations', { hackathon_id: hackathonId });
-      fetchMyRegistrations();
-      fetchHackathons();
-      alert('Successfully registered!');
-    }
-  };
-
-  const isRegistered = (hackathonId: string) => myRegistrations.some(r => r.hackathon_id === hackathonId);
+  const {
+    loading,
+    error,
+    hackathons,
+    statusFilter,
+    setStatusFilter,
+    modeFilter,
+    setModeFilter,
+    modal,
+    register,
+    isRegistered,
+  } = useHackathonsPage();
 
   if (loading) {
     return (
       <div className="hackathons-container">
-        <main className="hackathons-main"><div className="loading-spinner"></div></main>
+        <main className="hackathons-main"><Loader label="Loading hackathons" /></main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="hackathons-container">
+        <main className="hackathons-main"><p className="mxl-ds-error">{error}</p></main>
       </div>
     );
   }
@@ -278,19 +190,19 @@ const Hackathons = () => {
                 key={h.id}
                 hackathon={h}
                 isRegistered={isRegistered(h.id)}
-                onRegister={handleRegister}
-                onView={setSelectedHackathon}
+                onRegister={register}
+                onView={modal.open}
               />
             ))}
           </div>
         )}
 
-        {selectedHackathon && (
+        {modal.selected && (
           <HackathonDetailModal
-            hackathon={selectedHackathon}
-            onClose={() => setSelectedHackathon(null)}
-            onRegister={handleRegister}
-            isRegistered={isRegistered(selectedHackathon.id)}
+            hackathon={modal.selected}
+            onClose={modal.close}
+            onRegister={register}
+            isRegistered={isRegistered(modal.selected.id)}
           />
         )}
       </main>

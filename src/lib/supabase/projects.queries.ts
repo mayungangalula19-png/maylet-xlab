@@ -1,7 +1,7 @@
 import { supabase } from './client';
 import { deleteProjectRelations, linkTeamToProject, logActivity } from './dbHelpers';
 import { fetchAccessibleProjects } from '../../modules/projects/services/projectService';
-import { invalidateCache } from '../../lib/utils/queryCache';
+import { invalidateCache } from '../utils/queryCache';
 import type { ProjectViewModel } from '../../modules/projects/types';
 import type {
   CreateProjectInput,
@@ -105,8 +105,6 @@ async function listProjectsViaRls(): Promise<Project[]> {
 
 /** Load projects — direct DB read first (works even when enrichment schema is incomplete) */
 export async function getProjects(userId: string): Promise<Project[]> {
-  invalidateCache('projects:');
-
   try {
     const direct = await listProjectsViaRls();
     if (direct.length > 0) return direct;
@@ -131,6 +129,7 @@ export async function deleteProject(id: string, userId?: string): Promise<void> 
 
   const { error } = await query;
   if (error) throw error;
+  invalidateCache('projects:');
 }
 
 export async function createProject(input: CreateProjectInput): Promise<Project> {

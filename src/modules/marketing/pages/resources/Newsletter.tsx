@@ -1,5 +1,5 @@
-import { type FormEvent, useState } from 'react';
 import { AdvancedMarketingPage } from '../marketing/AdvancedMarketingPage';
+import { Newsletter } from '../../../newsletter';
 
 const ISSUES = [
   { title: 'Validation trends in health-tech', date: 'Jun 12, 2025' },
@@ -8,50 +8,15 @@ const ISSUES = [
 ];
 
 export default function ResourceNewsletter() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setSubscribed(true);
-  };
-
   return (
     <AdvancedMarketingPage
       pill="📧 Weekly newsletter"
       title="Innovation"
       titleAccent="insights"
-      subtitle="Pipeline tips, MAYA prompts, funding opportunities, and ecosystem news — delivered weekly. Subscribe form is demo only."
-      disclaimer="No email is sent from this page — wire to Mailchimp, Resend, or your CRM in production."
+      subtitle="Pipeline tips, MAYA prompts, funding opportunities, and ecosystem news — delivered weekly."
     >
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-        <section>
-          <div className="mkt-section__head">
-            <h2>
-              Subscribe <span>(demo)</span>
-            </h2>
-          </div>
-          {subscribed ? (
-            <p className="mkt-panel" style={{ color: '#68d391' }}>
-              Thanks! You&apos;re on the list (preview only — {email} not stored).
-            </p>
-          ) : (
-            <form className="mkt-form" onSubmit={handleSubmit}>
-              <input
-                className="mkt-input"
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <button type="submit" className="mkt-btn mkt-btn--primary">
-                Subscribe
-              </button>
-            </form>
-          )}
-        </section>
+        <Newsletter source="resources_page" showDashboardCta showFeaturesCta />
 
         <section>
           <div className="mkt-section__head">

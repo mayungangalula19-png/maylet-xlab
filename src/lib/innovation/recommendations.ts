@@ -271,7 +271,7 @@ export function getInnovationOnboardingSteps(projects: Project[]): { id: string;
     steps.push({ id: 'doc', label: 'Add research documentation', route: '/documents' });
   }
   if (m.stage === 'Prototype' || m.stage === 'Experiment') {
-    steps.push({ id: 'exp', label: 'Run a validation experiment', route: `/experiments/new?projectId=${top.id}` });
+    steps.push({ id: 'exp', label: 'Run a validation experiment', route: `/experiments/create?projectId=${top.id}` });
   }
   if (m.fundingReadiness >= 50) {
     steps.push({ id: 'fund', label: 'Search matching funding opportunities', route: '/funding' });

@@ -4,6 +4,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { useAuthContext } from '../../../contexts/AuthContext';
+import { getCached, setCached } from '../../../lib/utils/queryCache';
 
 // ============================================================
 // TYPES
@@ -61,15 +63,10 @@ const getOrCreateConversation = async (userId: string, otherUserId: string): Pro
 // ============================================================
 // NEW CONVERSATION MODAL (search users)
 // ============================================================
-const NewConversationModal = ({ onClose, onConversationCreated }: { onClose: () => void; onConversationCreated: (conversationId: string, otherUserId: string) => void }) => {
+const NewConversationModal = ({ onClose, onConversationCreated, currentUserId }: { onClose: () => void; onConversationCreated: (conversationId: string, otherUserId: string) => void; currentUserId: string | null }) => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id || null));
-  }, []);
 
   const searchUsers = async () => {
     if (!search.trim()) return;
@@ -137,51 +134,68 @@ const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuthContext();
+  const currentUserId = user?.id ?? null;
 
-  // Get current user
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) navigate('/login');
-      else setCurrentUserId(data.user.id);
-    });
-  }, [navigate]);
+    if (!authLoading && !user) navigate('/login');
+  }, [authLoading, user, navigate]);
 
   const fetchConversations = useCallback(async () => {
     if (!currentUserId) return;
-    // Get all conversations where current user is participant, include created_at
+
+    const cacheKey = `conversations:${currentUserId}`;
+    const cached = getCached<Conversation[]>(cacheKey);
+    if (cached) {
+      setConversations(cached);
+      setLoading(false);
+      return;
+    }
+
     const { data: convData, error } = await supabase
       .from('conversations')
       .select('id, user1_id, user2_id, created_at')
       .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
-    if (error) return;
+    if (error || !convData?.length) {
+      setConversations([]);
+      setLoading(false);
+      return;
+    }
 
-    const convList: Conversation[] = await Promise.all(convData.map(async (conv) => {
+    const otherUserIds = convData.map((conv) =>
+      conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
+    );
+    const convIds = convData.map((conv) => conv.id);
+
+    const [{ data: profiles }, { data: allMessages }] = await Promise.all([
+      supabase.from('profiles').select('id, full_name, avatar_url').in('id', otherUserIds),
+      supabase
+        .from('messages')
+        .select('conversation_id, content, created_at, receiver_id, read')
+        .in('conversation_id', convIds)
+        .order('created_at', { ascending: false }),
+    ]);
+
+    const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
+    const lastMsgByConv = new Map<string, { content: string; created_at: string }>();
+    const unreadByConv = new Map<string, number>();
+
+    for (const msg of allMessages ?? []) {
+      if (!lastMsgByConv.has(msg.conversation_id)) {
+        lastMsgByConv.set(msg.conversation_id, { content: msg.content, created_at: msg.created_at });
+      }
+      if (!msg.read && msg.receiver_id === currentUserId) {
+        unreadByConv.set(msg.conversation_id, (unreadByConv.get(msg.conversation_id) ?? 0) + 1);
+      }
+    }
+
+    const convList: Conversation[] = convData.map((conv) => {
       const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id;
-      // Get other user's profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('id', otherUserId)
-        .single();
-      // Get last message
-      const { data: lastMsg } = await supabase
-        .from('messages')
-        .select('content, created_at')
-        .eq('conversation_id', conv.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      // Count unread messages (sent to current user, not read)
-      const { count } = await supabase
-        .from('messages')
-        .select('id', { count: 'exact' })
-        .eq('conversation_id', conv.id)
-        .eq('receiver_id', currentUserId)
-        .eq('read', false);
+      const profile = profileMap.get(otherUserId);
+      const lastMsg = lastMsgByConv.get(conv.id);
       return {
         id: conv.id,
         other_user_id: otherUserId,
@@ -189,11 +203,13 @@ const Messages = () => {
         other_user_avatar: profile?.avatar_url || null,
         last_message: lastMsg?.content || 'No messages yet',
         last_message_at: lastMsg?.created_at || conv.created_at,
-        unread_count: count || 0,
+        unread_count: unreadByConv.get(conv.id) ?? 0,
       };
-    }));
+    });
+
     convList.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
     setConversations(convList);
+    setCached(cacheKey, convList, 15_000);
     setLoading(false);
   }, [currentUserId]);
 
@@ -372,6 +388,7 @@ const Messages = () => {
 
         {showNewModal && (
           <NewConversationModal
+            currentUserId={currentUserId}
             onClose={() => setShowNewModal(false)}
             onConversationCreated={(_convId, _otherUserId) => {
               fetchConversations();

@@ -10,6 +10,7 @@ import {
 } from '../../../lib/innovation/lifecycle';
 import type { EnterpriseHubSnapshot, EnterpriseSearchResult } from '../../../types/enterpriseHub.types';
 import type { Project } from '../../../types/project.types';
+import { Newsletter } from '../../newsletter';
 
 /* ─── Navigation & constants ─────────────────────────────────────────────── */
 
@@ -29,6 +30,7 @@ const NAV = [
   { id: 'analytics', label: 'Analytics & Reports', group: 'Intelligence' },
   { id: 'collaboration', label: 'Collaboration', group: 'Network' },
   { id: 'integrations', label: 'Integrations', group: 'Platform' },
+  { id: 'newsletter', label: 'Growth & Newsletter', group: 'Platform' },
 ] as const;
 
 type ViewId = (typeof NAV)[number]['id'];
@@ -871,6 +873,18 @@ function IntegrationsView() {
   );
 }
 
+function NewsletterView() {
+  return (
+    <>
+      <SectionHead title="Growth & Newsletter" />
+      <p className="eos-lead">
+        Convert enterprise visitors into tracked leads — CRM segmentation, analytics events, and welcome automation.
+      </p>
+      <Newsletter variant="enterprise" />
+    </>
+  );
+}
+
 function MayaSidebar({ data }: { data: EnterpriseHubSnapshot }) {
   const { maya, metrics, profile, subscription } = data;
   return (
@@ -1067,6 +1081,8 @@ export default function Enterprise() {
         return <CollaborationView data={data} />;
       case 'integrations':
         return <IntegrationsView />;
+      case 'newsletter':
+        return <NewsletterView />;
       default:
         return <ExecutiveView data={data} />;
     }

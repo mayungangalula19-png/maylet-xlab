@@ -1,36 +1,9 @@
 // C:\Users\user\maylet-xlab\src\app\routes\LearningHub.tsx
 // PROFESSIONAL LEARNING HUB – Courses, videos, articles with progress tracking
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase/client';
-
-// ============================================================
-// TYPES
-// ============================================================
-type ResourceType = 'course' | 'video' | 'article' | 'workshop';
-type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
-
-interface LearningResource {
-  id: string;
-  title: string;
-  description: string;
-  type: ResourceType;
-  skill_level: SkillLevel;
-  duration: string; // e.g., "2 hours", "15 min"
-  thumbnail_url: string | null;
-  url: string;
-  author: string;
-  tags: string[];
-  created_at: string;
-}
-
-interface UserProgress {
-  id: string;
-  resource_id: string;
-  completed: boolean;
-  completed_at: string | null;
-}
+import { useLearningHubPage } from '../hooks/useLearningHubPage';
+import { Loader } from '../../../design-system';
+import type { ResourceType, SkillLevel } from '../../../core';
 
 // ============================================================
 // RESOURCE CARD COMPONENT
@@ -40,7 +13,7 @@ const ResourceCard = ({
   completed,
   onToggleComplete,
 }: {
-  resource: LearningResource;
+  resource: import('../../../core').LearningResourceRecord;
   completed: boolean;
   onToggleComplete: (resourceId: string, completed: boolean) => void;
 }) => {
@@ -104,94 +77,25 @@ const ResourceCard = ({
 // MAIN LEARNING HUB PAGE
 // ============================================================
 const LearningHub = () => {
-  const [loading, setLoading] = useState(true);
-  const [resources, setResources] = useState<LearningResource[]>([]);
-  const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<ResourceType | 'all'>('all');
-  const [levelFilter, setLevelFilter] = useState<SkillLevel | 'all'>('all');
-  const [userId, setUserId] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  // Fetch current user
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) navigate('/login');
-      else setUserId(data.user.id);
-    });
-  }, [navigate]);
-
-  const fetchData = useCallback(async () => {
-    if (!userId) return;
-    setLoading(true);
-    try {
-      // Fetch all learning resources
-      const { data: resourcesData, error: rError } = await supabase
-        .from('learning_resources')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (rError) throw rError;
-      setResources(resourcesData || []);
-
-      // Fetch user progress
-      const { data: progressData, error: pError } = await supabase
-        .from('user_learning_progress')
-        .select('*')
-        .eq('user_id', userId);
-      if (pError) throw pError;
-      setUserProgress(progressData || []);
-    } catch (err) {
-      console.error('Fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId) fetchData();
-  }, [userId, fetchData]);
-
-  const handleToggleComplete = async (resourceId: string, completed: boolean) => {
-    if (!userId) return;
-    try {
-      if (completed) {
-        // Insert completion record
-        const { error } = await supabase.from('user_learning_progress').insert({
-          user_id: userId,
-          resource_id: resourceId,
-          completed: true,
-          completed_at: new Date().toISOString(),
-        });
-        if (error) throw error;
-        setUserProgress(prev => [...prev, { id: 'temp', resource_id: resourceId, completed: true, completed_at: new Date().toISOString() }]);
-      } else {
-        // Delete completion record
-        const existing = userProgress.find(p => p.resource_id === resourceId);
-        if (existing) {
-          const { error } = await supabase.from('user_learning_progress').delete().eq('id', existing.id);
-          if (error) throw error;
-          setUserProgress(prev => prev.filter(p => p.resource_id !== resourceId));
-        }
-      }
-    } catch (err) {
-      console.error('Update progress error:', err);
-    }
-  };
-
-  const isCompleted = (resourceId: string) => userProgress.some(p => p.resource_id === resourceId);
-
-  const filteredResources = resources.filter(res => {
-    const matchesSearch = res.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          res.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          res.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesType = typeFilter === 'all' || res.type === typeFilter;
-    const matchesLevel = levelFilter === 'all' || res.skill_level === levelFilter;
-    return matchesSearch && matchesType && matchesLevel;
-  });
+  const {
+    loading,
+    error,
+    searchTerm,
+    setSearchTerm,
+    typeFilter,
+    setTypeFilter,
+    levelFilter,
+    setLevelFilter,
+    filteredResources,
+    isCompleted,
+    toggleComplete,
+    resources,
+    progress,
+  } = useLearningHubPage();
 
   const stats = {
     total: resources.length,
-    completed: userProgress.length,
+    completed: progress.length,
     inProgress: resources.filter(r => !isCompleted(r.id)).length,
     byType: {
       courses: resources.filter(r => r.type === 'course').length,
@@ -204,7 +108,15 @@ const LearningHub = () => {
   if (loading) {
     return (
       <div className="learning-hub-container">
-        <main className="hub-main"><div className="loading-spinner"></div></main>
+        <main className="hub-main"><Loader label="Loading learning hub" /></main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="learning-hub-container">
+        <main className="hub-main"><p className="mxl-ds-error">{error}</p></main>
       </div>
     );
   }
@@ -235,14 +147,14 @@ const LearningHub = () => {
             className="search-input"
           />
           <div className="filters">
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as any)}>
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as ResourceType | 'all')}>
               <option value="all">All Types</option>
               <option value="course">📘 Courses</option>
               <option value="video">🎥 Videos</option>
               <option value="article">📄 Articles</option>
               <option value="workshop">🎤 Workshops</option>
             </select>
-            <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value as any)}>
+            <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value as SkillLevel | 'all')}>
               <option value="all">All Levels</option>
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
@@ -265,7 +177,7 @@ const LearningHub = () => {
                 key={res.id}
                 resource={res}
                 completed={isCompleted(res.id)}
-                onToggleComplete={handleToggleComplete}
+                onToggleComplete={toggleComplete}
               />
             ))}
           </div>

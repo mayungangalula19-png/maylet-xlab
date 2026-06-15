@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase/client';
 import { useAuth } from '../../../hooks/useAuth';
-import { getProjects } from '../../../lib/supabase/projects.queries';
+import { usePageLoad } from '../../../core/hooks/usePageLoad';
+import { ecosystemService } from '../../../core/services/ecosystem.service';
 import type { Project } from '../../../types/project.types';
 
 /* ─── Types & constants ───────────────────────────────────────────────────── */
@@ -515,40 +515,20 @@ export default function Ecosystem() {
     [sector, userProjects]
   );
 
-  const loadContext = useCallback(async () => {
+  usePageLoad(async ({ cancelled }) => {
     setLoading(true);
     try {
-      if (user) {
-        const projects = await getProjects(user.id);
-        setUserProjects(projects);
-
-        const [{ count: teamCount }, { count: projectCount }] = await Promise.all([
-          supabase.from('teams').select('*', { count: 'exact', head: true }).eq('owner_id', user.id),
-          supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-        ]);
-
-        setLiveMetrics({
-          innovators: defaultMetrics().innovators + (projectCount ?? 0),
-          startups: defaultMetrics().startups + Math.max(0, (projectCount ?? 0) - 1),
-          investors: defaultMetrics().investors,
-          mentors: defaultMetrics().mentors,
-          partners: defaultMetrics().partners,
-          communities: defaultMetrics().communities + (teamCount ?? 0),
-        });
-      } else {
-        setLiveMetrics(null);
-        setUserProjects([]);
-      }
+      const result = await ecosystemService.getContext(user?.id, defaultMetrics);
+      if (cancelled()) return;
+      setUserProjects(result.projects);
+      setLiveMetrics(result.metrics);
     } catch {
+      if (cancelled()) return;
       setLiveMetrics(null);
     } finally {
-      setLoading(false);
+      if (!cancelled()) setLoading(false);
     }
   }, [user]);
-
-  useEffect(() => {
-    void loadContext();
-  }, [loadContext]);
 
   const filtered = useMemo(() => {
     const types = SECTION_TYPES[activeSection];

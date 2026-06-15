@@ -1,0 +1,12 @@
+export { default as MessagesPage } from './pages/MessagesPage';
+export { useMessages } from './hooks/useMessages';
+export { useRealtimeMessages } from './hooks/useRealtimeMessages';
+export { useAIMessagingAssistant } from './hooks/useAIMessagingAssistant';
+export { messagesService } from './services/messages.service';
+export { messagesAIService } from './services/messagesAI.service';
+export { messagesAIMemoryService } from './services/messagesAIMemory.service';
+export { workspaceService } from './services/workspace.service';
+export type * from './types/messages.types';
+export type * from './types/realtime.events';
+export type * from './types/workspace.types';
+export type * from './types/aiMemory.types';

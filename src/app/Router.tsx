@@ -5,14 +5,18 @@
 //   DashboardLayout (AppSidebar) and AdminLayout (AdminSidebar).
 //   Pages never render their own sidebar.
 
-import { lazy, Suspense, useState, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { supabase } from '../lib/supabase/client';
 import { useAuthContext } from '../contexts/AuthContext';
 import { ProtectedRoute } from '../modules/shared/components/common/ProtectedRoute';
 import { PageLoader } from '../modules/shared/components/common/PageLoader';
-import { DashboardLayout } from '../modules/shared/layouts/DashboardLayout';
-import { AdminLayout } from '../modules/shared/layouts/AdminLayout';
+
+const DashboardLayout = lazy(() =>
+  import('../modules/shared/layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout }))
+);
+const AdminLayout = lazy(() =>
+  import('../modules/shared/layouts/AdminLayout').then((m) => ({ default: m.AdminLayout }))
+);
 
 // ============================================================
 // PUBLIC PAGES (lazy) — canonical implementations in modules/
@@ -177,43 +181,13 @@ const AdminCareerDetail = lazy(() => import('../modules/admin/pages/careers/Admi
 // ADMIN ROUTE GUARD COMPONENT
 // ============================================================
 const AdminRoute = () => {
-  // Session comes from the app-wide AuthContext (no duplicate getSession call);
-  // only the role lookup hits the database, once per admin-area entry.
-  const { user, loading: authLoading } = useAuthContext();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading, isAdmin, roleLoading } = useAuthContext();
 
-  useEffect(() => {
-    if (authLoading) return;
-
-    if (!user) {
-      setIsAdmin(false);
-      setLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-      .then(({ data: profile }) => {
-        if (cancelled) return;
-        setIsAdmin(profile?.role === 'admin' || profile?.role === 'super_admin');
-        setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user, authLoading]);
-
-  if (loading) {
+  if (authLoading || (user && roleLoading)) {
     return <div className="admin-loading">Loading Admin Panel...</div>;
   }
 
-  if (!isAdmin) {
+  if (!user || !isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -224,6 +198,18 @@ const AdminRoute = () => {
 const PublicSuspenseLayout = () => (
   <Suspense fallback={<PageLoader />}>
     <Outlet />
+  </Suspense>
+);
+
+const DashboardShell = () => (
+  <Suspense fallback={<PageLoader />}>
+    <DashboardLayout />
+  </Suspense>
+);
+
+const AdminShell = () => (
+  <Suspense fallback={<PageLoader />}>
+    <AdminLayout />
   </Suspense>
 );
 
@@ -274,7 +260,7 @@ export const Router = () => {
         {/* ========== PROTECTED ROUTES – require authentication ========== */}
         {/* All pages render inside DashboardLayout (single AppSidebar) */}
         <Route element={<ProtectedRoute />}>
-          <Route element={<DashboardLayout />}>
+          <Route element={<DashboardShell />}>
           <Route path="/dashboard" element={<Dashboard />} />
 
           {/* Projects */}
@@ -334,6 +320,7 @@ export const Router = () => {
           {/* Analytics & AI */}
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/ai-analyze" element={<AIAnalyze />} />
+          <Route path="/ai-assistant/analyze" element={<AIAnalyze />} />
 
           {/* Comms */}
           <Route path="/notifications" element={<Notifications />} />
@@ -374,7 +361,7 @@ export const Router = () => {
         {/* ========== ADMIN ROUTES – require admin role ========== */}
         {/* All pages render inside AdminLayout (single AdminSidebar) */}
         <Route element={<AdminRoute />}>
-          <Route element={<AdminLayout />}>
+          <Route element={<AdminShell />}>
             <Route path="/admin" element={<AdminDashboard />} />
 
             {/* Project Management */}

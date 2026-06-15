@@ -1,0 +1,26 @@
+import { useEffect, useMemo, useState } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
+import { supabase } from '../../../lib/supabase/client';
+
+/** Internal: single session listener — use via AuthProvider / useAuthContext. */
+export const useAuthState = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => listener?.subscription.unsubscribe();
+  }, []);
+
+  const user: User | null = session?.user ?? null;
+
+  return useMemo(() => ({ session, user, loading }), [session, user, loading]);
+};

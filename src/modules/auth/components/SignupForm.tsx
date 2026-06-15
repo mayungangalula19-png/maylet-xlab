@@ -55,6 +55,8 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
     setLoading(true);
 
     try {
+      console.log('[signup] Starting signup for:', email.trim());
+      
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -68,40 +70,30 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
         },
       });
 
-      if (signUpError) throw signUpError;
-
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            email: email.trim(),
-            full_name: fullName,
-            organization_name: organizationName,
-            user_type: userType,
-            phone: phoneNormalized,
-            is_student: userType === 'student',
-            created_at: new Date().toISOString(),
-          });
-        if (profileError) {
-          console.warn('Profile insert warning:', profileError);
-        }
-
-        await supabase
-          .from('profiles')
-          .update({ phone: phoneNormalized, updated_at: new Date().toISOString() })
-          .eq('id', authData.user.id)
-          .then(({ error: phoneErr }) => {
-            if (phoneErr) console.warn('Phone profile update:', phoneErr.message);
-          });
+      if (signUpError) {
+        console.error('[signup] Auth signup error:', signUpError);
+        throw signUpError;
       }
+
+      console.log('[signup] Auth user created:', authData.user?.id);
+      
+      // Database trigger (handle_new_user) automatically creates:
+      // - profiles (with full_name, email, phone, user_type, organization_name, role)
+      // - users (with all signup data)
+      // - dna_profiles (empty strengths/weaknesses)
+      // No manual inserts needed!
 
       alert('Registration successful! Please check your email for confirmation.');
       
       if (onSuccess) onSuccess();
       else navigate(redirectTo);
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      console.error('[signup] Full error:', err);
+      const errorMsg = err.message || 'Registration failed. Please try again.';
+      console.error('[signup] Error message:', errorMsg);
+      console.error('[signup] Error details:', err.details);
+      console.error('[signup] Error hint:', err.hint);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import { supabase } from '../supabase/client';
+import { dedupeAsync, getCached, setCached } from '../utils/queryCache';
 import { computeProjectCompletion } from '../research/utils';
 import type {
   FindingType,
@@ -12,6 +13,56 @@ import type {
   LiteratureItem,
 } from '../../types/research.types';
 import { buildDashboardStats } from '../research/utils';
+import { uploadProjectDocumentFile } from './document.queries';
+
+type SchemaError = { message?: string };
+
+function isMissingColumnError(error: unknown, column: string): boolean {
+  const msg = String((error as SchemaError)?.message ?? '').toLowerCase();
+  return msg.includes(column.toLowerCase()) && (msg.includes('schema cache') || msg.includes('column'));
+}
+
+/** Insert research row; retries without user_id when remote schema omits that column. */
+async function researchInsert(
+  table: string,
+  projectId: string,
+  userId: string,
+  fields: Record<string, unknown>
+) {
+  const full = { project_id: projectId, user_id: userId, ...fields };
+  let response = await supabase.from(table).insert(full).select().single();
+  if (response.error && isMissingColumnError(response.error, 'user_id')) {
+    const { user_id: _omit, ...withoutUser } = full;
+    response = await supabase.from(table).insert(withoutUser).select().single();
+  }
+  return response;
+}
+
+/** Update research row; retries without updated_at when column is absent. */
+async function researchUpdate(
+  table: string,
+  filterColumn: string,
+  filterValue: string,
+  fields: Record<string, unknown>
+) {
+  const withTs = { ...fields, updated_at: new Date().toISOString() };
+  let response = await supabase
+    .from(table)
+    .update(withTs)
+    .eq(filterColumn, filterValue)
+    .select()
+    .single();
+  if (response.error && isMissingColumnError(response.error, 'updated_at')) {
+    const { updated_at: _omit, ...withoutTs } = withTs;
+    response = await supabase
+      .from(table)
+      .update(withoutTs)
+      .eq(filterColumn, filterValue)
+      .select()
+      .single();
+  }
+  return response;
+}
 
 async function safe<T>(fn: () => PromiseLike<{ data: T | null; error: unknown }>, fallback: T): Promise<T> {
   try {
@@ -30,12 +81,11 @@ export async function fetchResearchProfile(projectId: string, userId: string): P
   );
   if (existing) return existing;
 
-  const { data, error } = await supabase
-    .from('research_profiles')
-    .insert({ project_id: projectId, user_id: userId })
-    .select()
-    .single();
-  if (error) return null;
+  const { data, error } = await researchInsert('research_profiles', projectId, userId, {});
+  if (error) {
+    console.warn('[research] profile insert:', (error as SchemaError).message);
+    return null;
+  }
   return data as ResearchProfile;
 }
 
@@ -45,12 +95,7 @@ export async function upsertResearchProfile(
   fields: Partial<Omit<ResearchProfile, 'id' | 'project_id' | 'user_id' | 'created_at' | 'updated_at'>>
 ): Promise<ResearchProfile | null> {
   await fetchResearchProfile(projectId, userId);
-  const { data, error } = await supabase
-    .from('research_profiles')
-    .update({ ...fields, updated_at: new Date().toISOString() })
-    .eq('project_id', projectId)
-    .select()
-    .single();
+  const { data, error } = await researchUpdate('research_profiles', 'project_id', projectId, fields);
   if (error) throw error;
   return data as ResearchProfile;
 }
@@ -72,18 +117,12 @@ export async function createResearchNote(
   userId: string,
   payload: { title: string; content?: string; category?: string; tags?: string[] }
 ): Promise<ResearchNote> {
-  const { data, error } = await supabase
-    .from('research_notes')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      title: payload.title,
-      content: payload.content ?? '',
-      category: payload.category ?? 'general',
-      tags: payload.tags ?? [],
-    })
-    .select()
-    .single();
+  const { data, error } = await researchInsert('research_notes', projectId, userId, {
+    title: payload.title,
+    content: payload.content ?? '',
+    category: payload.category ?? 'general',
+    tags: payload.tags ?? [],
+  });
   if (error) throw error;
   return data as ResearchNote;
 }
@@ -92,12 +131,7 @@ export async function updateResearchNote(
   id: string,
   payload: Partial<Pick<ResearchNote, 'title' | 'content' | 'category' | 'tags'>>
 ): Promise<ResearchNote> {
-  const { data, error } = await supabase
-    .from('research_notes')
-    .update({ ...payload, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
+  const { data, error } = await researchUpdate('research_notes', 'id', id, payload);
   if (error) throw error;
   return data as ResearchNote;
 }
@@ -124,34 +158,23 @@ export async function createLiteratureItem(
   userId: string,
   payload: Partial<LiteratureItem> & { title: string; item_type?: LiteratureType }
 ): Promise<LiteratureItem> {
-  const { data, error } = await supabase
-    .from('literature_items')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      title: payload.title,
-      item_type: payload.item_type ?? 'paper',
-      source: payload.source ?? null,
-      authors: payload.authors ?? null,
-      publication_date: payload.publication_date ?? null,
-      citation_count: payload.citation_count ?? null,
-      relevance_score: payload.relevance_score ?? null,
-      url: payload.url ?? null,
-      notes: payload.notes ?? null,
-    })
-    .select()
-    .single();
+  const { data, error } = await researchInsert('literature_items', projectId, userId, {
+    title: payload.title,
+    item_type: payload.item_type ?? 'paper',
+    source: payload.source ?? null,
+    authors: payload.authors ?? null,
+    publication_date: payload.publication_date ?? null,
+    citation_count: payload.citation_count ?? null,
+    relevance_score: payload.relevance_score ?? null,
+    url: payload.url ?? null,
+    notes: payload.notes ?? null,
+  });
   if (error) throw error;
   return data as LiteratureItem;
 }
 
 export async function updateLiteratureItem(id: string, payload: Partial<LiteratureItem>): Promise<LiteratureItem> {
-  const { data, error } = await supabase
-    .from('literature_items')
-    .update({ ...payload, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
+  const { data, error } = await researchUpdate('literature_items', 'id', id, payload as Record<string, unknown>);
   if (error) throw error;
   return data as LiteratureItem;
 }
@@ -178,17 +201,11 @@ export async function createResearchFinding(
   userId: string,
   payload: { title: string; content?: string; finding_type?: FindingType }
 ): Promise<ResearchFinding> {
-  const { data, error } = await supabase
-    .from('research_findings')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      title: payload.title,
-      content: payload.content ?? '',
-      finding_type: payload.finding_type ?? 'finding',
-    })
-    .select()
-    .single();
+  const { data, error } = await researchInsert('research_findings', projectId, userId, {
+    title: payload.title,
+    content: payload.content ?? '',
+    finding_type: payload.finding_type ?? 'finding',
+  });
   if (error) throw error;
   return data as ResearchFinding;
 }
@@ -197,12 +214,7 @@ export async function updateResearchFinding(
   id: string,
   payload: Partial<Pick<ResearchFinding, 'title' | 'content' | 'finding_type'>>
 ): Promise<ResearchFinding> {
-  const { data, error } = await supabase
-    .from('research_findings')
-    .update({ ...payload, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
+  const { data, error } = await researchUpdate('research_findings', 'id', id, payload);
   if (error) throw error;
   return data as ResearchFinding;
 }
@@ -230,31 +242,7 @@ export async function uploadResearchDocument(
   file: File,
   meta?: { category?: string; tags?: string[]; description?: string }
 ): Promise<ResearchDocument> {
-  const fileName = `${Date.now()}_${file.name}`;
-  const { error: uploadError } = await supabase.storage
-    .from('project-documents')
-    .upload(`${projectId}/${fileName}`, file);
-  if (uploadError) throw uploadError;
-
-  const { data: urlData } = supabase.storage.from('project-documents').getPublicUrl(`${projectId}/${fileName}`);
-
-  const { data, error } = await supabase
-    .from('documents')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      name: file.name,
-      file_url: urlData.publicUrl,
-      file_type: file.type,
-      size_bytes: file.size,
-      category: meta?.category ?? 'research',
-      tags: meta?.tags ?? [],
-      description: meta?.description ?? null,
-    })
-    .select()
-    .single();
-  if (error) throw error;
-  return data as ResearchDocument;
+  return uploadProjectDocumentFile(projectId, userId, file, meta);
 }
 
 export async function deleteResearchDocument(id: string): Promise<void> {
@@ -318,37 +306,47 @@ export async function fetchResearchDashboard(userId: string): Promise<{
 }
 
 export async function fetchResearchActivity(userId: string, days = 14): Promise<{ date: string; count: number }[]> {
+  const cacheKey = `researchActivity:${userId}:${days}`;
+  const cached = getCached<{ date: string; count: number }[]>(cacheKey);
+  if (cached) return cached;
+
+  return dedupeAsync(cacheKey, async () => {
+    const result = await fetchResearchActivityUncached(userId, days);
+    setCached(cacheKey, result, 30_000);
+    return result;
+  });
+}
+
+async function fetchResearchActivityUncached(userId: string, days = 14): Promise<{ date: string; count: number }[]> {
   const since = new Date();
   since.setDate(since.getDate() - days);
 
+  const { data: ownedProjects } = await supabase.from('projects').select('id').eq('user_id', userId);
+  const projectIds = (ownedProjects ?? []).map((p) => p.id as string);
+
+  const emptyBuckets = () => {
+    const buckets = new Map<string, number>();
+    for (let i = 0; i < days; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - (days - 1 - i));
+      buckets.set(d.toISOString().slice(0, 10), 0);
+    }
+    return Array.from(buckets.entries()).map(([date, count]) => ({ date, count }));
+  };
+
+  if (projectIds.length === 0) return emptyBuckets();
+
+  const activityFilter = (table: string) =>
+    supabase
+      .from(table)
+      .select('created_at')
+      .in('project_id', projectIds)
+      .gte('created_at', since.toISOString());
+
   const [notes, literature, findings, documents] = await Promise.all([
-    safe(
-      () =>
-        supabase
-          .from('research_notes')
-          .select('created_at')
-          .eq('user_id', userId)
-          .gte('created_at', since.toISOString()),
-      [] as { created_at: string }[]
-    ),
-    safe(
-      () =>
-        supabase
-          .from('literature_items')
-          .select('created_at')
-          .eq('user_id', userId)
-          .gte('created_at', since.toISOString()),
-      [] as { created_at: string }[]
-    ),
-    safe(
-      () =>
-        supabase
-          .from('research_findings')
-          .select('created_at')
-          .eq('user_id', userId)
-          .gte('created_at', since.toISOString()),
-      [] as { created_at: string }[]
-    ),
+    safe(() => activityFilter('research_notes'), [] as { created_at: string }[]),
+    safe(() => activityFilter('literature_items'), [] as { created_at: string }[]),
+    safe(() => activityFilter('research_findings'), [] as { created_at: string }[]),
     safe(
       () =>
         supabase
@@ -425,16 +423,7 @@ export async function saveGateReview(
     reviewed_at: string;
   }
 ): Promise<GateReviewRow | null> {
-  const { data, error } = await supabase
-    .from('research_gate_reviews')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      ...payload,
-      updated_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  const { data, error } = await researchInsert('research_gate_reviews', projectId, userId, payload);
   if (error) throw error;
   return data as GateReviewRow;
 }

@@ -4,18 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
-
-// ============================================================
-// TYPES
-// ============================================================
-interface AnalysisResult {
-  score: number;
-  risk_level: 'low' | 'medium' | 'high';
-  market_potential: number;
-  recommendations: string[];
-  competitor_insights: string;
-  summary: string;
-}
+import { analyzeIdea } from '../../../core/services/aiAnalyze.service';
+import type { AnalysisResult } from '../../../core/services/aiAnalyze.service';
 
 // ============================================================
 // AI ANALYZE PAGE (main component)
@@ -51,49 +41,7 @@ const AIAnalyze = () => {
     setResult(null);
 
     try {
-      const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-      if (!apiKey) throw new Error('Missing OpenRouter API key. Please add VITE_OPENROUTER_API_KEY to .env');
-
-      const prompt = `
-You are an expert innovation advisor. Analyze the following startup idea:
-
-Idea Name: ${formData.ideaName}
-Description: ${formData.description}
-Target Audience: ${formData.targetAudience || 'Not specified'}
-Industry: ${formData.industry || 'Not specified'}
-
-Return a JSON object with exactly these fields:
-- score (number 0-100)
-- risk_level (string: "low", "medium", or "high")
-- market_potential (number 0-100)
-- recommendations (array of 3-5 strings)
-- competitor_insights (string, 1-2 sentences)
-- summary (string, 2-3 sentences)
-
-Only output valid JSON. No extra text.
-      `;
-
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek/deepseek-r1:free',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.7,
-        }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error?.message || `API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      const parsed = JSON.parse(content) as AnalysisResult;
+      const parsed = await analyzeIdea(formData);
       setResult(parsed);
 
       if (userId) {

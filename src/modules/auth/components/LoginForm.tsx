@@ -1,7 +1,6 @@
-import { useState, FormEvent, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase/client';
+import { Link } from 'react-router-dom';
 import { BrandLogo } from '../../../modules/shared/components/common/BrandLogo';
+import { useLoginAuth } from '../hooks/useLoginAuth';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -9,88 +8,21 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormProps) => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load saved email if "Remember Me" was checked previously
-  useEffect(() => {
-    const savedEmail = localStorage.getItem('rememberedEmail');
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRememberMe(true);
-    }
-  }, []);
-
-  const handleEmailLogin = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (signInError) throw signInError;
-
-      // Handle "Remember Me"
-      if (rememberMe) {
-        localStorage.setItem('rememberedEmail', email.trim());
-      } else {
-        localStorage.removeItem('rememberedEmail');
-      }
-
-      if (onSuccess) onSuccess();
-      else navigate(redirectTo);
-    } catch (err: any) {
-      setError(err.message || 'Invalid email or password. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSocialLogin = async (provider: 'google' | 'github') => {
-    setError(null);
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-      if (error) throw error;
-      // OAuth redirects, no further action needed
-    } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      setError('Please enter your email address to reset your password.');
-      return;
-    }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) throw error;
-      alert('Password reset link sent to your email. Please check your inbox.');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    setShowPassword,
+    rememberMe,
+    setRememberMe,
+    loading,
+    error,
+    handleEmailLogin,
+    handleSocialLogin,
+    handleForgotPassword,
+  } = useLoginAuth({ onSuccess, redirectTo });
 
   return (
     <div className="login-form-container">

@@ -2,12 +2,10 @@
 // FULL PRODUCTION CODE – Maylet XLab Dashboard with Supabase
 // ALL 20+ LINKS ARE REAL AND CLICKABLE – LOGO ADDED – FULLY RESPONSIVE (MOBILE FRIENDLY)
 
-import { memo, useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase/client';
-import { fetchOwnedTeamIds } from '../../../lib/supabase/dbHelpers';
-import { useAuthContext } from '../../../contexts/AuthContext';
-import { getCached, setCached, invalidateCache } from '../../../lib/utils/queryCache';
+import { memo, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useDashboardPage } from '../hooks/useDashboardPage';
+import { Loader } from '../../../design-system';
 import { EMPTY, formatCount } from '../../../lib/innovation/dashboardData';
 
 // ============================================================
@@ -31,15 +29,6 @@ interface Activity {
   project_name: string;
   created_at: string;
   user_name: string;
-}
-
-interface DashboardStats {
-  totalProjects: number;
-  totalExperiments: number;
-  totalDocuments: number;
-  totalTeamMembers: number;
-  totalFundingPitches: number;
-  totalVaultEntries: number;
 }
 
 // ============================================================
@@ -146,114 +135,15 @@ const ActivityItem = memo(function ActivityItem({ activity }: { activity: Activi
 // MAIN DASHBOARD COMPONENT
 // ============================================================
 const Dashboard = () => {
-  const { user, loading: authLoading } = useAuthContext();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
+  const { loading, stats, recentProjects, activities, userName, userEmail } = useDashboardPage();
+  const safeStats = stats ?? {
     totalProjects: 0,
     totalExperiments: 0,
     totalDocuments: 0,
     totalTeamMembers: 0,
     totalFundingPitches: 0,
     totalVaultEntries: 0,
-  });
-  const [recentProjects, setRecentProjects] = useState<Project[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const navigate = useNavigate();
-
-  const userName = user?.user_metadata?.full_name as string | undefined
-    || user?.email?.split('@')[0]
-    || 'Innovator';
-  const userEmail = user?.email || '';
-
-  const fetchDashboardData = useCallback(async (userId: string, skipCache = false) => {
-    const cacheKey = `dashboard:${userId}`;
-    if (!skipCache) {
-      const cached = getCached<{
-        stats: DashboardStats;
-        recentProjects: Project[];
-        activities: Activity[];
-      }>(cacheKey);
-      if (cached) {
-        setStats(cached.stats);
-        setRecentProjects(cached.recentProjects);
-        setActivities(cached.activities);
-        setLoading(false);
-        return;
-      }
-    }
-
-    setLoading(true);
-    try {
-      const [
-        { count: projectsCount },
-        { count: experimentsCount },
-        { count: documentsCount },
-        ownedTeamIds,
-        { count: fundingCount },
-        { count: vaultCount },
-        { data: projects },
-        { data: activitiesData },
-      ] = await Promise.all([
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-        supabase.from('experiments').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-        supabase.from('documents').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-        fetchOwnedTeamIds(userId),
-        supabase.from('funding_pitches').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-        supabase.from('vault_entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-        supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5),
-        supabase.from('activities').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5),
-      ]);
-
-      const nextStats = {
-        totalProjects: projectsCount || 0,
-        totalExperiments: experimentsCount || 0,
-        totalDocuments: documentsCount || 0,
-        totalTeamMembers: ownedTeamIds.length,
-        totalFundingPitches: fundingCount || 0,
-        totalVaultEntries: vaultCount || 0,
-      };
-      const nextProjects = (projects as Project[]) || [];
-      const nextActivities = (activitiesData as Activity[]) || [];
-
-      setStats(nextStats);
-      setRecentProjects(nextProjects);
-      setActivities(nextActivities);
-      setCached(cacheKey, { stats: nextStats, recentProjects: nextProjects, activities: nextActivities });
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    fetchDashboardData(user.id);
-
-    let refetchTimer: ReturnType<typeof setTimeout> | undefined;
-    const debouncedRefetch = () => {
-      clearTimeout(refetchTimer);
-      refetchTimer = setTimeout(() => {
-        invalidateCache(`dashboard:${user.id}`);
-        fetchDashboardData(user.id, true);
-      }, 800);
-    };
-
-    const channel = supabase.channel('dashboard_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, debouncedRefetch)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activities' }, debouncedRefetch)
-      .subscribe();
-
-    return () => {
-      clearTimeout(refetchTimer);
-      channel.unsubscribe();
-    };
-  }, [authLoading, user, navigate, fetchDashboardData]);
+  };
 
   const { inProgressCount, completedCount, onHoldCount, notStartedCount, avgProgress } = useMemo(() => {
     const inProgress = recentProjects.filter(p => p.status !== 'Launched' && p.progress < 100).length;
@@ -272,14 +162,11 @@ const Dashboard = () => {
     };
   }, [recentProjects]);
 
-  if (loading || authLoading) {
+  if (loading) {
     return (
       <div className="dashboard-container">
         <main className="dashboard-main">
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Loading your dashboard...</p>
-          </div>
+          <Loader label="Loading your dashboard" />
         </main>
         <style>{`
           .loading-container {
@@ -318,12 +205,12 @@ const Dashboard = () => {
         </div>
 
         <div className="stats-grid">
-          <StatCard icon="📁" label="Projects" value={stats.totalProjects} route="/projects" />
-          <StatCard icon="📄" label="Documents" value={stats.totalDocuments} route="/research" />
-          <StatCard icon="🧪" label="Experiments" value={stats.totalExperiments} route="/experiments" />
-          <StatCard icon="💰" label="Funding Pitches" value={stats.totalFundingPitches} route="/funding" />
-          <StatCard icon="🔐" label="Vault Entries" value={stats.totalVaultEntries} route="/vault" />
-          <StatCard icon="👥" label="Team Members" value={stats.totalTeamMembers} route="/teams" />
+          <StatCard icon="📁" label="Projects" value={safeStats.totalProjects} route="/projects" />
+          <StatCard icon="📄" label="Documents" value={safeStats.totalDocuments} route="/research" />
+          <StatCard icon="🧪" label="Experiments" value={safeStats.totalExperiments} route="/experiments" />
+          <StatCard icon="💰" label="Funding Pitches" value={safeStats.totalFundingPitches} route="/funding" />
+          <StatCard icon="🔐" label="Vault Entries" value={safeStats.totalVaultEntries} route="/vault" />
+          <StatCard icon="👥" label="Team Members" value={safeStats.totalTeamMembers} route="/teams" />
         </div>
 
         <div className="dashboard-grid">
@@ -394,13 +281,13 @@ const Dashboard = () => {
                 <Link to="/projects" className="card-link">Command Center →</Link>
               </div>
               <div className="ops-status-rows">
-                <div className="ops-status-row"><span>Research documents</span><strong>{formatCount(stats.totalDocuments)}</strong></div>
-                <div className="ops-status-row"><span>Experiments</span><strong>{formatCount(stats.totalExperiments)}</strong></div>
-                <div className="ops-status-row"><span>Funding pitches</span><strong>{formatCount(stats.totalFundingPitches)}</strong></div>
-                <div className="ops-status-row"><span>Vault entries</span><strong>{formatCount(stats.totalVaultEntries)}</strong></div>
-                <div className="ops-status-row"><span>Team members</span><strong>{formatCount(stats.totalTeamMembers)}</strong></div>
+                <div className="ops-status-row"><span>Research documents</span><strong>{formatCount(safeStats.totalDocuments)}</strong></div>
+                <div className="ops-status-row"><span>Experiments</span><strong>{formatCount(safeStats.totalExperiments)}</strong></div>
+                <div className="ops-status-row"><span>Funding pitches</span><strong>{formatCount(safeStats.totalFundingPitches)}</strong></div>
+                <div className="ops-status-row"><span>Vault entries</span><strong>{formatCount(safeStats.totalVaultEntries)}</strong></div>
+                <div className="ops-status-row"><span>Team members</span><strong>{formatCount(safeStats.totalTeamMembers)}</strong></div>
               </div>
-              {stats.totalProjects === 0 ? (
+              {safeStats.totalProjects === 0 ? (
                 <p className="empty-state">{EMPTY.COMPLETE_SETUP}</p>
               ) : (
                 <Link to="/ai-assistant/analyze" className="ai-analyze-btn">Run MAYA Analysis →</Link>

@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
 import { fetchOwnedTeamIds } from '../../../lib/supabase/dbHelpers';
 import { useAuthContext } from '../../../contexts/AuthContext';
+import { usePageLoad } from '../../../core/hooks/usePageLoad';
+import { getCached, setCached } from '../../../lib/utils/queryCache';
 import { ContentLoader } from '../../../modules/shared/components/common/ContentLoader';
 
 const AnalyticsCharts = lazy(() => import('../components/charts/AnalyticsCharts'));
@@ -52,6 +54,15 @@ const Analytics = () => {
 
   const fetchAnalytics = useCallback(async () => {
     if (!userId) return;
+
+    const cacheKey = `analytics:${userId}`;
+    const cached = getCached<{ stats: DashboardStats; monthlyActivity: MonthlyActivity[] }>(cacheKey);
+    if (cached) {
+      setStats(cached.stats);
+      setMonthlyActivity(cached.monthlyActivity);
+      setLoading(false);
+      return;
+    }
 
     // Fetch counts from different tables
     const [
@@ -114,11 +125,21 @@ const Analytics = () => {
       })
     );
     setMonthlyActivity(activityData);
+    setCached(cacheKey, { stats: {
+      totalProjects: projectsCount || 0,
+      totalExperiments: experimentsCount || 0,
+      totalPrototypes: prototypesCount || 0,
+      totalTeamMembers: ownedTeamIds.length,
+      totalFundingPitches: fundingPitchesCount || 0,
+      totalAIAnalyses: aiAnalysesCount || 0,
+    }, monthlyActivity: activityData });
     setLoading(false);
   }, [userId]);
 
-  useEffect(() => {
-    if (userId) fetchAnalytics();
+  usePageLoad(async ({ cancelled }) => {
+    if (!userId) return;
+    await fetchAnalytics();
+    if (cancelled()) return;
   }, [userId, fetchAnalytics]);
 
   const barChartData = useMemo(() => ({

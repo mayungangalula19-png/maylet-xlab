@@ -1,61 +1,65 @@
-import { AdvancedMarketingPage } from '../../marketing/pages/marketing/AdvancedMarketingPage';
+import CreatePostModal from '../components/community/CreatePostModal';
+import DiscoverySidebar from '../components/community/DiscoverySidebar';
+import FeedFiltersSidebar from '../components/community/FeedFiltersSidebar';
+import FeedList from '../components/community/FeedList';
+import { useCommunityFeed } from '../hooks/useCommunityFeed';
+import './ecosystem-community.css';
 
-const REGIONS = [
-  { flag: '🇹🇿', name: 'East Africa', members: '3,200+', focus: 'AgriTech & Health' },
-  { flag: '🇳🇬', name: 'West Africa', members: '2,800+', focus: 'FinTech & EdTech' },
-  { flag: '🇰🇪', name: 'Pan-African', members: '1,900+', focus: 'Cross-border ventures' },
-  { flag: '🌐', name: 'Global diaspora', members: '1,100+', focus: 'Remote teams & capital' },
-];
+export default function EcosystemCommunityPage() {
+  const feed = useCommunityFeed();
 
-const PROGRAMS = [
-  { title: 'Regional demo days', detail: 'Quarterly showcases connecting founders to angels and grants.' },
-  { title: 'Mentor circles', detail: 'Sector-specific groups led by operators who have raised and launched.' },
-  { title: 'Innovation fellows', detail: 'Bridge academy, incubator, and live builder projects on XLab.' },
-];
-
-export default function EcosystemCommunity() {
   return (
-    <AdvancedMarketingPage
-      pill="🌍 Ecosystem community"
-      title="Global innovation"
-      titleAccent="network"
-      subtitle="Regional chapters, mentor circles, and demo days — the human layer of the Maylet XLab ecosystem."
-      ctaTitle="Connect with your region"
-      ctaSubtitle="Join the platform to access chapter channels, events, and mentor matching."
-      ctas={[
-        { label: 'Join Community', to: '/community', variant: 'primary' },
-        { label: 'Hackathons', to: '/hackathons', variant: 'secondary' },
-        { label: 'Mentorship', to: '/mentorship', variant: 'ghost' },
-      ]}
-    >
-      <div className="mkt-grid">
-        {REGIONS.map((r) => (
-          <div key={r.name} className="mkt-card">
-            <div className="mkt-card__icon">{r.flag}</div>
-            <h3>{r.name}</h3>
-            <p>
-              {r.members} innovators · {r.focus}
-            </p>
-          </div>
-        ))}
+    <div className="mxl-comm">
+      <header className="mxl-comm__header">
+        <div>
+          <h1>Ecosystem Community Feed</h1>
+          <p>
+            Hybrid intelligence network for Maylet X Lab — research sharing, project signals, and
+            collaboration discovery.
+          </p>
+        </div>
+        <button type="button" className="mxl-comm__btn-primary" onClick={feed.openComposer}>
+          Create post
+        </button>
+      </header>
+
+      <div className="mxl-comm__grid">
+        <FeedFiltersSidebar filter={feed.filter} onFilterChange={feed.setFilter} />
+
+        <FeedList
+          posts={feed.posts}
+          filter={feed.filter}
+          sort={feed.sort}
+          loading={feed.loading}
+          loadingMore={feed.loadingMore}
+          likedIds={feed.likedIds}
+          savedIds={feed.savedIds}
+          comments={feed.comments}
+          openComments={feed.openComments}
+          onLike={feed.handleLike}
+          onShare={feed.handleShare}
+          onSave={feed.handleSave}
+          onToggleComments={feed.toggleComments}
+          onComment={feed.handleComment}
+          onCollaboration={feed.handleCollaboration}
+          onLoadMore={feed.loadMore}
+          onOpenComposer={feed.openComposer}
+          onSortChange={feed.setSort}
+        />
+
+        <DiscoverySidebar trending={feed.trending} suggestions={feed.suggestions} />
       </div>
 
-      <section className="mkt-section" style={{ marginTop: '2rem' }}>
-        <div className="mkt-section__head">
-          <div className="mkt-kicker">Programs</div>
-          <h2>
-            Ecosystem <span>initiatives</span>
-          </h2>
-        </div>
-        <div className="mkt-grid">
-          {PROGRAMS.map((p) => (
-            <div key={p.title} className="mkt-card">
-              <h3>{p.title}</h3>
-              <p>{p.detail}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </AdvancedMarketingPage>
+      {feed.modalOpen ? (
+        <CreatePostModal
+          onClose={() => feed.setModalOpen(false)}
+          onSubmit={feed.handleCreatePost}
+          posting={feed.posting}
+          error={feed.postError}
+        />
+      ) : null}
+
+      <style>{`.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }`}</style>
+    </div>
   );
 }

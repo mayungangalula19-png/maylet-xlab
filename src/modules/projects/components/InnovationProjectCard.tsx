@@ -134,7 +134,7 @@ export function InnovationProjectCard({ project, onDelete }: Props) {
           </Link>
           <div className="portfolio-card__shortcuts">
             <Link to={`/research/${project.id}`} className="portfolio-card__shortcut">Research</Link>
-            <Link to={`/experiments/new?projectId=${project.id}`} className="portfolio-card__shortcut">Lab</Link>
+            <Link to={`/experiments/create?projectId=${project.id}`} className="portfolio-card__shortcut">Lab</Link>
             <Link to="/funding" className="portfolio-card__shortcut">Fund</Link>
             <Link to={`/ai-assistant/analyze?projectId=${project.id}`} className="portfolio-card__shortcut">MAYA</Link>
           </div>

@@ -1,56 +1,12 @@
 // C:\Users\user\maylet-xlab\src\app\routes\Mentorship.tsx
 // PROFESSIONAL MENTORSHIP HUB – Find mentors, request sessions, track progress
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase/client';
+import { useState } from 'react';
+import { useMentorshipPage } from '../hooks/useMentorshipPage';
+import { Loader } from '../../../design-system';
+import type { MentorRecord } from '../../../core';
 
-// ============================================================
-// TYPES
-// ============================================================
-interface Mentor {
-  id: string;
-  user_id: string;
-  full_name: string;
-  avatar_url: string | null;
-  title: string;
-  expertise: string[];      // e.g. ['AI', 'Product', 'Funding']
-  bio: string;
-  years_experience: number;
-  hourly_rate: number | null;
-  rating: number;           // average rating from reviews
-  total_sessions: number;
-  is_active: boolean;
-}
-
-interface MentorshipRequest {
-  id: string;
-  mentor_id: string;
-  mentor_name?: string;
-  mentor_avatar?: string;
-  user_id: string;
-  message: string;
-  status: 'pending' | 'approved' | 'rejected' | 'completed';
-  requested_date: string;
-  scheduled_date: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface MentorshipSession {
-  id: string;
-  request_id: string;
-  mentor_id: string;
-  mentor_name?: string;
-  user_id: string;
-  scheduled_at: string;
-  duration_minutes: number;
-  meeting_link: string | null;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  feedback: string | null;
-  rating: number | null;
-}
+type Mentor = MentorRecord;
 
 // ============================================================
 // COMPONENTS
@@ -110,109 +66,23 @@ const RequestModal = ({ mentor, onClose, onSubmit }: { mentor: Mentor; onClose: 
 // MAIN MENTORSHIP PAGE
 // ============================================================
 const Mentorship = () => {
-  const [activeTab, setActiveTab] = useState<'mentors' | 'sessions' | 'requests'>('mentors');
-  const [mentors, setMentors] = useState<Mentor[]>([]);
-  const [requests, setRequests] = useState<MentorshipRequest[]>([]);
-  const [sessions, setSessions] = useState<MentorshipSession[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  const fetchData = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/login');
-      return;
-    }
-    const userId = session.user.id;
-
-    try {
-      // Fetch active mentors
-      const { data: mentorsData, error: mError } = await supabase
-        .from('mentors')
-        .select('*')
-        .eq('is_active', true)
-        .order('rating', { ascending: false });
-      if (mError) throw mError;
-      setMentors(mentorsData as Mentor[]);
-
-      // Fetch mentorship requests made by this user
-      const { data: reqData, error: rError } = await supabase
-        .from('mentorship_requests')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-      if (rError) throw rError;
-      // enrich with mentor names
-      const enrichedReqs = await Promise.all((reqData || []).map(async (req) => {
-        const { data: mentor } = await supabase.from('mentors').select('full_name, avatar_url').eq('id', req.mentor_id).single();
-        return { ...req, mentor_name: mentor?.full_name || 'Unknown', mentor_avatar: mentor?.avatar_url };
-      }));
-      setRequests(enrichedReqs);
-
-      // Fetch upcoming/completed sessions
-      const { data: sessData, error: sError } = await supabase
-        .from('mentorship_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('scheduled_at', { ascending: true });
-      if (sError) throw sError;
-      const enrichedSess = await Promise.all((sessData || []).map(async (sess) => {
-        const { data: mentor } = await supabase.from('mentors').select('full_name').eq('id', sess.mentor_id).single();
-        return { ...sess, mentor_name: mentor?.full_name || 'Unknown' };
-      }));
-      setSessions(enrichedSess);
-    } catch (err) {
-      console.error('Mentorship fetch error:', err);
-      setError('Failed to load mentorship data');
-    } finally {
-      setLoading(false);
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleRequest = (mentor: Mentor) => {
-    setSelectedMentor(mentor);
-  };
-
-  const submitRequest = async (message: string) => {
-    if (!selectedMentor) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    const { error: insertError } = await supabase.from('mentorship_requests').insert({
-      mentor_id: selectedMentor.id,
-      user_id: session.user.id,
-      message,
-      status: 'pending',
-      requested_date: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-    if (insertError) {
-      alert('Failed to send request: ' + insertError.message);
-    } else {
-      alert('Request sent! The mentor will review your request.');
-      setSelectedMentor(null);
-      fetchData(); // refresh
-    }
-  };
-
-  const cancelRequest = async (requestId: string) => {
-    if (window.confirm('Cancel this mentorship request?')) {
-      const { error } = await supabase.from('mentorship_requests').delete().eq('id', requestId);
-      if (error) alert('Cancel failed');
-      else fetchData();
-    }
-  };
+  const {
+    loading,
+    error,
+    mentors,
+    requests,
+    sessions,
+    activeTab,
+    setActiveTab,
+    modal,
+    submitRequest,
+    cancelRequest,
+  } = useMentorshipPage();
 
   if (loading) {
     return (
       <div className="mentorship-container">
-        <main className="mentorship-main"><div className="loading-spinner"></div></main>
+        <main className="mentorship-main"><Loader label="Loading mentorship" /></main>
       </div>
     );
   }
@@ -244,7 +114,7 @@ const Mentorship = () => {
             {mentors.length === 0 ? (
               <div className="empty-state">No mentors available at the moment. Check back soon!</div>
             ) : (
-              mentors.map(mentor => <MentorCard key={mentor.id} mentor={mentor} onRequest={handleRequest} />)
+              mentors.map(mentor => <MentorCard key={mentor.id} mentor={mentor} onRequest={modal.open} />)
             )}
           </div>
         )}
@@ -303,7 +173,7 @@ const Mentorship = () => {
           </div>
         )}
 
-        {selectedMentor && <RequestModal mentor={selectedMentor} onClose={() => setSelectedMentor(null)} onSubmit={submitRequest} />}
+        {modal.selected && <RequestModal mentor={modal.selected} onClose={modal.close} onSubmit={submitRequest} />}
       </main>
 
       <style>{`

@@ -38,5 +38,4 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Storage bucket for avatars (run via dashboard or storage migration if needed)
--- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+-- Storage buckets: see migration 20240612000022_storage_buckets.sql
