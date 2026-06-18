@@ -34,6 +34,56 @@ export interface PrototypeRecord {
 }
 
 /** Build artifact attached to a prototype */
+export type ScreenshotCategory = 'ui' | 'workflow' | 'architecture' | 'analytics' | 'other';
+
+export interface ScreenshotInput {
+  title: string;
+  context?: string;
+  category?: ScreenshotCategory;
+}
+
+export interface ScreenshotDescription {
+  title: string;
+  purpose: string;
+  uxDescription: string;
+  functionality: string;
+  userValue: string;
+}
+
+export interface PrototypeScreenshot {
+  id: string;
+  prototypeId: string;
+  userId: string;
+  title: string;
+  url: string;
+  category: ScreenshotCategory;
+  context: string | null;
+  purpose: string | null;
+  uxDescription: string | null;
+  functionality: string | null;
+  userValue: string | null;
+  isHero: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const SCREENSHOT_CATEGORIES: { id: ScreenshotCategory; label: string }[] = [
+  { id: 'ui', label: 'UI' },
+  { id: 'workflow', label: 'Workflow' },
+  { id: 'architecture', label: 'Architecture' },
+  { id: 'analytics', label: 'Analytics' },
+  { id: 'other', label: 'Other' },
+];
+
+export const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp'] as const;
+
+export function isImageFileName(fileName: string): boolean {
+  return IMAGE_FILE_EXTENSIONS.includes(
+    getPrototypeFileExtension(fileName) as (typeof IMAGE_FILE_EXTENSIONS)[number]
+  );
+}
+
 export interface PrototypeFile {
   id: string;
   prototypeId: string;
@@ -58,6 +108,9 @@ export const PROTOTYPE_ALLOWED_EXTENSIONS = [
   'jpeg',
   'gif',
   'webp',
+  'svg',
+  'mp4',
+  'webm',
   'stl',
   'step',
   'dwg',

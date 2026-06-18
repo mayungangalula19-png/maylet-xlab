@@ -61,6 +61,7 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
         email: email.trim(),
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/verify-email`,
           data: {
             full_name: fullName,
             user_type: userType,
@@ -75,24 +76,38 @@ export const SignupForm = ({ onSuccess, redirectTo = '/dashboard' }: SignupFormP
         throw signUpError;
       }
 
-      console.log('[signup] Auth user created:', authData.user?.id);
-      
-      // Database trigger (handle_new_user) automatically creates:
-      // - profiles (with full_name, email, phone, user_type, organization_name, role)
-      // - users (with all signup data)
-      // - dna_profiles (empty strengths/weaknesses)
-      // No manual inserts needed!
+      const userId = authData.user?.id;
+      const hasSession = Boolean(authData.session);
 
-      alert('Registration successful! Please check your email for confirmation.');
-      
-      if (onSuccess) onSuccess();
-      else navigate(redirectTo);
+      console.log(
+        '[signup] Auth user created:',
+        userId ?? '(hidden until email is confirmed — this is normal)'
+      );
+      console.log('[signup] Session active:', hasSession);
+
+      // Database trigger (handle_new_user) creates profiles/users/dna_profiles on auth insert.
+
+      if (hasSession) {
+        if (onSuccess) onSuccess();
+        else navigate(redirectTo);
+        return;
+      }
+
+      // Email confirmation required: Supabase often omits user.id until the inbox link is opened.
+      navigate('/login', {
+        replace: true,
+        state: {
+          message:
+            'Account created! Check your email and click the confirmation link, then sign in.',
+        },
+      });
     } catch (err: any) {
       console.error('[signup] Full error:', err);
-      const errorMsg = err.message || 'Registration failed. Please try again.';
-      console.error('[signup] Error message:', errorMsg);
-      console.error('[signup] Error details:', err.details);
-      console.error('[signup] Error hint:', err.hint);
+      let errorMsg = err.message || 'Registration failed. Please try again.';
+      if (errorMsg.includes('Database error saving new user')) {
+        errorMsg =
+          'Account setup failed on the server. Ask your admin to run scripts/fix-signup-trigger.sql in Supabase SQL Editor, then try again.';
+      }
       setError(errorMsg);
     } finally {
       setLoading(false);

@@ -622,9 +622,17 @@ export default function Commercialization() {
           <div className="icc-glass icc-widget" style={{ marginBottom: '1.5rem' }}>
             <div className="icc-widget-header">
               <h3>Workspace: {selected.project.name}</h3>
-              <Link to={`/projects/${selected.project.id}`} className="icc-widget-link">
-                Open project →
-              </Link>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <Link
+                  to={`/commercialization/${selected.project.id}/edit`}
+                  className="icc-widget-link"
+                >
+                  Full editor →
+                </Link>
+                <Link to={`/projects/${selected.project.id}`} className="icc-widget-link">
+                  Open project →
+                </Link>
+              </div>
             </div>
             <div className="icc-comm-score">
               <span>Commercialization score</span>

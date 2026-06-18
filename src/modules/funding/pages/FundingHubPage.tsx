@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { sanitizePitchNumbers } from '../services/funding.service';
 
 // ============================================================
 // TYPES
@@ -109,11 +110,22 @@ const PitchCard = ({ pitch, onEdit, onDelete, onSubmit, applications }: {
 // PITCH FORM MODAL (Create/Edit)
 // ============================================================
 const PitchModal = ({ pitch, onClose, onSave }: { pitch?: FundingPitch; onClose: () => void; onSave: () => void }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    amount: number | '';
+    equity_offered: number | '';
+    pitch_deck_url: string;
+    industry: string;
+    stage: string;
+  }>({
     title: pitch?.title || '',
     description: pitch?.description || '',
-    amount: pitch?.amount || 50000,
-    equity_offered: pitch?.equity_offered || 10,
+    amount: pitch?.amount ?? 50000,
+    equity_offered: (() => {
+      const value = Number(pitch?.equity_offered ?? 0);
+      return Number.isFinite(value) && value >= 0 && value <= 100 ? value : 0;
+    })(),
     pitch_deck_url: pitch?.pitch_deck_url || '',
     industry: pitch?.industry || 'Technology',
     stage: pitch?.stage || 'idea',
@@ -135,10 +147,15 @@ const PitchModal = ({ pitch, onClose, onSave }: { pitch?: FundingPitch; onClose:
         navigate('/login');
         return;
       }
+      const { amount, equity_offered } = sanitizePitchNumbers(
+        formData.amount,
+        formData.equity_offered
+      );
       const payload = {
         ...formData,
-        amount: Number(formData.amount),
-        equity_offered: Number(formData.equity_offered),
+        amount,
+        equity_offered,
+        pitch_deck_url: formData.pitch_deck_url.trim() || null,
         updated_at: new Date().toISOString(),
       };
       if (pitch) {
@@ -156,7 +173,13 @@ const PitchModal = ({ pitch, onClose, onSave }: { pitch?: FundingPitch; onClose:
       onSave();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: string }).message)
+          : err instanceof Error
+            ? err.message
+            : 'Save failed';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -183,11 +206,35 @@ const PitchModal = ({ pitch, onClose, onSave }: { pitch?: FundingPitch; onClose:
             <div className="form-row">
               <div className="form-group">
                 <label>Amount ($) *</label>
-                <input type="number" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })} required />
+                <input
+                  type="number"
+                  min={0}
+                  step={1000}
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      amount: e.target.value === '' ? '' : Number(e.target.value),
+                    })
+                  }
+                  required
+                />
               </div>
               <div className="form-group">
-                <label>Equity (%)</label>
-                <input type="number" value={formData.equity_offered} onChange={(e) => setFormData({ ...formData, equity_offered: Number(e.target.value) })} />
+                <label>Equity % (0 for grants)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={formData.equity_offered}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      equity_offered: e.target.value === '' ? '' : Number(e.target.value),
+                    })
+                  }
+                />
               </div>
             </div>
             <div className="form-row">
@@ -222,15 +269,51 @@ const PitchModal = ({ pitch, onClose, onSave }: { pitch?: FundingPitch; onClose:
 // ============================================================
 // INVESTOR MATCHING MODAL
 // ============================================================
-const InvestorMatchModal = ({ pitchId, onClose, onSubmitted }: { pitchId: string; onClose: () => void; onSubmitted: () => void }) => {
+const InvestorMatchModal = ({
+  pitchId,
+  submittedInvestorIds,
+  onClose,
+  onSubmitted,
+}: {
+  pitchId: string;
+  submittedInvestorIds: string[];
+  onClose: () => void;
+  onSubmitted: () => void;
+}) => {
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [submittedIds, setSubmittedIds] = useState<Set<string>>(
+    () => new Set(submittedInvestorIds)
+  );
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSubmittedIds(new Set(submittedInvestorIds));
+  }, [submittedInvestorIds, pitchId]);
 
   useEffect(() => {
     const fetchInvestors = async () => {
-      // Get pitch industry to suggest matches
-      const { data: pitch } = await supabase.from('funding_pitches').select('industry, amount').eq('id', pitchId).single();
+      setSubmitError(null);
+      const { data: pitch } = await supabase
+        .from('funding_pitches')
+        .select('industry, amount')
+        .eq('id', pitchId)
+        .single();
+
+      const { data: existing } = await supabase
+        .from('pitch_investor_applications')
+        .select('investor_id')
+        .eq('pitch_id', pitchId);
+
+      if (existing?.length) {
+        setSubmittedIds((prev) => {
+          const next = new Set(prev);
+          for (const row of existing) next.add(String(row.investor_id));
+          return next;
+        });
+      }
+
       if (pitch) {
         const { data, error } = await supabase
           .from('investors')
@@ -246,20 +329,39 @@ const InvestorMatchModal = ({ pitchId, onClose, onSubmitted }: { pitchId: string
   }, [pitchId]);
 
   const submitToInvestor = async (investorId: string) => {
+    if (submittedIds.has(investorId)) {
+      setSubmitError('You already submitted this pitch to that investor.');
+      return;
+    }
+
     setSubmitting(investorId);
+    setSubmitError(null);
+
     const { error } = await supabase.from('pitch_investor_applications').insert({
       pitch_id: pitchId,
       investor_id: investorId,
       status: 'pending',
-      message: `Pitch submitted for consideration.`,
-      created_at: new Date().toISOString(),
+      message: 'Pitch submitted for consideration.',
     });
-    if (error) alert('Submission failed');
-    else {
-      alert('Submitted! The investor will review your pitch.');
-      onSubmitted();
-      onClose();
+
+    if (error) {
+      const duplicate =
+        error.code === '23505' ||
+        /duplicate key|unique constraint/i.test(error.message);
+      if (duplicate) {
+        setSubmittedIds((prev) => new Set(prev).add(investorId));
+        setSubmitError('You already submitted this pitch to that investor.');
+      } else {
+        setSubmitError(error.message || 'Submission failed');
+      }
+      setSubmitting(null);
+      return;
     }
+
+    setSubmittedIds((prev) => new Set(prev).add(investorId));
+    alert('Submitted! The investor will review your pitch.');
+    onSubmitted();
+    onClose();
     setSubmitting(null);
   };
 
@@ -271,6 +373,7 @@ const InvestorMatchModal = ({ pitchId, onClose, onSubmitted }: { pitchId: string
           <button onClick={onClose} className="modal-close">×</button>
         </div>
         <div className="modal-body">
+          {submitError ? <div className="error-banner">{submitError}</div> : null}
           {loading ? (
             <div className="loading-spinner-small"></div>
           ) : investors.length === 0 ? (
@@ -284,8 +387,16 @@ const InvestorMatchModal = ({ pitchId, onClose, onSubmitted }: { pitchId: string
                     <h4>{inv.name}</h4>
                     <p>{inv.type.toUpperCase()} · ${inv.investment_range_min.toLocaleString()} – ${inv.investment_range_max.toLocaleString()}</p>
                     <p className="investor-focus">{inv.focus_industries.join(', ')}</p>
-                    <button onClick={() => submitToInvestor(inv.id)} disabled={submitting === inv.id} className="btn-submit-pitch">
-                      {submitting === inv.id ? 'Submitting...' : 'Submit Pitch'}
+                    <button
+                      onClick={() => submitToInvestor(inv.id)}
+                      disabled={submitting === inv.id || submittedIds.has(inv.id)}
+                      className="btn-submit-pitch"
+                    >
+                      {submittedIds.has(inv.id)
+                        ? 'Already submitted'
+                        : submitting === inv.id
+                          ? 'Submitting...'
+                          : 'Submit Pitch'}
                     </button>
                   </div>
                 </div>
@@ -467,7 +578,14 @@ const FundingHub = () => {
 
         {showCreateModal && <PitchModal onClose={() => setShowCreateModal(false)} onSave={fetchData} />}
         {editingPitch && <PitchModal pitch={editingPitch} onClose={() => setEditingPitch(null)} onSave={fetchData} />}
-        {submittingPitchId && <InvestorMatchModal pitchId={submittingPitchId} onClose={() => setSubmittingPitchId(null)} onSubmitted={handlePitchSubmitted} />}
+        {submittingPitchId && (
+          <InvestorMatchModal
+            pitchId={submittingPitchId}
+            submittedInvestorIds={applicationsForPitch(submittingPitchId).map((a) => a.investor_id)}
+            onClose={() => setSubmittingPitchId(null)}
+            onSubmitted={handlePitchSubmitted}
+          />
+        )}
         {viewingAppsPitchId && (
           <ApplicationsModal
             applications={applications.filter(a => a.pitch_id === viewingAppsPitchId)}

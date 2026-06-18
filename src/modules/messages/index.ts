@@ -9,4 +9,5 @@ export { workspaceService } from './services/workspace.service';
 export type * from './types/messages.types';
 export type * from './types/realtime.events';
 export type * from './types/workspace.types';
+export type * from './types/workspaceCreation.types';
 export type * from './types/aiMemory.types';

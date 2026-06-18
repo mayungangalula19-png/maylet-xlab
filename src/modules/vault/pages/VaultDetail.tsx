@@ -4,26 +4,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
-
-// ============================================================
-// TYPES
-// ============================================================
-interface VaultEntry {
-  id: string;
-  user_id: string;
-  title: string;
-  description: string;
-  content: string;
-  tags: string[];
-  is_public: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import {
+  deleteVaultEntry,
+  getVaultEntry,
+  updateVaultEntry,
+  type VaultEntryRecord,
+} from '../services/vault.service';
 
 // ============================================================
 // EDIT MODAL (inline editing)
 // ============================================================
-const EditVaultModal = ({ entry, onClose, onUpdate }: { entry: VaultEntry; onClose: () => void; onUpdate: () => void }) => {
+const EditVaultModal = ({ entry, onClose, onUpdate }: { entry: VaultEntryRecord; onClose: () => void; onUpdate: () => void }) => {
   const [formData, setFormData] = useState({
     title: entry.title,
     description: entry.description || '',
@@ -39,18 +30,13 @@ const EditVaultModal = ({ entry, onClose, onUpdate }: { entry: VaultEntry; onClo
     setLoading(true);
     setError(null);
     try {
-      const { error: updateError } = await supabase
-        .from('innovation_vault')
-        .update({
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          content: formData.content.trim(),
-          tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
-          is_public: formData.is_public,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', entry.id);
-      if (updateError) throw updateError;
+      await updateVaultEntry(entry.id, {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        content: formData.content.trim(),
+        tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        is_public: formData.is_public,
+      });
       onUpdate();
       onClose();
     } catch (err) {
@@ -110,7 +96,7 @@ const VaultDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [entry, setEntry] = useState<VaultEntry | null>(null);
+  const [entry, setEntry] = useState<VaultEntryRecord | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -124,17 +110,12 @@ const VaultDetail = () => {
 
   const fetchEntry = useCallback(async () => {
     if (!id || !userId) return;
-    const { data, error } = await supabase
-      .from('innovation_vault')
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (error || !data) {
+    const data = await getVaultEntry(id);
+    if (!data) {
       setError('Entry not found or access denied');
       setLoading(false);
       return;
     }
-    // Check permission: only owner can view private entries
     if (!data.is_public && data.user_id !== userId) {
       setError('You do not have permission to view this entry');
       setLoading(false);
@@ -151,9 +132,12 @@ const VaultDetail = () => {
   const handleDelete = async () => {
     if (!entry) return;
     if (window.confirm('Permanently delete this vault entry? This action cannot be undone.')) {
-      const { error } = await supabase.from('innovation_vault').delete().eq('id', entry.id);
-      if (!error) navigate('/vault');
-      else alert('Delete failed');
+      try {
+        await deleteVaultEntry(entry.id);
+        navigate('/vault');
+      } catch {
+        alert('Delete failed');
+      }
     }
   };
 

@@ -27,6 +27,8 @@
   grid-template-columns: 300px minmax(0, 1fr) 280px;
   gap: 1rem;
   min-height: calc(100vh - 10rem);
+  min-height: calc(100dvh - 10rem);
+  contain: layout style;
 }
 
 .msg-panel {
@@ -318,7 +320,7 @@
   overflow: hidden;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
   .msg-layout {
     grid-template-columns: 260px minmax(0, 1fr);
   }
@@ -327,7 +329,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .msg-layout {
     grid-template-columns: 1fr;
   }

@@ -665,6 +665,9 @@ export default function ExperimentDetail() {
             </p>
           </div>
           <div className="exp-header__actions">
+            <Link to={`/experiments/${id}/edit`} className="exp-btn exp-btn--ghost">
+              Full editor
+            </Link>
             {statusActions
               .filter((a) => a.show)
               .map((a) => (

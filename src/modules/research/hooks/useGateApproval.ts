@@ -71,6 +71,14 @@ export function useGateApproval(
     );
   }, []);
 
+  const confirmAllSectionC = useCallback(() => {
+    setSectionC((prev) => prev.map((c) => ({ ...c, status: 'pass' as const })));
+  }, []);
+
+  const resetSectionC = useCallback(() => {
+    setSectionC((prev) => prev.map((c) => ({ ...c, status: 'pending' as const })));
+  }, []);
+
   const submitReview = useCallback(async () => {
     if (!projectId || !userId || !evaluation) return false;
     if (!reviewerName.trim()) {
@@ -123,6 +131,8 @@ export function useGateApproval(
     setOpenRisks,
     setReviewerName,
     toggleSectionC,
+    confirmAllSectionC,
+    resetSectionC,
     submitReview,
     prototypeAuthorized,
     refresh: load,

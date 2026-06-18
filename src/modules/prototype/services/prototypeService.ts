@@ -402,4 +402,10 @@ export const prototypeService = {
 
     return { projectId, prototypeId, promoted: true };
   },
+
+  async incrementViews(prototypeId: string): Promise<void> {
+    const { data } = await supabase.from('prototypes').select('views').eq('id', prototypeId).single();
+    const views = Number(data?.views ?? 0) + 1;
+    await supabase.from('prototypes').update({ views }).eq('id', prototypeId);
+  },
 };

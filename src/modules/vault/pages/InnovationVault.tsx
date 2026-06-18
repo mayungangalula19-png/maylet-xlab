@@ -4,26 +4,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
-
-// ============================================================
-// TYPES
-// ============================================================
-interface VaultEntry {
-  id: string;
-  user_id: string;
-  title: string;
-  description: string;
-  content: string; // encrypted or plain text
-  tags: string[];
-  is_public: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import {
+  createVaultEntry,
+  deleteVaultEntry,
+  formatVaultError,
+  listVaultEntriesForUser,
+  updateVaultEntry,
+  type VaultEntryRecord,
+} from '../services/vault.service';
 
 // ============================================================
 // VAULT ENTRY CARD COMPONENT
 // ============================================================
-const VaultCard = ({ entry, onEdit, onDelete }: { entry: VaultEntry; onEdit: (entry: VaultEntry) => void; onDelete: (id: string) => void }) => (
+const VaultCard = ({ entry, onEdit, onDelete }: { entry: VaultEntryRecord; onEdit: (entry: VaultEntryRecord) => void; onDelete: (id: string) => void }) => (
   <div className="vault-card">
     <div className="vault-header">
       <h3>{entry.title}</h3>
@@ -46,7 +39,7 @@ const VaultCard = ({ entry, onEdit, onDelete }: { entry: VaultEntry; onEdit: (en
 // ============================================================
 // VAULT ENTRY MODAL (CREATE/EDIT)
 // ============================================================
-const VaultModal = ({ entry, onClose, onSave }: { entry?: VaultEntry; onClose: () => void; onSave: () => void }) => {
+const VaultModal = ({ entry, onClose, onSave }: { entry?: VaultEntryRecord; onClose: () => void; onSave: () => void }) => {
   const [formData, setFormData] = useState({
     title: entry?.title || '',
     description: entry?.description || '',
@@ -76,30 +69,18 @@ const VaultModal = ({ entry, onClose, onSave }: { entry?: VaultEntry; onClose: (
         title: formData.title.trim(),
         description: formData.description.trim(),
         content: formData.content.trim(),
-        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
         is_public: formData.is_public,
-        updated_at: new Date().toISOString(),
       };
       if (entry) {
-        const { error: updateError } = await supabase
-          .from('innovation_vault')
-          .update(payload)
-          .eq('id', entry.id);
-        if (updateError) throw updateError;
+        await updateVaultEntry(entry.id, payload);
       } else {
-        const { error: insertError } = await supabase
-          .from('innovation_vault')
-          .insert({
-            ...payload,
-            user_id: session.user.id,
-            created_at: new Date().toISOString(),
-          });
-        if (insertError) throw insertError;
+        await createVaultEntry(session.user.id, payload);
       }
       onSave();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(formatVaultError(err));
     } finally {
       setLoading(false);
     }
@@ -153,12 +134,12 @@ const VaultModal = ({ entry, onClose, onSave }: { entry?: VaultEntry; onClose: (
 // ============================================================
 const InnovationVault = () => {
   const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState<VaultEntry[]>([]);
-  const [filteredEntries, setFilteredEntries] = useState<VaultEntry[]>([]);
+  const [entries, setEntries] = useState<VaultEntryRecord[]>([]);
+  const [filteredEntries, setFilteredEntries] = useState<VaultEntryRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPublicOnly, setShowPublicOnly] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<VaultEntry | null>(null);
+  const [editingEntry, setEditingEntry] = useState<VaultEntryRecord | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -171,14 +152,12 @@ const InnovationVault = () => {
 
   const fetchEntries = useCallback(async () => {
     if (!userId) return;
-    let query = supabase.from('innovation_vault').select('*');
-    if (showPublicOnly) {
-      query = query.eq('is_public', true);
-    } else {
-      query = query.or(`user_id.eq.${userId},is_public.eq.true`);
+    try {
+      const data = await listVaultEntriesForUser(userId, { publicOnly: showPublicOnly });
+      setEntries(data);
+    } catch {
+      setEntries([]);
     }
-    const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error) setEntries(data || []);
     setLoading(false);
   }, [userId, showPublicOnly]);
 
@@ -200,9 +179,12 @@ const InnovationVault = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Permanently delete this vault entry? This action cannot be undone.')) {
-      const { error } = await supabase.from('innovation_vault').delete().eq('id', id);
-      if (!error) fetchEntries();
-      else alert('Delete failed');
+      try {
+        await deleteVaultEntry(id);
+        fetchEntries();
+      } catch {
+        alert('Delete failed');
+      }
     }
   };
 

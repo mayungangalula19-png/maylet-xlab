@@ -1,11 +1,64 @@
-body { margin: 0; padding: 0; font-family: sans-serif; background: #0a0a0f; color: white; }
-
-/* Layout shell — sidebar is fixed 280px; content area offset here (not per-page). */
-.layout-content {
-  margin-left: 280px;
-  min-height: 100vh;
-  transition: margin-left 0.3s ease;
+:root {
+  --mxl-bp-tablet: 1024px;
+  --mxl-bp-mobile: 640px;
+  --mxl-layout-speed: 0.15s;
+  --mxl-layout-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --mxl-sidebar-width: 280px;
+  --mxl-sidebar-collapsed: 80px;
 }
-@media (max-width: 768px) {
-  .layout-content { margin-left: 0; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background: #0a0a0f;
+  color: white;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Layout shell — sidebar is fixed; content offset here (not per-page). */
+.layout-content {
+  margin-left: var(--mxl-sidebar-width);
+  min-height: 100vh;
+  min-height: 100dvh;
+  transition: margin-left var(--mxl-layout-speed) var(--mxl-layout-ease);
+  contain: layout style;
+  box-sizing: border-box;
+}
+
+body[data-sidebar-collapsed='1'] .layout-content {
+  margin-left: var(--mxl-sidebar-collapsed);
+}
+
+@media (max-width: 1024px) {
+  .layout-content {
+    margin-left: 0 !important;
+    padding: 4.5rem 0.85rem 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .layout-content {
+    padding: 4rem 0.5rem 0.75rem;
+  }
+}
+
+/* Faster tap response on touch devices */
+button,
+a,
+[role='button'],
+input,
+select,
+textarea,
+label {
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-content,
+  .sidebar,
+  .sidebar-overlay {
+    transition: none !important;
+    animation: none !important;
+  }
 }

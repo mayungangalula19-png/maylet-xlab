@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../../lib/supabase/client';
 import { debounce } from '../../../core/utils/debounce';
 import type {
@@ -11,6 +11,7 @@ import type {
 import type { Message, MessageStatus } from '../types/messages.types';
 
 const WS_URL = import.meta.env.VITE_MESSAGING_WS_URL?.replace(/\/$/, '') ?? '';
+const WS_CONNECT_TIMEOUT_MS = 1_500;
 
 type HandlerMap = Map<ServerEventName, Set<(payload: unknown) => void>>;
 
@@ -237,8 +238,32 @@ export function useRealtimeMessages(userId: string | undefined) {
     const init = async () => {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token ?? '';
-      const base = useWs ? createWebSocketTransport() : createSupabaseTransport();
 
+      if (useWs && token) {
+        const wsTransport = createWebSocketTransport();
+        try {
+          await Promise.race([
+            wsTransport.connect(userId, token),
+            new Promise<void>((_, reject) =>
+              setTimeout(() => reject(new Error('WebSocket connect timeout')), WS_CONNECT_TIMEOUT_MS)
+            ),
+          ]);
+          if (!cancelled) {
+            transportRef.current = wsTransport;
+            bindPendingHandlers(wsTransport);
+            setConnected(wsTransport.isConnected());
+          }
+          return;
+        } catch (err) {
+          console.warn(
+            '[messages] Custom WebSocket unavailable (check VITE_MESSAGING_WS_URL). Falling back to Supabase Realtime.',
+            err
+          );
+          wsTransport.disconnect();
+        }
+      }
+
+      const base = createSupabaseTransport();
       try {
         await base.connect(userId, token);
         if (!cancelled) {
@@ -304,12 +329,15 @@ export function useRealtimeMessages(userId: string | undefined) {
     transportRef.current?.notifyTyping(conversationId, isTyping);
   }, []);
 
-  return {
-    connected,
-    on,
-    emit,
-    subscribeConversation,
-    unsubscribeConversation,
-    notifyTyping,
-  };
+  return useMemo(
+    () => ({
+      connected,
+      on,
+      emit,
+      subscribeConversation,
+      unsubscribeConversation,
+      notifyTyping,
+    }),
+    [connected, on, emit, subscribeConversation, unsubscribeConversation, notifyTyping]
+  );
 }

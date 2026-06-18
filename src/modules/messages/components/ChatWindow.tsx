@@ -4,6 +4,7 @@ import { Button } from '../../../modules/shared';
 import { MessagesEmptyState } from './MessagesEmptyState';
 import { MessagesSkeleton } from './MessagesSkeleton';
 import { TypingIndicator } from './TypingIndicator';
+import { dedupeById } from '../lib/messageUtils';
 import type { AsyncState, Conversation, Message } from '../types/messages.types';
 
 // ============================================================================
@@ -70,6 +71,7 @@ interface Props {
   onSend: () => void;
   onTyping: (typing: boolean) => void;
   onRetry: () => void;
+  onCreateWorkspace?: () => void;
 }
 
 // ============================================================================
@@ -462,6 +464,7 @@ export function ChatWindow({
   onSend: _onSend,
   onTyping: _onTyping,
   onRetry,
+  onCreateWorkspace,
 }: Props) {
   const memberNames = useMemo(
     () => conversation?.members.map((m) => m.name) ?? [],
@@ -471,6 +474,11 @@ export function ChatWindow({
   const memberMap = useMemo(
     () => new Map(conversation?.members.map(m => [m.id, m.name]) ?? []),
     [conversation?.members]
+  );
+
+  const visibleMessages = useMemo(
+    () => dedupeById(messages.data ?? []),
+    [messages.data]
   );
 
   // Handlers (TODO: Connect to real services)
@@ -519,7 +527,10 @@ export function ChatWindow({
       <Card className="msg-panel msg-panel--center">
         <MessagesEmptyState
           title="Select a conversation"
-          description="Choose a conversation to start collaborating on innovation projects."
+          description="Choose a conversation or create a workspace to start collaborating."
+          actionLabel="Create Workspace"
+          onCreateWorkspace={onCreateWorkspace}
+          onAction={onCreateWorkspace}
         />
       </Card>
     );
@@ -568,8 +579,8 @@ export function ChatWindow({
           </div>
         ) : null}
 
-        {messages.data && messages.data.length > 0 && messages.data.map((msg, index) => {
-          const prev = index > 0 ? messages.data![index - 1] : undefined;
+        {visibleMessages.length > 0 && visibleMessages.map((msg, index) => {
+          const prev = index > 0 ? visibleMessages[index - 1] : undefined;
           const showDate = shouldShowDateSeparator(msg, prev);
           const senderName = msg.senderId === userId ? 'You' : (memberMap.get(msg.senderId) || 'Unknown');
 

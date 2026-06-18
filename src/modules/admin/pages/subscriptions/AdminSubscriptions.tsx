@@ -1,19 +1,28 @@
-﻿import { useState, useEffect } from 'react';
-import { supabase } from '../../../../lib/supabase/client';
+import { AdminEntityListPage } from '../../components/templates/AdminResourceListPage';
+import { AdminPlanBadge } from '../../components/ui/AdminBadge';
+import { formatAdminDate } from '../../utils/adminPage.utils';
 
-const AdminSubscriptions = () => {
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+interface SubscriptionRow {
+  id: string;
+  user_id?: string | null;
+  plan?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+}
 
-  useEffect(() => {
-    supabase.from('profiles').select('plan').then(({ data }) => setSubscriptions(data || []));
-  }, []);
-
+export default function AdminSubscriptions() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Subscriptions Management</h1>
-      <p>Total Subscriptions: {subscriptions.length}</p>
-    </div>
+    <AdminEntityListPage<SubscriptionRow>
+      title="Subscriptions"
+      listRoute="/admin/subscriptions"
+      table="subscriptions"
+      select="id, user_id, plan, status, created_at"
+      detailRoute={(id) => `/admin/subscriptions/${id}`}
+      columns={[
+        { header: 'Plan', render: (row) => <AdminPlanBadge plan={row.plan} /> },
+        { header: 'Status', render: (row) => row.status || '—' },
+        { header: 'Created', render: (row) => formatAdminDate(row.created_at) },
+      ]}
+    />
   );
-};
-
-export default AdminSubscriptions;
+}

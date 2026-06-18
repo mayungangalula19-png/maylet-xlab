@@ -8,6 +8,8 @@ import { supabase } from '../../../lib/supabase/client';
 import { uploadProjectDocumentFile } from '../../../lib/supabase/document.queries';
 import { buildProjectUpdate, fetchTeamMembersForProject } from '../../../lib/supabase/dbHelpers';
 import { normalizeProjectStatus } from '../../../types/project.types';
+import { LifecycleTracker, useWorkflow } from '../../workflow';
+import { sanitizePitchNumbers } from '../../funding/services/funding.service';
 
 // ============================================================
 // TYPES
@@ -132,6 +134,23 @@ const Tabs = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (t
 // ============================================================
 // OVERVIEW TAB
 // ============================================================
+function ProjectLifecyclePanel({ projectId, projectName }: { projectId: string; projectName?: string }) {
+  const { stages, lifecycle, readiness, loading, error, refresh } = useWorkflow(projectId);
+  return (
+    <LifecycleTracker
+      projectId={projectId}
+      projectName={projectName}
+      lifecycle={lifecycle}
+      stages={stages}
+      readiness={readiness}
+      readinessOverall={readiness?.overallScore}
+      loading={loading}
+      error={error}
+      onRefresh={refresh}
+    />
+  );
+}
+
 const OverviewTab = ({ project, stats }: { project: Project; stats: any }) => {
   const getSectorIcon = (sector: string) => {
     if (sector.includes('Agri')) return '🌾';
@@ -175,6 +194,8 @@ const OverviewTab = ({ project, stats }: { project: Project; stats: any }) => {
           <Link to={`/experiments/create?projectId=${project.id}`} className="btn-experiment-header">🧪 Run Experiment</Link>
         </div>
       </div>
+
+      <ProjectLifecyclePanel projectId={project.id} projectName={project.name} />
 
       {/* Description */}
       <div className="info-card">
@@ -852,23 +873,52 @@ const AILabTab = ({ analysis, projectId: _projectId, projectName }: { analysis: 
 // ============================================================
 // FUNDING TAB
 // ============================================================
-const FundingTab = ({ pitches, onPitchSubmit, projectName: _projectName }: { pitches: FundingPitch[]; onPitchSubmit: () => void; projectName: string }) => {
+const FundingTab = ({ pitches, onPitchSubmit, projectName }: { pitches: FundingPitch[]; onPitchSubmit: () => void; projectName: string }) => {
   const [showPitchForm, setShowPitchForm] = useState(false);
   const [newPitch, setNewPitch] = useState({ amount: '', equity: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [pitchError, setPitchError] = useState<string | null>(null);
   const { id } = useParams();
 
   const handleSubmitPitch = async () => {
-    if (!newPitch.amount || !newPitch.equity) return;
+    if (!newPitch.amount) return;
     setSubmitting(true);
+    setPitchError(null);
 
-    await supabase.from('funding_pitches').insert({
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      setPitchError('You must be signed in to create a pitch.');
+      setSubmitting(false);
+      return;
+    }
+
+    let amount: number;
+    let equity_offered: number;
+    try {
+      ({ amount, equity_offered } = sanitizePitchNumbers(newPitch.amount, newPitch.equity));
+    } catch (err) {
+      setPitchError(err instanceof Error ? err.message : 'Invalid pitch values.');
+      setSubmitting(false);
+      return;
+    }
+
+    const { error } = await supabase.from('funding_pitches').insert({
+      user_id: session.user.id,
       project_id: id,
-      amount: parseInt(newPitch.amount),
-      equity: parseInt(newPitch.equity),
-      description: newPitch.description,
+      title: `${projectName} funding pitch`,
+      amount,
+      equity_offered,
+      description: newPitch.description.trim() || null,
       status: 'submitted',
+      industry: 'Technology',
+      stage: 'idea',
     });
+
+    if (error) {
+      setPitchError(error.message);
+      setSubmitting(false);
+      return;
+    }
 
     setNewPitch({ amount: '', equity: '', description: '' });
     setShowPitchForm(false);
@@ -916,6 +966,7 @@ const FundingTab = ({ pitches, onPitchSubmit, projectName: _projectName }: { pit
 
       {showPitchForm && (
         <div className="pitch-form">
+          {pitchError ? <p className="research-error">{pitchError}</p> : null}
           <div className="form-row">
             <div className="form-group">
               <label>Amount ($)</label>
@@ -927,9 +978,12 @@ const FundingTab = ({ pitches, onPitchSubmit, projectName: _projectName }: { pit
               />
             </div>
             <div className="form-group">
-              <label>Equity (%)</label>
+              <label>Equity % (0 for grants)</label>
               <input
                 type="number"
+                min={0}
+                max={100}
+                step={0.1}
                 placeholder="e.g., 10"
                 value={newPitch.equity}
                 onChange={(e) => setNewPitch({ ...newPitch, equity: e.target.value })}

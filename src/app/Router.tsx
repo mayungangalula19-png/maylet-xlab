@@ -71,6 +71,13 @@ const EditProject = lazy(() => import('../modules/projects/pages/EditProjectPage
 const Experiments = lazy(() => import('../modules/experiment/pages/ExperimentsPage'));
 const ExperimentDetail = lazy(() => import('../modules/experiment/pages/ExperimentDetailPage'));
 const CreateExperiment = lazy(() => import('../modules/experiment/pages/CreateExperimentPage'));
+const ExperimentEdit = lazy(() => import('../modules/experiment/pages/ExperimentEditPage'));
+const PrototypeEdit = lazy(() => import('../modules/prototype/pages/PrototypeEditPage'));
+const TestingEdit = lazy(() => import('../modules/prototype/pages/TestingEditPage'));
+const ResearchEdit = lazy(() => import('../modules/research/pages/ResearchEditPage'));
+const ValidationEdit = lazy(() => import('../modules/validation/pages/ValidationEditPage'));
+const FundingEdit = lazy(() => import('../modules/funding/pages/FundingEditPage'));
+const CommercializationEdit = lazy(() => import('../modules/commercialization/pages/CommercializationEditPage'));
 const Prototypes = lazy(() => import('../modules/prototype/pages/PrototypesDashboard'));
 const NewPrototype = lazy(() => import('../modules/prototype/pages/NewPrototype'));
 const PrototypeWorkspace = lazy(() => import('../modules/prototype/pages/PrototypeWorkspace'));
@@ -115,7 +122,7 @@ const PatentAssistant = lazy(() => import('../modules/tools/pages/patent/PatentA
 const InnovationTwin = lazy(() => import('../modules/tools/pages/predictive/InnovationTwin'));
 const Settings = lazy(() => import('../modules/account/pages/Settings'));
 const Security = lazy(() => import('../modules/account/pages/Security'));
-const Billing = lazy(() => import('../modules/account/pages/Billing'));
+const Billing = lazy(() => import('../modules/billing/pages/BillingDashboard'));
 const Support = lazy(() => import('../modules/ecosystem/pages/Support'));
 const SaveIdea = lazy(() => import('../modules/projects/pages/SaveIdea'));
 const UploadPrototype = lazy(() => import('../modules/prototype/pages/UploadPrototypePage'));
@@ -133,6 +140,8 @@ const AdminProjects = lazy(() => import('../modules/admin/pages/projects/AdminPr
 const AdminProjectDetail = lazy(() => import('../modules/admin/pages/projects/AdminProjectDetail'));
 const AdminProjectReview = lazy(() => import('../modules/admin/pages/projects/AdminProjectReview'));
 const AdminProjectDelete = lazy(() => import('../modules/admin/pages/projects/AdminProjectDelete'));
+const AdminResearchEdit = lazy(() => import('../modules/admin/pages/projects/AdminResearchEdit'));
+const AdminCommercializationEdit = lazy(() => import('../modules/admin/pages/projects/AdminCommercializationEdit'));
 const AdminReports = lazy(() => import('../modules/admin/pages/reports/AdminReports'));
 const AdminSettings = lazy(() => import('../modules/admin/pages/settings/AdminSettings'));
 const AdminRoles = lazy(() => import('../modules/admin/pages/settings/AdminRoles'));
@@ -152,8 +161,14 @@ const AdminInvestorDetail = lazy(() => import('../modules/admin/pages/investors/
 const AdminInvestorVerify = lazy(() => import('../modules/admin/pages/investors/AdminInvestorVerify'));
 const AdminExperiments = lazy(() => import('../modules/admin/pages/experiments/AdminExperiments'));
 const AdminExperimentDetail = lazy(() => import('../modules/admin/pages/experiments/AdminExperimentDetail'));
+const AdminExperimentEdit = lazy(() => import('../modules/admin/pages/experiments/AdminExperimentEdit'));
 const AdminPrototypes = lazy(() => import('../modules/admin/pages/prototypes/AdminPrototypes'));
 const AdminPrototypeDetail = lazy(() => import('../modules/admin/pages/prototypes/AdminPrototypeDetail'));
+const AdminPrototypeEdit = lazy(() => import('../modules/admin/pages/prototypes/AdminPrototypeEdit'));
+const AdminTestingEdit = lazy(() => import('../modules/admin/pages/prototypes/AdminTestingEdit'));
+const AdminValidationEdit = lazy(() => import('../modules/admin/pages/validation/AdminValidationEdit'));
+const AdminFunding = lazy(() => import('../modules/admin/pages/funding/AdminFunding'));
+const AdminFundingEdit = lazy(() => import('../modules/admin/pages/funding/AdminFundingEdit'));
 const AdminVault = lazy(() => import('../modules/admin/pages/vault/AdminVault'));
 const AdminVaultDetail = lazy(() => import('../modules/admin/pages/vault/AdminVaultDetail'));
 const AdminSubscriptions = lazy(() => import('../modules/admin/pages/subscriptions/AdminSubscriptions'));
@@ -175,6 +190,7 @@ const AdminSecurity = lazy(() => import('../modules/admin/pages/system/AdminSecu
 const AdminNotifications = lazy(() => import('../modules/admin/pages/notifications/AdminNotifications'));
 const AdminBroadcast = lazy(() => import('../modules/admin/pages/notifications/AdminBroadcast'));
 const AdminCareers = lazy(() => import('../modules/admin/pages/careers/AdminCareers'));
+const AdminCareerApplications = lazy(() => import('../modules/admin/pages/careers/AdminCareerApplications'));
 const AdminCareerDetail = lazy(() => import('../modules/admin/pages/careers/AdminCareerDetail'));
 
 // ============================================================
@@ -272,11 +288,14 @@ export const Router = () => {
           {/* Experiments */}
           <Route path="/experiments" element={<Experiments />} />
           <Route path="/experiments/create" element={<CreateExperiment />} />
+          <Route path="/experiments/:id/edit" element={<ExperimentEdit />} />
           <Route path="/experiments/:id" element={<ExperimentDetail />} />
 
           {/* Prototypes */}
           <Route path="/prototypes" element={<Prototypes />} />
           <Route path="/prototypes/new" element={<NewPrototype />} />
+          <Route path="/prototypes/:id/edit" element={<PrototypeEdit />} />
+          <Route path="/prototypes/:id/testing/edit" element={<TestingEdit />} />
           <Route path="/prototypes/:id/testing" element={<PrototypeTesting />} />
           <Route path="/prototypes/:id" element={<PrototypeWorkspace />} />
           <Route path="/prototypes/:id/workspace" element={<PrototypeWorkspace />} />
@@ -292,13 +311,16 @@ export const Router = () => {
           {/* Funding Hub */}
           <Route path="/funding" element={<FundingHub />} />
           <Route path="/funding/create" element={<CreatePitch />} />
+          <Route path="/funding/:id/edit" element={<FundingEdit />} />
           <Route path="/funding/:id" element={<FundingDetail />} />
 
           {/* Validation & Commercialization */}
           <Route path="/validation" element={<Validation />} />
           <Route path="/validation/new" element={<CreateValidation />} />
+          <Route path="/validation/:id/edit" element={<ValidationEdit />} />
           <Route path="/validation/:id" element={<ValidationDetail />} />
           <Route path="/commercialization" element={<Commercialization />} />
+          <Route path="/commercialization/:projectId/edit" element={<CommercializationEdit />} />
 
           {/* Innovation Vault */}
           <Route path="/vault" element={<InnovationVault />} />
@@ -316,6 +338,7 @@ export const Router = () => {
 
           {/* Enterprise */}
           <Route path="/enterprise" element={<Enterprise />} />
+          <Route path="/billing" element={<Billing />} />
 
           {/* Analytics & AI */}
           <Route path="/analytics" element={<Analytics />} />
@@ -331,6 +354,7 @@ export const Router = () => {
 
           {/* Research Center */}
           <Route path="/research" element={<ResearchCenter />} />
+          <Route path="/research/:projectId/edit" element={<ResearchEdit />} />
           <Route path="/research/:projectId" element={<ResearchWorkspace />} />
           <Route path="/research/:projectId/literature" element={<LiteratureReview />} />
           <Route path="/research/:projectId/documents" element={<ResearchDocuments />} />
@@ -366,6 +390,8 @@ export const Router = () => {
 
             {/* Project Management */}
             <Route path="/admin/projects" element={<AdminProjects />} />
+            <Route path="/admin/projects/:projectId/research/edit" element={<AdminResearchEdit />} />
+            <Route path="/admin/projects/:projectId/commercialization/edit" element={<AdminCommercializationEdit />} />
             <Route path="/admin/projects/:id" element={<AdminProjectDetail />} />
             <Route path="/admin/projects/:id/review" element={<AdminProjectReview />} />
             <Route path="/admin/projects/:id/delete" element={<AdminProjectDelete />} />
@@ -392,9 +418,15 @@ export const Router = () => {
 
             {/* Innovation Management */}
             <Route path="/admin/experiments" element={<AdminExperiments />} />
+            <Route path="/admin/experiments/:id/edit" element={<AdminExperimentEdit />} />
             <Route path="/admin/experiments/:id" element={<AdminExperimentDetail />} />
             <Route path="/admin/prototypes" element={<AdminPrototypes />} />
+            <Route path="/admin/prototypes/:id/testing/edit" element={<AdminTestingEdit />} />
+            <Route path="/admin/prototypes/:id/edit" element={<AdminPrototypeEdit />} />
             <Route path="/admin/prototypes/:id" element={<AdminPrototypeDetail />} />
+            <Route path="/admin/validation/:id/edit" element={<AdminValidationEdit />} />
+            <Route path="/admin/funding" element={<AdminFunding />} />
+            <Route path="/admin/funding/:id/edit" element={<AdminFundingEdit />} />
             <Route path="/admin/vault" element={<AdminVault />} />
             <Route path="/admin/vault/:id" element={<AdminVaultDetail />} />
 
@@ -429,7 +461,8 @@ export const Router = () => {
             <Route path="/admin/notifications/broadcast" element={<AdminBroadcast />} />
 
             <Route path="/admin/careers" element={<AdminCareers />} />
-            <Route path="/admin/careers/:id" element={<AdminCareerDetail />} />
+            <Route path="/admin/careers/applications" element={<AdminCareerApplications />} />
+            <Route path="/admin/careers/applications/:id" element={<AdminCareerDetail />} />
           </Route>
         </Route>
 

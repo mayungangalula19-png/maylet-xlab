@@ -8,15 +8,48 @@ import { supabase } from '../../../lib/supabase/client';
 // ============================================================
 // TYPES
 // ============================================================
+type NotificationType = 'ai' | 'team' | 'funding' | 'system' | 'mentorship';
+
 interface Notification {
   id: string;
   user_id: string;
   title: string;
   message: string;
-  type: 'ai' | 'team' | 'funding' | 'system' | 'mentorship';
+  type: NotificationType;
   read: boolean;
   created_at: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
+}
+
+type NotificationRow = {
+  id: string;
+  user_id: string;
+  title: string;
+  body?: string | null;
+  message?: string | null;
+  type?: string | null;
+  read: boolean;
+  created_at: string;
+  metadata?: Record<string, unknown>;
+};
+
+function mapNotificationType(raw: string | null | undefined): NotificationType {
+  const t = (raw ?? 'system').toLowerCase();
+  if (t === 'ai' || t === 'team' || t === 'funding' || t === 'mentorship') return t;
+  return 'system';
+}
+
+function mapNotificationRow(row: NotificationRow): Notification {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    title: row.title,
+    message: (row.body ?? row.message ?? '').trim() || row.title,
+    type: mapNotificationType(row.type),
+    read: row.read,
+    created_at: row.created_at,
+    metadata: row.metadata,
+  };
 }
 
 // ============================================================
@@ -96,7 +129,7 @@ const Notifications = () => {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
     if (!error) {
-      setNotifications(data || []);
+      setNotifications((data as NotificationRow[] | null)?.map(mapNotificationRow) ?? []);
     }
   }, [userId]);
 

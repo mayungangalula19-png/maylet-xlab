@@ -681,6 +681,9 @@ Give: readiness verdict, top 3 risks, top 3 actions, investor fit summary. Be co
             </div>
           </div>
           <div className="fund-header__actions">
+            <Link to={`/funding/${id}/edit`} className="fund-btn fund-btn--ghost">
+              Full editor
+            </Link>
             <StageBadge stage={workflow} />
             <button type="button" className="fund-btn fund-btn--ghost" onClick={() => void persist()} disabled={saving}>
               {saving ? 'Saving…' : 'Save workspace'}

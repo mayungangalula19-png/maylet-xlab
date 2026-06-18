@@ -8,6 +8,7 @@ import { LiteratureTable } from '../components/LiteratureTable';
 import { MayaAssistantPanel } from '../components/MayaAssistantPanel';
 import { NotesEditor } from '../components/NotesEditor';
 import { ProblemDefinitionForm } from '../components/ProblemDefinitionForm';
+import { ResearchFormsHub } from '../components/ResearchFormsHub';
 import { ResearchImpactPanel } from '../components/ResearchImpactPanel';
 import { useMayaAI } from '../hooks/useMayaAI';
 import { useResearch } from '../hooks/useResearch';
@@ -23,6 +24,7 @@ import '../research.css';
 
 const TABS: { id: ResearchWorkspaceTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
+  { id: 'forms', label: 'All Forms' },
   { id: 'notes', label: 'Notes' },
   { id: 'problem', label: 'Problem' },
   { id: 'findings', label: 'Findings' },
@@ -147,6 +149,9 @@ export default function ResearchWorkspace() {
           <p>Research workspace — {snapshot.completionRate}% complete</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <Link to={`/research/${projectId}/edit`} className="research-btn research-btn--secondary">
+            Edit profile
+          </Link>
           <Link to={`/research/${projectId}/playbook`} className="research-btn research-btn--secondary">
             Playbook
           </Link>
@@ -190,7 +195,13 @@ export default function ResearchWorkspace() {
         {tab === 'overview' && (
           <>
             <h2>Overview</h2>
-            <div className="research-stats" style={{ marginTop: '1rem' }}>
+            <ResearchFormsHub
+              snapshot={snapshot}
+              evaluation={gate.evaluation}
+              onOpenTab={setTab}
+              compact
+            />
+            <div className="research-stats" style={{ marginTop: '1.5rem' }}>
               <div className="research-glass research-stat"><strong>{snapshot.notes.length}</strong><span>Notes</span></div>
               <div className="research-glass research-stat"><strong>{snapshot.literature.length}</strong><span>Literature</span></div>
               <div className="research-glass research-stat"><strong>{snapshot.findings.length}</strong><span>Findings</span></div>
@@ -203,9 +214,18 @@ export default function ResearchWorkspace() {
           </>
         )}
 
+        {tab === 'forms' && (
+          <ResearchFormsHub
+            snapshot={snapshot}
+            evaluation={gate.evaluation}
+            onOpenTab={setTab}
+          />
+        )}
+
         {tab === 'notes' && (
           <NotesEditor
             notes={filteredNotes}
+            disabled={saving}
             onCreate={async (payload) => {
               await withSaving(() => researchService.createNote(projectId, userId, payload));
             }}
@@ -221,6 +241,7 @@ export default function ResearchWorkspace() {
         {tab === 'problem' && (
           <ProblemDefinitionForm
             profile={snapshot.profile}
+            disabled={saving}
             onSave={async (fields) => {
               await withSaving(() => researchService.saveProfile(projectId, userId, fields));
             }}
@@ -230,6 +251,7 @@ export default function ResearchWorkspace() {
         {tab === 'findings' && (
           <FindingsPanel
             findings={filteredFindings}
+            disabled={saving}
             onCreate={async (payload) => {
               await withSaving(() => researchService.createFinding(projectId, userId, payload));
             }}
@@ -249,6 +271,8 @@ export default function ResearchWorkspace() {
             </div>
             <LiteratureTable
               items={filteredLiterature}
+              disabled={saving}
+              compact
               onDelete={async (id) => {
                 await withSaving(() => literatureService.remove(id));
               }}
@@ -276,9 +300,13 @@ export default function ResearchWorkspace() {
             insights={maya.insights}
             questions={maya.questions}
             loading={maya.loading}
+            error={maya.error}
+            localAnalysis={maya.localAnalysis}
+            completionRate={snapshot.completionRate}
             onRunPrompt={maya.runPrompt}
             onSend={maya.send}
             onRunLocalAnalysis={maya.runLocalAnalysis}
+            onClear={maya.clear}
           />
         )}
 
@@ -319,6 +347,7 @@ export default function ResearchWorkspace() {
             openRisks={gate.openRisks}
             reviewerName={gate.reviewerName}
             saving={gate.saving}
+            loading={gate.loading}
             error={gate.error}
             onDecisionChange={gate.setDecision}
             onV1ScopeChange={gate.setV1Scope}
@@ -326,6 +355,8 @@ export default function ResearchWorkspace() {
             onOpenRisksChange={gate.setOpenRisks}
             onReviewerNameChange={gate.setReviewerName}
             onToggleSectionC={gate.toggleSectionC}
+            onConfirmAllSectionC={gate.confirmAllSectionC}
+            onResetSectionC={gate.resetSectionC}
             onSubmit={async () => { await gate.submitReview(); }}
             onAdvanceToPrototype={handleAdvanceToPrototype}
             advancing={advancing}

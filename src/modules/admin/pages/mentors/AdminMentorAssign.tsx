@@ -1,4 +1,7 @@
-import { AdminDetailShell } from '../../components/AdminDetailShell';
+import { Navigate, useParams } from 'react-router-dom';
+
 export default function AdminMentorAssign() {
-  return <AdminDetailShell title="Assign mentor" backTo="/admin/mentors" />;
+  const { id } = useParams();
+  if (!id) return <Navigate to="/admin/mentors" replace />;
+  return <Navigate to={`/admin/mentors?mentor=${id}&tab=matching`} replace />;
 }

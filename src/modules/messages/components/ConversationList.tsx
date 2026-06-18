@@ -3,7 +3,7 @@ import { ErrorState } from '../../../design-system';
 import { Button } from '../../../modules/shared';
 import { MessagesEmptyState } from './MessagesEmptyState';
 import { MessagesSkeleton } from './MessagesSkeleton';
-import { formatMessageTime, truncatePreview } from '../lib/messageUtils';
+import { formatMessageTime, truncatePreview, dedupeById } from '../lib/messageUtils';
 import type { AsyncState, Conversation } from '../types/messages.types';
 
 // ============================================================================
@@ -481,7 +481,7 @@ export function ConversationList({
   }, []);
 
   const enriched = useMemo<EnrichedConversation[]>(() => {
-    const list = state.data ?? [];
+    const list = dedupeById(state.data ?? []);
     return list.map((c) => enrich(c, pinned, muted, archived, followed));
   }, [state.data, pinned, muted, archived, followed]);
 
@@ -497,30 +497,42 @@ export function ConversationList({
     else if (activeFilter === 'archived') list = list.filter((c) => c.isArchived);
 
     if (query.trim()) {
-      const q = query.trim().toLowerCase();
+    const q = query.trim().toLowerCase();
       list = list.filter(
-        (c) =>
-          c.title.toLowerCase().includes(q) ||
+      (c) =>
+        c.title.toLowerCase().includes(q) ||
           c.lastMessage?.content.toLowerCase().includes(q) ||
           c.members.some((m) => m.name.toLowerCase().includes(q))
       );
     }
 
-    return list.sort((a, b) => {
-      if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-      return b.activityScore - a.activityScore;
-    });
+    return dedupeById(
+      list.sort((a, b) => {
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        return b.activityScore - a.activityScore;
+      })
+    );
   }, [enriched, activeFilter, query]);
+
+  const pinnedConversations = useMemo(
+    () => filtered.filter((c) => c.isPinned),
+    [filtered]
+  );
 
   const grouped = useMemo(() => {
     const map = new Map<InnovationCategory, EnrichedConversation[]>();
-    for (const conv of filtered) {
+    const listForGroups =
+      activeFilter === 'all' ? filtered.filter((c) => !c.isPinned) : filtered;
+    for (const conv of listForGroups) {
       const arr = map.get(conv.category) ?? [];
       arr.push(conv);
       map.set(conv.category, arr);
     }
+    for (const [category, convs] of map) {
+      map.set(category, dedupeById(convs));
+    }
     return map;
-  }, [filtered]);
+  }, [filtered, activeFilter]);
 
   const stats = useMemo(() => {
     const total = enriched.length;
@@ -563,7 +575,7 @@ export function ConversationList({
             >
               🔍
             </button>
-            <Button onClick={onNewMessage}>+ New</Button>
+        <Button onClick={onNewMessage}>+ New</Button>
           </div>
         </div>
 
@@ -666,17 +678,15 @@ export function ConversationList({
         )}
 
         {/* PINNED SECTION */}
-        {activeFilter === 'all' && pinned.size > 0 && (
+        {activeFilter === 'all' && pinnedConversations.length > 0 && (
           <div className="cnl-group">
             <div className="cnl-group__header cnl-group__header--static">
               <span className="cnl-group__icon">📌</span>
               <span className="cnl-group__label">Pinned</span>
-              <span className="cnl-group__count">{pinned.size}</span>
+              <span className="cnl-group__count">{pinnedConversations.length}</span>
             </div>
             <div className="cnl-group__body">
-              {filtered
-                .filter((c) => c.isPinned)
-                .map((conv) => (
+              {pinnedConversations.map((conv) => (
                   <ConversationCard
                     key={conv.id}
                     conv={conv}
@@ -709,8 +719,9 @@ export function ConversationList({
           </div>
         )}
 
-        {/* CATEGORY GROUPS */}
-        {categoriesWithConvs.map((cat) => {
+        {/* CATEGORY GROUPS — only in "all" view; filtered views use flat list */}
+        {activeFilter === 'all' &&
+          categoriesWithConvs.map((cat) => {
           const convs = grouped.get(cat.id) ?? [];
           return (
             <CategoryGroup
@@ -732,18 +743,18 @@ export function ConversationList({
         {/* FLAT LIST when filtered */}
         {activeFilter !== 'all' && (
           <div className="cnl-flat-list">
-            {filtered.map((conv) => (
+        {filtered.map((conv) => (
               <ConversationCard
-                key={conv.id}
+            key={conv.id}
                 conv={conv}
-                active={conv.id === activeId}
-                onSelect={onSelect}
+            active={conv.id === activeId}
+            onSelect={onSelect}
                 onPin={togglePin}
                 onMute={toggleMute}
                 onArchive={toggleArchive}
                 onFollow={toggleFollow}
-              />
-            ))}
+          />
+        ))}
           </div>
         )}
       </div>

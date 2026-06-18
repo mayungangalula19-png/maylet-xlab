@@ -470,3 +470,43 @@
     padding: 1.25rem;
   }
 }
+
+.careers-section__head--spaced {
+  margin-top: 3rem;
+}
+
+.careers-card--published {
+  border-color: rgba(47, 212, 255, 0.35);
+}
+
+.careers-card__meta {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 0.35rem;
+}
+
+.careers-loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.careers-card--skeleton {
+  min-height: 220px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: careers-shimmer 1.2s infinite;
+  pointer-events: none;
+}
+
+@keyframes careers-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { normalizeValidationEvidence } from '../services/validationService';
 import type { ValidationEvidenceSummary } from '../types/validation.types';
 
 interface Props {
@@ -6,7 +7,11 @@ interface Props {
 }
 
 export function ValidationEvidencePanel({ evidence }: Props) {
-  const { research, prototypes, experiments, projectId } = evidence;
+  const { research, prototypes, experiments, projectId } = normalizeValidationEvidence(
+    evidence,
+    evidence.projectId,
+    evidence.projectName
+  );
 
   return (
     <section className="val-panel">

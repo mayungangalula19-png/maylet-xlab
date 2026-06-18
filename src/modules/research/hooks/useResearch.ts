@@ -7,6 +7,16 @@ import type {
   ResearchProjectSummary,
 } from '../types/research.types';
 
+function formatSaveError(e: unknown): string {
+  if (e && typeof e === 'object') {
+    const err = e as { message?: string; code?: string; details?: string; hint?: string };
+    const parts = [err.message, err.details, err.hint].filter(Boolean);
+    if (parts.length > 0) return parts.join(' — ');
+  }
+  if (e instanceof Error) return e.message;
+  return 'Save failed — check database connection and migrations';
+}
+
 export function useResearch(userId: string | undefined, projectId?: string) {
   const [dashboard, setDashboard] = useState<{
     stats: ResearchDashboardStats;
@@ -67,7 +77,7 @@ export function useResearch(userId: string | undefined, projectId?: string) {
       await refresh();
       return result;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Operation failed');
+      setError(formatSaveError(e));
       return undefined;
     } finally {
       setSaving(false);

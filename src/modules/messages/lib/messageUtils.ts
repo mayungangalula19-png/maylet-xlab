@@ -1,5 +1,17 @@
 import type { MessageStatus } from '../types/messages.types';
 
+export function dedupeById<T extends { id: string }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const item of items) {
+    const id = String(item.id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(item);
+  }
+  return out;
+}
+
 export function formatMessageTime(iso: string): string {
   const d = new Date(iso);
   const now = new Date();

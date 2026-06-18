@@ -23,6 +23,7 @@ export interface CareerApplicationInput {
   skills: string;
   portfolio: string;
   userId?: string | null;
+  careerId?: string | null;
   mayaMatchSnapshot?: MayaMatchSnapshot | null;
   resumeFile?: File | null;
   applicationId?: string;
@@ -37,6 +38,7 @@ export interface MayaMatchSnapshot {
 export interface CareerApplicationRow {
   id: string;
   user_id: string | null;
+  career_id: string | null;
   full_name: string;
   email: string;
   role_interest: string;
@@ -50,6 +52,39 @@ export interface CareerApplicationRow {
   created_at: string;
   updated_at: string;
 }
+
+export interface PublishedCareerOpportunity {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  type: string;
+  department: string;
+  location: string;
+  is_remote: boolean;
+  application_deadline: string | null;
+  published_at: string | null;
+}
+
+export const PUBLISHED_CAREER_TYPE_LABELS: Record<string, string> = {
+  job: 'Job',
+  internship: 'Internship',
+  fellowship: 'Fellowship',
+  research_opportunity: 'Research Opportunity',
+  hackathon: 'Hackathon',
+  innovation_challenge: 'Innovation Challenge',
+  mentorship_program: 'Mentorship Program',
+};
+
+export const PUBLISHED_CAREER_TYPE_ICONS: Record<string, string> = {
+  job: '💼',
+  internship: '🎓',
+  fellowship: '🌱',
+  research_opportunity: '🔬',
+  hackathon: '⚡',
+  innovation_challenge: '💡',
+  mentorship_program: '🤝',
+};
 
 const ROLE_KEYWORDS: Record<string, string[]> = {
   'AI Engineers (MAYA)': ['ai', 'llm', 'prompt', 'maya', 'openai', 'machine learning', 'nlp'],
@@ -144,8 +179,8 @@ export function formatCareerSubmitError(message: string): string {
     return 'Database table missing. Open Supabase → SQL Editor, run scripts/create-career-applications-table.sql, then try again.';
   }
 
-  if (lower.includes('resume_path') || lower.includes('resume_file_name')) {
-    return 'Database needs an update. Run scripts/create-career-applications-table.sql in Supabase SQL Editor (it adds resume columns), then try again.';
+  if (lower.includes('resume_path') || lower.includes('resume_file_name') || lower.includes('career_id')) {
+    return 'Database needs an update. Run scripts/create-career-opportunities-table.sql in Supabase SQL Editor, then try again.';
   }
 
   if (lower.includes('bucket') && lower.includes('career-resumes')) {
@@ -196,6 +231,7 @@ export async function submitCareerApplication(
   const payload = {
     id: applicationId,
     user_id: userId,
+    career_id: input.careerId ?? null,
     full_name: input.fullName.trim(),
     email: input.email.trim().toLowerCase(),
     role_interest: input.roleInterest.trim(),
@@ -329,4 +365,31 @@ export async function getCareerResumeSignedUrl(
 
   if (error) return { url: null, error: error.message };
   return { url: data.signedUrl, error: null };
+}
+
+/** Published opportunities from admin Career Management (public RLS). */
+export async function listPublishedCareerOpportunities(): Promise<{
+  data: PublishedCareerOpportunity[];
+  error: string | null;
+}> {
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('career_opportunities')
+    .select(
+      'id, title, slug, description, type, department, location, is_remote, application_deadline, published_at'
+    )
+    .eq('status', 'published')
+    .order('published_at', { ascending: false });
+
+  if (error) {
+    return { data: [], error: error.message };
+  }
+
+  const rows = (data ?? []) as PublishedCareerOpportunity[];
+  const open = rows.filter(
+    (row) => !row.application_deadline || row.application_deadline >= now
+  );
+
+  return { data: open, error: null };
 }

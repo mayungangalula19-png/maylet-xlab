@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../../../modules/shared/components/common/BrandLogo';
 import { useLoginAuth } from '../hooks/useLoginAuth';
 
@@ -8,6 +8,9 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormProps) => {
+  const location = useLocation();
+  const successMessage = (location.state as { message?: string } | null)?.message;
+
   const {
     email,
     setEmail,
@@ -22,6 +25,9 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
     handleEmailLogin,
     handleSocialLogin,
     handleForgotPassword,
+    handleResendConfirmation,
+    needsEmailConfirmation,
+    resendMessage,
   } = useLoginAuth({ onSuccess, redirectTo });
 
   return (
@@ -33,7 +39,19 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
         <h2 className="form-title">Welcome back</h2>
         <p className="form-subtitle">Sign in to your Maylet XLab account</p>
 
+        {successMessage ? <div className="success-message">{successMessage}</div> : null}
         {error && <div className="error-message">{error}</div>}
+        {resendMessage ? <div className="success-message">{resendMessage}</div> : null}
+        {needsEmailConfirmation ? (
+          <button
+            type="button"
+            className="resend-verification-btn"
+            onClick={handleResendConfirmation}
+            disabled={loading}
+          >
+            Resend verification email
+          </button>
+        ) : null}
 
         <div className="input-group">
           <label htmlFor="email">Email address</label>
@@ -191,6 +209,33 @@ export const LoginForm = ({ onSuccess, redirectTo = '/dashboard' }: LoginFormPro
           margin-bottom: 1rem;
           color: #ff8888;
           font-size: 0.875rem;
+        }
+        .success-message {
+          background: rgba(72,187,120,0.1);
+          border-left: 3px solid #48bb78;
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+          margin-bottom: 1rem;
+          color: #9ae6b4;
+          font-size: 0.875rem;
+        }
+        .resend-verification-btn {
+          width: 100%;
+          margin-bottom: 1rem;
+          padding: 0.75rem 1rem;
+          border-radius: 0.5rem;
+          border: 1px solid rgba(124, 95, 230, 0.45);
+          background: rgba(124, 95, 230, 0.12);
+          color: #c4b5fd;
+          font-size: 0.875rem;
+          cursor: pointer;
+        }
+        .resend-verification-btn:hover:not(:disabled) {
+          background: rgba(124, 95, 230, 0.2);
+        }
+        .resend-verification-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
         .input-group {
           margin-bottom: 1rem;

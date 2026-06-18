@@ -4,7 +4,23 @@ export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read';
 
 export type MessageContentType = 'text' | 'image' | 'file' | 'system';
 
+export type ComposerPriority = 'normal' | 'high' | 'critical';
+
 export type PresenceStatus = 'online' | 'offline' | 'away';
+
+export interface MessageMetadata {
+  priority?: ComposerPriority;
+  composerType?: string;
+  mentionedIds?: string[];
+  conversationType?: string;
+  workspaceId?: string | null;
+  attachmentMeta?: Array<{
+    name: string;
+    size: number;
+    mimeType: string;
+  }>;
+  [key: string]: unknown;
+}
 
 export interface AsyncState<T> {
   loading: boolean;
@@ -48,6 +64,7 @@ export interface Message {
   type: MessageContentType;
   createdAt: string;
   clientId?: string;
+  metadata?: MessageMetadata;
 }
 
 export interface SendMessagePayload {
@@ -55,6 +72,12 @@ export interface SendMessagePayload {
   senderId: string;
   content: string;
   clientId?: string;
+  messageType?: string;
+  priority?: ComposerPriority;
+  mentionedIds?: string[];
+  workspaceId?: string | null;
+  conversationType?: string;
+  attachmentMeta?: MessageMetadata['attachmentMeta'];
 }
 
 export interface CreateDmPayload {
@@ -76,4 +99,11 @@ export interface AiAssistantPayload {
 export interface MessagesPageData {
   conversations: Conversation[];
   currentUser: MessageUser;
+}
+
+export class MessagingSchemaError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MessagingSchemaError';
+  }
 }

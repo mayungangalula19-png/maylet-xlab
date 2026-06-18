@@ -11,30 +11,29 @@ import {
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
 const SECTORS = [
-  'Agriculture',
-  'Health',
-  'Education',
-  'FinTech',
-  'Environment',
-  'Blockchain',
-  'AI/ML',
-  'IoT',
-  'E-commerce',
-  'Logistics',
-  'Tourism',
-  'Cybersecurity',
-  'Gaming',
-  'Other',
+  { value: 'Agriculture', color: '#7c5fe6' },
+  { value: 'Health', color: '#2fd4ff' },
+  { value: 'Education', color: '#48bb78' },
+  { value: 'FinTech', color: '#f6c90e' },
+  { value: 'Environment', color: '#68d391' },
+  { value: 'Blockchain', color: '#b794f4' },
+  { value: 'AI/ML', color: '#4fd1c5' },
+  { value: 'IoT', color: '#9ae6b4' },
+  { value: 'E-commerce', color: '#f6ad55' },
+  { value: 'Logistics', color: '#fbd38d' },
+  { value: 'Tourism', color: '#fc8181' },
+  { value: 'Cybersecurity', color: '#b794f4' },
+  { value: 'Gaming', color: '#f6ad55' },
+  { value: 'Other', color: '#a0aec0' },
 ] as const;
 
 const FLOW_STEPS = [
   'Idea',
-  'Research',
-  'Prototype',
+  'Analysis',
   'Experiment',
-  'Validation',
+  'Prototype',
   'Funding',
-  'Commercialization',
+  'Launched',
 ] as const;
 
 const EMPTY_FORM = {
@@ -253,14 +252,31 @@ export default function CreateProject() {
         <h1>Start innovation project</h1>
         <p>Define your idea and enter the Maylet XLab pipeline.</p>
         <nav className="cpj-flow" aria-label="Innovation pipeline">
-          {FLOW_STEPS.map((step) => (
-            <span
-              key={step}
-              className={`cpj-flow__step ${step === 'Idea' ? 'cpj-flow__step--active' : ''}`}
-            >
-              {step}
-            </span>
-          ))}
+          {FLOW_STEPS.map((step, index) => {
+            const stepIndex = FLOW_STEPS.indexOf(step);
+            const currentIndex = FLOW_STEPS.indexOf(form.initial_stage);
+            const isActive = step === form.initial_stage;
+            const isPast = currentIndex > stepIndex;
+            const isFuture = currentIndex < stepIndex;
+            return (
+              <button
+                key={step}
+                type="button"
+                className={`cpj-flow__step ${
+                  isActive ? 'cpj-flow__step--active' : ''
+                } ${isPast ? 'cpj-flow__step--past' : ''} ${
+                  isFuture ? 'cpj-flow__step--future' : ''
+                }`}
+                onClick={() => patch({ initial_stage: step as PipelineStage })}
+                disabled={isFuture}
+                title={isFuture ? 'Cannot skip to future stage' : 'Click to set stage'}
+              >
+                <span className="cpj-flow__num">{index + 1}</span>
+                <span className="cpj-flow__label">{step}</span>
+                {isPast && <span className="cpj-flow__check">✓</span>}
+              </button>
+            );
+          })}
         </nav>
       </header>
 
@@ -293,32 +309,34 @@ export default function CreateProject() {
 
         <section className="cpj-section">
           <h2>Project identity</h2>
-          <label className="cpj-field">
-            <span>Project name *</span>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => patch({ name: e.target.value })}
-              placeholder="e.g. MediScan AI"
-              maxLength={120}
-              required
-            />
-          </label>
-          <label className="cpj-field">
-            <span>Tagline</span>
-            <input
-              type="text"
-              value={form.tagline}
-              onChange={(e) => patch({ tagline: e.target.value })}
-              placeholder="One-line pitch for your innovation"
-            />
-          </label>
+          <div className="cpj-grid">
+            <label className="cpj-field">
+              <span>Project name *</span>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => patch({ name: e.target.value })}
+                placeholder="e.g. MediScan AI"
+                maxLength={120}
+                required
+              />
+            </label>
+            <label className="cpj-field">
+              <span>Tagline</span>
+              <input
+                type="text"
+                value={form.tagline}
+                onChange={(e) => patch({ tagline: e.target.value })}
+                placeholder="One-line pitch for your innovation"
+              />
+            </label>
+          </div>
           <label className="cpj-field">
             <span>Sector</span>
             <select value={form.sector} onChange={(e) => patch({ sector: e.target.value })}>
-              {SECTORS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              {SECTORS.map(({ value, color }) => (
+                <option key={value} value={value} style={{ backgroundColor: color + '30', color: '#fff' }}>
+                  ● {value}
                 </option>
               ))}
             </select>
@@ -327,24 +345,26 @@ export default function CreateProject() {
 
         <section className="cpj-section">
           <h2>Problem & vision</h2>
-          <label className="cpj-field">
-            <span>Problem statement</span>
-            <textarea
-              rows={3}
-              value={form.problem_statement}
-              onChange={(e) => patch({ problem_statement: e.target.value })}
-              placeholder="What pain point are you solving?"
-            />
-          </label>
-          <label className="cpj-field">
-            <span>Solution / vision</span>
-            <textarea
-              rows={4}
-              value={form.vision}
-              onChange={(e) => patch({ vision: e.target.value })}
-              placeholder="How will your innovation solve the problem?"
-            />
-          </label>
+          <div className="cpj-grid">
+            <label className="cpj-field">
+              <span>Problem statement</span>
+              <textarea
+                rows={3}
+                value={form.problem_statement}
+                onChange={(e) => patch({ problem_statement: e.target.value })}
+                placeholder="What pain point are you solving?"
+              />
+            </label>
+            <label className="cpj-field">
+              <span>Solution / vision</span>
+              <textarea
+                rows={4}
+                value={form.vision}
+                onChange={(e) => patch({ vision: e.target.value })}
+                placeholder="How will your innovation solve the problem?"
+              />
+            </label>
+          </div>
           <label className="cpj-field">
             <span>Target users</span>
             <textarea
@@ -358,28 +378,30 @@ export default function CreateProject() {
 
         <section className="cpj-section">
           <h2>Innovation goals</h2>
-          <label className="cpj-field">
-            <span>Goals & success metrics</span>
-            <textarea
-              rows={4}
-              value={form.innovation_goals}
-              onChange={(e) => patch({ innovation_goals: e.target.value })}
-              placeholder="What must be true in 90 days? (MVP, users, revenue, impact)"
-            />
-          </label>
-          <label className="cpj-field">
-            <span>Initial pipeline stage</span>
-            <select
-              value={form.initial_stage}
-              onChange={(e) => patch({ initial_stage: e.target.value as PipelineStage })}
-            >
-              {PIPELINE_STAGES.map((stage) => (
-                <option key={stage} value={stage}>
-                  {stage}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="cpj-grid">
+            <label className="cpj-field">
+              <span>Goals & success metrics</span>
+              <textarea
+                rows={4}
+                value={form.innovation_goals}
+                onChange={(e) => patch({ innovation_goals: e.target.value })}
+                placeholder="What must be true in 90 days? (MVP, users, revenue, impact)"
+              />
+            </label>
+            <label className="cpj-field">
+              <span>Initial pipeline stage</span>
+              <select
+                value={form.initial_stage}
+                onChange={(e) => patch({ initial_stage: e.target.value as PipelineStage })}
+              >
+                {PIPELINE_STAGES.map((stage) => (
+                  <option key={stage} value={stage}>
+                    {stage}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </section>
 
         <section className="cpj-section">
@@ -423,39 +445,76 @@ export default function CreateProject() {
           max-width: 900px;
           margin: 0 auto;
           padding: 1.5rem 2rem 3rem;
-          color: #e8e8f0;
+          color: #c4c4d0;
+          background: transparent;
         }
         .cpj-header { margin-bottom: 1.25rem; }
         .cpj-back { color: #9b7ff0; text-decoration: none; font-size: 0.88rem; }
         .cpj-header h1 {
           margin: 0.5rem 0 0.25rem;
           font-size: 1.75rem;
-          background: linear-gradient(135deg, #fff, #2fd4ff);
+          background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
         }
         .cpj-header p { margin: 0; opacity: 0.65; font-size: 0.92rem; }
+
+        /* Pipeline Stepper */
         .cpj-flow {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.4rem;
+          gap: 0.2rem;
           margin-top: 1rem;
+          align-items: center;
         }
         .cpj-flow__step {
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
           padding: 0.3rem 0.7rem;
-          border-radius: 18px;
-          font-size: 0.65rem;
-          font-weight: 600;
+          border-radius: 20px;
+          font-size: 0.7rem;
+          font-weight: 500;
           border: 1px solid rgba(255,255,255,0.1);
-          opacity: 0.5;
+          background: rgba(255,255,255,0.03);
+          color: rgba(200,200,210,0.6);
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: inherit;
+        }
+        .cpj-flow__step:hover:not(:disabled) {
+          background: rgba(124,95,230,0.15);
+        }
+        .cpj-flow__step:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+          filter: grayscale(0.8);
         }
         .cpj-flow__step--active {
-          opacity: 1;
-          border-color: rgba(47,212,255,0.5);
-          background: rgba(47,212,255,0.12);
+          border-color: #2fd4ff;
+          background: rgba(47,212,255,0.15);
           color: #2fd4ff;
         }
+        .cpj-flow__step--past {
+          border-color: rgba(72,187,120,0.3);
+          color: #68d391;
+        }
+        .cpj-flow__step--past .cpj-flow__check {
+          color: #68d391;
+          margin-left: 0.1rem;
+        }
+        .cpj-flow__num {
+          font-weight: 700;
+          font-size: 0.65rem;
+          background: rgba(255,255,255,0.06);
+          padding: 0 0.35rem;
+          border-radius: 10px;
+        }
+        .cpj-flow__label {
+          white-space: nowrap;
+        }
+
         .cpj-error {
           background: rgba(252,129,129,0.15);
           border: 1px solid rgba(252,129,129,0.4);
@@ -478,7 +537,7 @@ export default function CreateProject() {
           padding: 1.25rem;
           font-size: 0.85rem;
         }
-        .cpj-maya strong { color: #9b7ff0; display: block; margin-bottom: 0.75rem; }
+        .cpj-maya strong { color: #b794f4; display: block; margin-bottom: 0.75rem; }
         .cpj-maya__block { margin-bottom: 0.85rem; }
         .cpj-maya__block label {
           display: block;
@@ -523,23 +582,39 @@ export default function CreateProject() {
           font-size: 1rem;
           color: #2fd4ff;
         }
+        .cpj-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+        .cpj-grid .cpj-field {
+          margin-bottom: 0;
+        }
         .cpj-field {
           display: flex;
           flex-direction: column;
           gap: 0.35rem;
           margin-bottom: 0.85rem;
         }
-        .cpj-field span { font-size: 0.78rem; font-weight: 600; opacity: 0.85; }
+        .cpj-field span { font-size: 0.78rem; font-weight: 600; opacity: 0.85; color: #c4c4d0; }
         .cpj-field input,
         .cpj-field select,
         .cpj-field textarea {
-          background: rgba(0,0,0,0.45);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(0,0,0,0.5);
+          border: 1px solid rgba(255,255,255,0.1);
           border-radius: 10px;
           padding: 0.65rem 0.75rem;
-          color: #fff;
+          color: #e0e0e8;
           font-family: inherit;
           font-size: 0.88rem;
+        }
+        .cpj-field input::placeholder,
+        .cpj-field textarea::placeholder {
+          color: rgba(255,255,255,0.25);
+        }
+        .cpj-field select option {
+          background: #1a1a2e;
+          color: #e0e0e8;
         }
         .cpj-field input:focus,
         .cpj-field select:focus,
@@ -562,7 +637,7 @@ export default function CreateProject() {
           border: none;
           cursor: pointer;
         }
-        .cpj-btn--ghost { background: rgba(255,255,255,0.08); color: #fff; }
+        .cpj-btn--ghost { background: rgba(255,255,255,0.08); color: #c4c4d0; }
         .cpj-btn--primary {
           background: linear-gradient(135deg, #7c5fe6, #2fd4ff);
           color: #0a0d1a;
@@ -578,6 +653,20 @@ export default function CreateProject() {
           animation: cpj-spin 0.8s linear infinite;
         }
         @keyframes cpj-spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+          .cpj-grid {
+            grid-template-columns: 1fr;
+          }
+          .cpj-flow {
+            gap: 0.1rem;
+          }
+          .cpj-flow__step {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.5rem;
+          }
+        }
       `}</style>
     </div>
   );

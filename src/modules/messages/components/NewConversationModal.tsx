@@ -1,81 +1,26 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { MessageUser } from '../types/messages.types';
+import type {
+  AttachedAsset,
+  KnowledgeSettings,
+  WorkspaceCreationPayload,
+  WorkspaceParticipant,
+  WorkspacePriority,
+  WorkspaceType,
+  WorkspaceVisibility,
+} from '../types/workspaceCreation.types';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+export type {
+  AttachedAsset,
+  KnowledgeSettings,
+  WorkspaceCreationPayload,
+  WorkspaceParticipant,
+  WorkspaceType,
+  WorkspaceVisibility,
+} from '../types/workspaceCreation.types';
 
-export type WorkspaceType =
-  | 'direct'
-  | 'team'
-  | 'project'
-  | 'research'
-  | 'prototype'
-  | 'experiment'
-  | 'validation'
-  | 'funding'
-  | 'commercialization'
-  | 'enterprise'
-  | 'community'
-  | 'partnership';
-
-export type Priority = 'low' | 'medium' | 'high' | 'critical';
-export type Visibility = 'private' | 'team' | 'organization' | 'public';
-
-export interface AttachedAsset {
-  id: string;
-  type:
-    | 'project'
-    | 'research'
-    | 'prototype'
-    | 'experiment'
-    | 'validation'
-    | 'funding'
-    | 'document'
-    | 'post';
-  title: string;
-  subtitle?: string;
-  status?: string;
-}
-
-export interface WorkspaceParticipant extends MessageUser {
-  role:
-    | 'owner'
-    | 'admin'
-    | 'member'
-    | 'researcher'
-    | 'engineer'
-    | 'mentor'
-    | 'investor'
-    | 'reviewer'
-    | 'observer';
-}
-
-export interface KnowledgeSettings {
-  knowledgeCapture: boolean;
-  discussionSummaries: boolean;
-  decisionTracking: boolean;
-  actionTracking: boolean;
-  meetingRecords: boolean;
-  insightExtraction: boolean;
-}
-
-export interface WorkspaceCreationPayload {
-  workspaceType: WorkspaceType;
-  title: string;
-  purpose: string;
-  objectives: string;
-  expectedOutcomes: string;
-  successMetrics: string;
-  priority: Priority;
-  timeline: string;
-  attachedAssets: AttachedAsset[];
-  participants: WorkspaceParticipant[];
-  visibility: Visibility;
-  moderationEnabled: boolean;
-  approvalRequired: boolean;
-  knowledgeSettings: KnowledgeSettings;
-}
+export type Priority = WorkspacePriority;
+export type Visibility = WorkspaceVisibility;
 
 interface WorkspaceConfig {
   workspaceType: WorkspaceType | null;

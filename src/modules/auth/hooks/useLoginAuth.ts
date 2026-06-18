@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useFormState } from '../../../core/hooks/useAsyncState';
 import {
   authSessionService,
+  formatAuthError,
   getRememberedEmail,
+  isEmailNotConfirmedError,
   setRememberedEmail,
   type OAuthProvider,
 } from '../../../core/services/authSession.service';
+import { getCurrentUser, isAppAdminRole, resolveUserRole } from '../../../services/auth.service';
 
 interface UseLoginAuthOptions {
   redirectTo?: string;
@@ -20,23 +23,51 @@ export function useLoginAuth({ redirectTo = '/dashboard', onSuccess }: UseLoginA
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => Boolean(getRememberedEmail()));
+  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
-  const completeLogin = () => {
-    if (onSuccess) onSuccess();
-    else navigate(redirectTo);
+  const completeLogin = async () => {
+    if (onSuccess) {
+      onSuccess();
+      return;
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
+      navigate(redirectTo);
+      return;
+    }
+    const role = await resolveUserRole(user.id, user.user_metadata);
+    navigate(isAppAdminRole(role) ? '/admin' : redirectTo);
   };
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
+    setResendMessage(null);
+    setNeedsEmailConfirmation(false);
     form.start();
     try {
       await authSessionService.signInWithPassword(email, password);
       setRememberedEmail(rememberMe ? email.trim() : null);
       form.succeed();
-      completeLogin();
+      await completeLogin();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Invalid email or password. Please try again.';
-      form.fail(message);
+      setNeedsEmailConfirmation(isEmailNotConfirmedError(err));
+      form.fail(formatAuthError(err, 'Invalid email or password. Please try again.'));
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email.trim()) {
+      form.fail('Enter your email address first.');
+      return;
+    }
+    setResendMessage(null);
+    try {
+      await authSessionService.resendSignupConfirmation(email);
+      setResendMessage('Verification email sent. Check your inbox and spam folder.');
+    } catch (err) {
+      setResendMessage(formatAuthError(err, 'Could not resend verification email.'));
     }
   };
 
@@ -80,5 +111,8 @@ export function useLoginAuth({ redirectTo = '/dashboard', onSuccess }: UseLoginA
     handleEmailLogin,
     handleSocialLogin,
     handleForgotPassword,
+    handleResendConfirmation,
+    needsEmailConfirmation,
+    resendMessage,
   };
 }

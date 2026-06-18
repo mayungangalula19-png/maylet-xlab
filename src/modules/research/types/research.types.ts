@@ -93,6 +93,10 @@ export interface ResearchProjectSummary {
   name: string;
   sector: string;
   completionRate: number;
+  notesCount?: number;
+  findingsCount?: number;
+  literatureCount?: number;
+  documentsCount?: number;
 }
 
 export interface ResearchActivityPoint {
@@ -102,6 +106,7 @@ export interface ResearchActivityPoint {
 
 export type ResearchWorkspaceTab =
   | 'overview'
+  | 'forms'
   | 'notes'
   | 'problem'
   | 'findings'

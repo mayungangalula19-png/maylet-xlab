@@ -1,271 +1,185 @@
+/**
+ * Generate docs/route-inventory.csv from the canonical Router.tsx registry.
+ * Run: npm run audit:routes
+ */
 import fs from 'fs';
 import path from 'path';
 
-const rows = [];
-const cat = (f) => {
-  if (f.includes('admin/')) return 'Enterprise';
-  if (['Login', 'Register', 'ForgotPassword', 'ResetPassword', 'VerifyEmail'].some((x) => f.includes(x))) return 'Marketing';
-  if (['Privacy', 'Terms', 'Cookies'].some((x) => f.includes(x))) return 'Legal';
-  if (['Dashboard', 'Analytics', 'AIAnalyze', 'AIDashboard', 'Notifications', 'Messages', 'Profile', 'Settings', 'Security', 'Billing', 'MayaAssistantPage'].some((x) => f.endsWith(`${x}.tsx`))) return 'Dashboard';
-  if (['Project', 'SaveIdea', 'InnovationVault', 'Vault', 'InnovationTwin', 'InnovationDNA'].some((x) => f.includes(x))) return 'Projects';
-  if (f.includes('Research')) return 'Research';
-  if (f.includes('Prototype')) return 'Prototype';
-  if (f.includes('Experiment')) return 'Experiment';
-  if (f.includes('Validation')) return 'Validation';
-  if (['Funding', 'CreatePitch', 'Investor'].some((x) => f.includes(x))) return 'Funding';
-  if (['Commercialization', 'Marketplace', 'Market'].some((x) => f.includes(x))) return 'Commercialization';
-  if (f.includes('Documents')) return 'Documents';
-  if (['Community', 'Teams', 'Team', 'Mentorship', 'Learning', 'Hackathons', 'Support', 'CoFounder'].some((x) => f.includes(x))) return 'Ecosystem';
-  if (f.includes('Enterprise')) return 'Enterprise';
-  if (f.includes('Feedback')) return 'Feedback';
-  if (f.includes('Patent')) return 'Documents';
-  if (f.includes('marketing/') || f.includes('landing/components')) return 'Legacy';
+const ROUTER_PATH = 'src/app/Router.tsx';
+const SIDEBAR_PATH = 'src/modules/dashboard/components/AppSidebar.tsx';
+const ADMIN_NAV_PATH = 'src/modules/admin/config/adminNav.config.ts';
+const OUTPUT_CSV = 'docs/route-inventory.csv';
+
+const routerSource = fs.readFileSync(ROUTER_PATH, 'utf8');
+const sidebarSource = fs.existsSync(SIDEBAR_PATH) ? fs.readFileSync(SIDEBAR_PATH, 'utf8') : '';
+const adminNavSource = fs.existsSync(ADMIN_NAV_PATH) ? fs.readFileSync(ADMIN_NAV_PATH, 'utf8') : '';
+
+/** @type {Map<string, string>} */
+const componentImports = new Map();
+
+const lazyImportRe =
+  /const\s+(\w+)\s*=\s*lazy\(\(\)\s*=>\s*import\((['"])([^'"]+)\2\)(?:\.then\([^)]+\))?\)/g;
+
+for (const match of routerSource.matchAll(lazyImportRe)) {
+  const [, name, , importPath] = match;
+  componentImports.set(name, importPath.replace(/^\.\.\//, 'src/'));
+}
+
+const layoutImportRe =
+  /import\((['"])([^'"]+)\1\)\.then\(\(m\)\s*=>\s*\(\{\s*default:\s*m\.(\w+)\s*\}\)\)/g;
+for (const match of routerSource.matchAll(layoutImportRe)) {
+  const [, , importPath, exportName] = match;
+  componentImports.set(exportName, importPath.replace(/^\.\.\//, 'src/'));
+}
+
+const routeRe = /<Route\s+path="([^"]+)"\s+element=\{<(\w+)\s*\/>\}\s*\/>/g;
+/** @type {Array<{ path: string, component: string, modulePath: string, zone: string }>} */
+const routes = [];
+
+for (const match of routerSource.matchAll(routeRe)) {
+  const [, routePath, component] = match;
+  const modulePath = componentImports.get(component) ?? '(unknown)';
+  let zone = 'public';
+  if (routePath.startsWith('/admin')) zone = 'admin';
+  else if (routePath === '/' || routePath.startsWith('/login') || routePath.startsWith('/register')) {
+    zone = 'public';
+  } else if (
+    [
+      '/features',
+      '/pricing',
+      '/about',
+      '/blog',
+      '/faq',
+      '/contact',
+      '/privacy',
+      '/terms',
+      '/demo',
+      '/careers',
+      '/press',
+      '/cookies',
+      '/status',
+      '/community',
+      '/security',
+      '/help',
+      '/ecosystem',
+      '/resources',
+    ].some((p) => routePath === p || routePath.startsWith(`${p}/`))
+  ) {
+    zone = 'public';
+  } else if (routePath === '*') {
+    zone = 'catch-all';
+  } else {
+    zone = 'protected';
+  }
+
+  routes.push({ path: routePath, component, modulePath, zone });
+}
+
+function inAppSidebar(routePath) {
+  if (routePath === '/') return sidebarSource.includes("route: '/'");
+  const base = routePath.split('/:')[0];
+  return sidebarSource.includes(`route: '${base}'`) || sidebarSource.includes(`route: "${base}"`);
+}
+
+function inAdminNav(routePath) {
+  const base = routePath.split('/:')[0];
+  return adminNavSource.includes(`route: '${base}'`) || adminNavSource.includes(`route: "${base}"`);
+}
+
+function moduleCategory(modulePath) {
+  if (modulePath.includes('/admin/')) return 'Enterprise';
+  if (modulePath.includes('/auth/')) return 'Marketing';
+  if (modulePath.includes('/billing/')) return 'Dashboard';
+  if (modulePath.includes('/projects/')) return 'Projects';
+  if (modulePath.includes('/research/')) return 'Research';
+  if (modulePath.includes('/prototype/')) return 'Prototype';
+  if (modulePath.includes('/experiment/')) return 'Experiment';
+  if (modulePath.includes('/validation/')) return 'Validation';
+  if (modulePath.includes('/funding/')) return 'Funding';
+  if (modulePath.includes('/commercialization/')) return 'Commercialization';
+  if (modulePath.includes('/documents/')) return 'Documents';
+  if (modulePath.includes('/ecosystem/') || modulePath.includes('/teams/')) return 'Ecosystem';
+  if (modulePath.includes('/enterprise/') || modulePath.includes('/vault/')) return 'Enterprise';
+  if (modulePath.includes('/marketing/') || modulePath.includes('/careers/')) return 'Marketing';
+  if (modulePath.includes('/messages/') || modulePath.includes('/account/')) return 'Dashboard';
+  if (modulePath.includes('/maya/')) return 'Dashboard';
+  if (modulePath.includes('/tools/')) return 'Dashboard';
   return 'Marketing';
-};
+}
 
-const routeMap = {
-  'About.tsx': '/about',
-  'admin/AdminDashboard.tsx': '/admin',
-  'admin/ai-monitor/AdminAIMonitor.tsx': '/admin/ai-monitor',
-  'admin/ai-monitor/AdminAIPredictions.tsx': '/admin/ai-monitor/predictions',
-  'admin/analytics/AdminAnalytics.tsx': '/admin/analytics',
-  'admin/analytics/AdminExport.tsx': '/admin/analytics/export',
-  'admin/analytics/AdminReports.tsx': '(no route — duplicate shim)',
-  'admin/careers/AdminCareerDetail.tsx': '/admin/careers/:id',
-  'admin/careers/AdminCareers.tsx': '/admin/careers',
-  'admin/experiments/AdminExperimentDetail.tsx': '/admin/experiments/:id',
-  'admin/experiments/AdminExperiments.tsx': '/admin/experiments',
-  'admin/innovators/AdminInnovatorDetail.tsx': '/admin/innovators/:id',
-  'admin/innovators/AdminInnovators.tsx': '/admin/innovators',
-  'admin/investors/AdminInvestorDetail.tsx': '/admin/investors/:id',
-  'admin/investors/AdminInvestors.tsx': '/admin/investors',
-  'admin/investors/AdminInvestorVerify.tsx': '/admin/investors/:id/verify',
-  'admin/mentors/AdminMentorAssign.tsx': '/admin/mentors/:id/assign',
-  'admin/mentors/AdminMentorDetail.tsx': '/admin/mentors/:id',
-  'admin/mentors/AdminMentors.tsx': '/admin/mentors',
-  'admin/moderation/AdminAppeals.tsx': '/admin/moderation/appeals',
-  'admin/moderation/AdminFlags.tsx': '/admin/moderation/flags',
-  'admin/moderation/AdminModeration.tsx': '/admin/moderation',
-  'admin/notifications/AdminBroadcast.tsx': '/admin/notifications/broadcast',
-  'admin/notifications/AdminNotifications.tsx': '/admin/notifications',
-  'admin/payments/AdminPaymentDetail.tsx': '/admin/payments/:id',
-  'admin/payments/AdminPaymentRefund.tsx': '/admin/payments/:id/refund',
-  'admin/payments/AdminPayments.tsx': '/admin/payments',
-  'admin/projects/AdminProjectDelete.tsx': '/admin/projects/:id/delete',
-  'admin/projects/AdminProjectDetail.tsx': '/admin/projects/:id',
-  'admin/projects/AdminProjectReview.tsx': '/admin/projects/:id/review',
-  'admin/projects/AdminProjects.tsx': '/admin/projects',
-  'admin/prototypes/AdminPrototypeDetail.tsx': '/admin/prototypes/:id',
-  'admin/prototypes/AdminPrototypes.tsx': '/admin/prototypes',
-  'admin/reports/AdminReports.tsx': '/admin/reports',
-  'admin/settings/AdminAPIKeys.tsx': '/admin/api-keys',
-  'admin/settings/AdminRoles.tsx': '/admin/roles',
-  'admin/settings/AdminSettings.tsx': '/admin/settings',
-  'admin/subscriptions/AdminSubscriptionDetail.tsx': '/admin/subscriptions/:id',
-  'admin/subscriptions/AdminSubscriptions.tsx': '/admin/subscriptions',
-  'admin/system/AdminBackup.tsx': '/admin/backup',
-  'admin/system/AdminLogs.tsx': '/admin/logs',
-  'admin/system/AdminSecurity.tsx': '/admin/security',
-  'admin/system/AdminSystemMonitor.tsx': '/admin/system-monitor',
-  'admin/users/AdminUserCreate.tsx': '/admin/users/create',
-  'admin/users/AdminUserDetail.tsx': '/admin/users/:id',
-  'admin/users/AdminUserEdit.tsx': '/admin/users/:id/edit',
-  'admin/users/AdminUsers.tsx': '/admin/users',
-  'admin/vault/AdminVault.tsx': '/admin/vault',
-  'admin/vault/AdminVaultDetail.tsx': '/admin/vault/:id',
-  'AIAnalyze.tsx': '/ai-analyze',
-  'AIDashboard.tsx': '/ai-dashboard',
-  'Analytics.tsx': '/analytics',
-  'Billing.tsx': '/settings/billing',
-  'Blog.tsx': '/blog',
-  'BlogPost.tsx': '/blog/:slug',
-  'Careers.tsx': '/careers',
-  'co-founder/CoFounderWizard.tsx': '/co-founder',
-  'Commercialization.tsx': '/commercialization',
-  'Community.tsx': '/community',
-  'Contact.tsx': '/contact',
-  'Cookies.tsx': '/cookies',
-  'CreateExperiment.tsx': '/experiments/create',
-  'CreatePitch.tsx': '/funding/create',
-  'CreateProject.tsx': '/projects/create',
-  'CreateTeam.tsx': '/teams/create',
-  'CreateValidation.tsx': '/validation/new',
-  'Dashboard.tsx': '/dashboard',
-  'Demo.tsx': '/demo',
-  'dna/InnovationDNA.tsx': '/profile/dna',
-  'Documents.tsx': '/documents',
-  'Ecosystem.tsx': '/ecosystem',
-  'ecosystem/Academy.tsx': '/ecosystem/academy',
-  'ecosystem/Community.tsx': '/ecosystem/community',
-  'ecosystem/Incubator.tsx': '/ecosystem/incubator',
-  'EditProject.tsx': '/projects/:id/edit',
-  'Enterprise.tsx': '/enterprise',
-  'enterprise/EnterpriseVault.tsx': '/enterprise/vault',
-  'ExperimentDetail.tsx': '/experiments/:id',
-  'Experiments.tsx': '/experiments',
-  'FAQ.tsx': '/faq',
-  'FeatureDetail.tsx': '/features/:featureId',
-  'Features.tsx': '/features',
-  'Feedback.tsx': '/feedback',
-  'ForgotPassword.tsx': '/forgot-password',
-  'FundingDetail.tsx': '/funding/:id',
-  'FundingHub.tsx': '/funding',
-  'Hackathons.tsx': '/hackathons',
-  'Help.tsx': '/help',
-  'InnovationVault.tsx': '/vault',
-  'investor/InvestorConnect.tsx': '/investors',
-  'landing/LandingPage.tsx': '/ (duplicate shim)',
-  'LandingPage.tsx': '/',
-  'LearningHub.tsx': '/learning',
-  'LiteratureReview.tsx': '/research/:projectId/literature',
-  'Login.tsx': '/login',
-  'Market.tsx': '/market',
-  'marketing/AdvancedMarketingPage.tsx': '(component — no route)',
-  'marketing/MarketingStubPage.tsx': '(component — no route)',
-  'Marketplace.tsx': '/marketplace',
-  'marketplace/MarketplaceListing.tsx': '/marketplace/:id',
-  'MayaAssistantPage.tsx': '/ai-assistant',
-  'Mentorship.tsx': '/mentorship',
-  'Messages.tsx': '/messages',
-  'NewPrototype.tsx': '/prototypes/new',
-  'NotFound.tsx': '*',
-  'Notifications.tsx': '/notifications',
-  'patent/PatentAssistant.tsx': '/patent',
-  'predictive/InnovationTwin.tsx': '/projects/:id/twin',
-  'Press.tsx': '/press',
-  'Pricing.tsx': '/pricing',
-  'Privacy.tsx': '/privacy',
-  'Profile.tsx': '/profile',
-  'ProjectDetail.tsx': '/projects/:id',
-  'Projects.tsx': '/projects',
-  'PrototypeBuilder.tsx': '/prototypes/:id/build',
-  'PrototypePreview.tsx': '/prototypes/:id/preview',
-  'Prototypes.tsx': '/prototypes',
-  'PrototypeTesting.tsx': '/prototypes/:id/test',
-  'PrototypeWorkspace.tsx': '/prototypes/:id',
-  'Register.tsx': '/register',
-  'ResearchCenter.tsx': '/research',
-  'ResearchDocuments.tsx': '/research/:projectId/documents',
-  'ResearchPlaybook.tsx': '/research/:projectId/playbook',
-  'ResearchWorkspace.tsx': '/research/:projectId',
-  'ResetPassword.tsx': '/reset-password',
-  'Resources.tsx': '/resources',
-  'resources/CaseStudies.tsx': '/resources/case-studies',
-  'resources/Guide.tsx': '/resources/guide',
-  'resources/Newsletter.tsx': '/resources/newsletter',
-  'resources/Prompts.tsx': '/resources/prompts',
-  'resources/Videos.tsx': '/resources/videos',
-  'resources/Webinars.tsx': '/resources/webinars',
-  'SaveIdea.tsx': '/vault/save',
-  'Security.tsx': '/settings/security',
-  'SecurityOverview.tsx': '/security',
-  'Settings.tsx': '/settings',
-  'Support.tsx': '/support',
-  'SystemStatus.tsx': '/status',
-  'Teams.tsx': '/teams',
-  'TeamWorkspace.tsx': '/teams/:id',
-  'Terms.tsx': '/terms',
-  'UploadPrototype.tsx': '/prototypes/upload',
-  'Validation.tsx': '/validation',
-  'ValidationDetail.tsx': '/validation/:id',
-  'VaultDetail.tsx': '/vault/:id',
-  'VaultEntry.tsx': '/vault/entry/:id',
-  'VerifyEmail.tsx': '/verify-email',
-};
+function shimForModule(modulePath) {
+  if (!modulePath.startsWith('src/modules/')) return '(none)';
+  const rel = modulePath.replace(/^src\/modules\//, '');
+  const candidates = walkTsx('src/app/routes');
+  for (const shim of candidates) {
+    try {
+      const content = fs.readFileSync(shim, 'utf8');
+      if (content.includes(rel.split('/').pop()?.replace('.tsx', '') ?? '___')) {
+        if (content.includes(rel.replace(/\.tsx$/, '').split('/').slice(-2).join('/'))) {
+          return shim.replace(/\\/g, '/');
+        }
+      }
+    } catch {
+      // skip
+    }
+  }
+  return '(no shim — Router imports module directly)';
+}
 
-const landingComponents = [
-  'landing/components/AnimatedCounter.tsx',
-  'landing/components/LandingBlogResources.tsx',
-  'landing/components/LandingEcosystem.tsx',
-  'landing/components/LandingFeatures.tsx',
-  'landing/components/LandingFinalCta.tsx',
-  'landing/components/LandingFooter.tsx',
-  'landing/components/LandingHeader.tsx',
-  'landing/components/LandingHero.tsx',
-  'landing/components/LandingPricing.tsx',
-  'landing/components/LandingStats.tsx',
-  'landing/components/LandingTestimonials.tsx',
-  'landing/components/LandingWorkflow.tsx',
-  'landing/components/SectionHeading.tsx',
-];
-
-const sidebar = new Set([
-  '/',
-  '/dashboard',
-  '/projects',
-  '/experiments',
-  '/validation',
-  '/ai-assistant',
-  '/prototypes',
-  '/teams',
-  '/research',
-  '/vault',
-  '/funding',
-  '/commercialization',
-  '/mentorship',
-  '/enterprise',
-  '/hackathons',
-  '/learning',
-  '/analytics',
-  '/marketplace',
-  '/feedback',
-  '/help',
-  '/notifications',
-  '/messages',
-  '/settings',
-  '/profile',
-]);
+function walkTsx(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walkTsx(full));
+    else if (entry.name.endsWith('.tsx')) out.push(full);
+  }
+  return out;
+}
 
 const esc = (v) => `"${String(v).replace(/"/g, '""')}"`;
 
-for (const [file, route] of Object.entries(routeMap)) {
-  const content = fs.readFileSync(path.join('src/app/routes', file), 'utf8');
-  const m = content.match(/from ['"]([^'"]+)['"]/);
-  const target = m ? m[1] : '';
-  const inRouter = route.startsWith('(') ? 'No' : route === '*' ? 'Yes' : 'Yes';
-  const baseRoute = route.replace(/ \(duplicate shim\)/, '').split(' ')[0];
-  const inSidebar = sidebar.has(baseRoute) ? 'Yes' : baseRoute.includes(':') ? 'Sub-route' : 'No';
-  const status = route.includes('no route') || route.includes('component')
-    ? 'Component/duplicate shim'
-    : route.includes('duplicate')
-      ? 'Duplicate shim'
-      : 'Active shim';
-  const rec = status.includes('Component')
-    ? 'Safe to remove when confirmed zero imports'
-    : status.includes('Duplicate')
-      ? 'Consolidate to one path'
-      : 'Keep; edit canonical module';
-  rows.push([file, route, 'See route inventory report', cat(file), status, target, inRouter, inSidebar, rec]);
-}
-
-for (const file of landingComponents) {
-  const content = fs.readFileSync(path.join('src/app/routes', file), 'utf8');
-  const m = content.match(/from ['"]([^'"]+)['"]/);
-  rows.push([
-    file,
-    '(component — no route)',
-    'Landing section re-export',
-    'Marketing',
-    'Component shim',
-    m ? m[1] : '',
-    'No',
-    'No',
-    'Safe to remove when confirmed zero imports',
-  ]);
-}
-
 const header = [
-  'File',
   'Route',
-  'Purpose',
+  'Component',
+  'Zone',
   'Module Category',
-  'Status',
   'Canonical Module Path',
-  'In Router',
+  'Legacy Shim',
   'In AppSidebar',
-  'Recommendation',
+  'In AdminNav',
+  'Source',
 ];
-const csv = [header.map(esc).join(',')].concat(rows.map((r) => r.map(esc).join(','))).join('\n');
+
+const rows = routes.map((r) => [
+  r.path,
+  r.component,
+  r.zone,
+  moduleCategory(r.modulePath),
+  r.modulePath,
+  shimForModule(r.modulePath),
+  r.zone === 'protected' ? (inAppSidebar(r.path) ? 'Yes' : 'No') : 'N/A',
+  r.zone === 'admin' ? (inAdminNav(r.path) ? 'Yes' : 'No') : 'N/A',
+  'Router.tsx',
+]);
+
 fs.mkdirSync('docs', { recursive: true });
-fs.writeFileSync('docs/route-inventory.csv', csv);
-console.log(`Wrote ${rows.length} rows to docs/route-inventory.csv`);
+const csv = [header.map(esc).join(',')].concat(rows.map((r) => r.map(esc).join(','))).join('\n');
+fs.writeFileSync(OUTPUT_CSV, csv);
+
+const aliasGroups = new Map();
+for (const r of routes) {
+  const key = r.component;
+  if (!aliasGroups.has(key)) aliasGroups.set(key, []);
+  aliasGroups.get(key).push(r.path);
+}
+const duplicateAliases = [...aliasGroups.entries()].filter(([, paths]) => paths.length > 1);
+
+console.log(`Wrote ${rows.length} routes to ${OUTPUT_CSV}`);
+console.log(`Lazy imports resolved: ${componentImports.size}`);
+if (duplicateAliases.length) {
+  console.log('\nAlias routes (same component, multiple paths):');
+  for (const [component, paths] of duplicateAliases) {
+    console.log(`  ${component}: ${paths.join(', ')}`);
+  }
+}

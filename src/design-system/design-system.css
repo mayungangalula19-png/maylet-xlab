@@ -29,6 +29,19 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--mxl-space-md) var(--mxl-space-lg);
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .mxl-ds-page-container {
+    padding: var(--mxl-space-md);
+  }
+}
+
+@media (max-width: 640px) {
+  .mxl-ds-page-container {
+    padding: var(--mxl-space-sm) var(--mxl-space-md);
+  }
 }
 
 .mxl-ds-grid {

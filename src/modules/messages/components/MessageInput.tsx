@@ -931,12 +931,12 @@ function MessageInputBase({
         <textarea
           ref={textareaRef}
           className="mic-textarea"
-          value={value}
+        value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || sending || aiProcessing}
-          rows={2}
+        rows={2}
           aria-label="Compose message"
           aria-multiline="true"
           aria-describedby="mic-shortcuts"
@@ -1110,7 +1110,7 @@ function MessageInputBase({
                 ? <><span className="mic-spin">⟳</span> Sending</>
                 : <>Send ↑</>
               }
-            </button>
+      </button>
           </div>
         </div>
       </div>

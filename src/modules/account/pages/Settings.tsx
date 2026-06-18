@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
 import { signOut } from '../../../services/auth.service';
+import BillingDashboard from '../../billing/pages/BillingDashboard';
 
 interface UserProfile {
   id: string;
@@ -508,41 +508,10 @@ const Settings = () => {
           </div>
         )}
 
-        {/* Billing Tab */}
+        {/* Billing Tab — live enterprise dashboard */}
         {activeTab === 'billing' && (
-          <div className="settings-card">
-            <h2>Billing & Subscription</h2>
-            <div className="current-plan">
-              <h3>Current Plan: <span className="plan-name">Free</span></h3>
-              <p>You are on the Free plan. Upgrade to Pro for more features.</p>
-              <Link to="/pricing" className="btn-primary">Upgrade to Pro</Link>
-            </div>
-
-            <div className="payment-methods">
-              <h3>Payment Methods</h3>
-              <div className="payment-method">
-                <span className="payment-icon">💳</span>
-                <div>
-                  <strong>•••• 4242</strong>
-                  <span>Expires 12/2027</span>
-                </div>
-                <button className="btn-outline-small">Edit</button>
-              </div>
-              <button className="btn-outline">+ Add Payment Method</button>
-            </div>
-
-            <div className="billing-history">
-              <h3>Billing History</h3>
-              <table className="billing-table">
-                <thead>
-                  <tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>May 1, 2025</td><td>Pro Plan - Monthly</td><td>$15.00</td><td><span className="status-paid">Paid</span></td></tr>
-                  <tr><td>Apr 1, 2025</td><td>Pro Plan - Monthly</td><td>$15.00</td><td><span className="status-paid">Paid</span></td></tr>
-                </tbody>
-              </table>
-            </div>
+          <div className="settings-billing-embed">
+            <BillingDashboard />
           </div>
         )}
 
@@ -697,6 +666,13 @@ const Settings = () => {
         }
         .settings-content {
           flex: 1;
+        }
+        .settings-billing-embed {
+          margin: 0 -0.5rem;
+        }
+        .settings-billing-embed .billing-page {
+          max-width: none;
+          padding: 0;
         }
         .settings-card {
           background: rgba(255,255,255,0.03);

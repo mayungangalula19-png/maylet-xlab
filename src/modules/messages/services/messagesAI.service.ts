@@ -1,3 +1,4 @@
+import { invokeMayaChat } from '../../../lib/maya/mayaChat.service';
 import { supabase } from '../../../lib/supabase/client';
 import type { ConversationMemory } from '../types/aiMemory.types';
 import type { AiAssistantPayload, Message } from '../types/messages.types';
@@ -48,6 +49,29 @@ function buildInsights(memory: ConversationMemory, messages: Message[]): string[
   return insights;
 }
 
+async function summarizeWithBackend(messages: Message[], fallback: string): Promise<string> {
+  if (!messages.length) return fallback;
+
+  const transcript = messages
+    .slice(-14)
+    .map((m) => `${m.senderId}: ${m.content}`)
+    .join('\n');
+
+  try {
+    const summary = await invokeMayaChat([
+      {
+        role: 'system',
+        content:
+          'You are MAYA. Summarize this team message thread in 2-3 concise sentences. Focus on decisions, blockers, and next steps. Do not invent facts.',
+      },
+      { role: 'user', content: transcript },
+    ]);
+    return summary.trim() || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 type MemoryRow = {
   conversation_id: string;
   summary: string;
@@ -61,10 +85,12 @@ type MemoryRow = {
 };
 
 export const messagesAIService = {
-  analyze(conversationId: string, messages: Message[]): AiAssistantPayload {
+  async analyze(conversationId: string, messages: Message[]): Promise<AiAssistantPayload> {
     const memory = messagesAIMemoryService.extractMemory(conversationId, messages);
+    const summary = await summarizeWithBackend(messages, memory.summary);
+
     return {
-      summary: memory.summary,
+      summary,
       suggestedReplies: buildSuggestions(messages),
       actionItems: memory.actionItems.length
         ? memory.actionItems
@@ -80,26 +106,29 @@ export const messagesAIService = {
   async loadPersistedMemory(conversationId: string): Promise<ConversationMemory | null> {
     const { data, error } = await supabase
       .from('conversation_memory')
-      .select('conversation_id, summary, topics, decisions, action_items, risks, importance_score, payload, updated_at')
+      .select(
+        'conversation_id, summary, topics, decisions, action_items, risks, importance_score, payload, updated_at'
+      )
       .eq('conversation_id', conversationId)
       .maybeSingle();
     if (error || !data) return null;
     const row = data as MemoryRow;
-    return row.payload ?? {
-      conversationId: row.conversation_id,
-      summary: row.summary,
-      topics: row.topics ?? [],
-      decisions: row.decisions ?? [],
-      actionItems: row.action_items ?? [],
-      risks: row.risks ?? [],
-      importanceScore: row.importance_score ?? 0,
-      items: [],
-      updatedAt: row.updated_at,
-    };
+    return (
+      row.payload ?? {
+        conversationId: row.conversation_id,
+        summary: row.summary,
+        topics: row.topics ?? [],
+        decisions: row.decisions ?? [],
+        actionItems: row.action_items ?? [],
+        risks: row.risks ?? [],
+        importanceScore: row.importance_score ?? 0,
+        items: [],
+        updatedAt: row.updated_at,
+      }
+    );
   },
 
   async persistMemory(memory: ConversationMemory): Promise<void> {
-    if (memory.conversationId.startsWith('seed-')) return;
     await supabase.from('conversation_memory').upsert({
       conversation_id: memory.conversationId,
       summary: memory.summary,

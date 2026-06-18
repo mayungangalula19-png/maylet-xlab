@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase/client';
-import { dedupeAsync } from '../modules/shared/utils/queryCache';
+import { dedupeAsync, invalidateCache } from '../modules/shared/utils/queryCache';
 
 type EnsureProfileResult = {
   ok?: boolean;
@@ -8,7 +8,44 @@ type EnsureProfileResult = {
   error?: string;
 };
 
-/** Ensure a profiles row exists; returns role or null on failure. */
+/** Read the signed-in user's role from the database. */
+export async function fetchMyRole(): Promise<string | null> {
+  const { data, error } = await supabase.rpc('get_my_role');
+  if (error) {
+    console.warn('[auth.service] get_my_role:', error.message);
+    return null;
+  }
+  return typeof data === 'string' && data.length > 0 ? data : null;
+}
+
+export function isAppAdminRole(role: string | null | undefined): boolean {
+  return role === 'admin' || role === 'super_admin';
+}
+
+/** Resolve role via RPC, profile row, then ensure_profile fallback. */
+export async function resolveUserRole(
+  userId: string,
+  metadata?: Record<string, unknown>
+): Promise<string> {
+  const rpcRole = await fetchMyRole();
+  if (rpcRole) return rpcRole;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('[auth.service] profiles.role:', error.message);
+  }
+
+  if (data?.role) return String(data.role);
+
+  const ensured = await ensureProfileRole(userId, metadata);
+  return ensured ?? 'innovator';
+}
+
 export async function ensureProfileRole(
   userId: string,
   metadata?: Record<string, unknown>
@@ -67,6 +104,7 @@ export async function syncProfileOnLogin(
 }
 
 export async function signOut(redirectTo = '/') {
+  invalidateCache('profile-role:');
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
   if (typeof window !== 'undefined') {

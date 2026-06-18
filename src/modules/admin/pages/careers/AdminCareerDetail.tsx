@@ -77,8 +77,8 @@ export default function AdminCareerDetail() {
   if (!application) {
     return (
       <div style={{ padding: '2rem', color: '#e8e8f0' }}>
-        <Link to="/admin/careers" style={{ color: '#9b7ff0' }}>
-          ← Back to queue
+        <Link to="/admin/careers/applications" style={{ color: '#9b7ff0' }}>
+          ← Back to applications
         </Link>
         <p>Application not found.</p>
       </div>
@@ -89,8 +89,8 @@ export default function AdminCareerDetail() {
 
   return (
     <div style={{ padding: '2rem', color: '#e8e8f0', maxWidth: 900 }}>
-      <Link to="/admin/careers" style={{ color: '#9b7ff0', fontSize: '0.85rem' }}>
-        ← Back to queue
+      <Link to="/admin/careers/applications" style={{ color: '#9b7ff0', fontSize: '0.85rem' }}>
+        ← Back to applications
       </Link>
 
       <h1 style={{ marginTop: '1rem', marginBottom: '0.25rem' }}>{application.full_name}</h1>

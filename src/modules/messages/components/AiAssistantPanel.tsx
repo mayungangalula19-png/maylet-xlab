@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { Card, Loader } from '../../../design-system';
+import { invokeMayaChat } from '../../../lib/maya/mayaChat.service';
+import type { AiAssistantPayload } from '../types/messages.types';
 
 // ============================================================================
 // TYPES
@@ -21,6 +23,8 @@ interface AssistantContext {
 
 interface Props {
   context?: AssistantContext;
+  insights?: AiAssistantPayload | null;
+  insightsLoading?: boolean;
   onClose?: () => void;
 }
 
@@ -75,11 +79,11 @@ const SUGGESTED_QUESTIONS: Record<string, string[]> = {
 // MAIN COMPONENT
 // ============================================================================
 
-export function AiAssistantPanel({ context, onClose }: Props) {
+export function AiAssistantPanel({ context, insights, insightsLoading, onClose }: Props) {
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isOnline] = useState(true); // TODO: Connect to AI service status
+  const [isOnline, setIsOnline] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -116,8 +120,27 @@ export function AiAssistantPanel({ context, onClose }: Props) {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual AI service call
-      const response = await mockAiResponse(content, context);
+      const systemLines = [
+        'You are MAYA, the Maylet XLab collaboration assistant. Be concise and actionable.',
+        context?.pageContext ? `Current page: ${context.pageContext}` : '',
+        context?.conversationId ? `Conversation ID: ${context.conversationId}` : '',
+        insights?.summary ? `Thread summary: ${insights.summary}` : '',
+        insights?.actionItems?.length
+          ? `Action items: ${insights.actionItems.join('; ')}`
+          : '',
+        insights?.risks?.length ? `Risks: ${insights.risks.join('; ')}` : '',
+      ].filter(Boolean);
+
+      const history = messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const response = await invokeMayaChat([
+        { role: 'system', content: systemLines.join('\n') },
+        ...history,
+        { role: 'user', content: content.trim() },
+      ]);
 
       const assistantMessage: AiMessage = {
         id: `assistant-${Date.now()}`,
@@ -127,7 +150,9 @@ export function AiAssistantPanel({ context, onClose }: Props) {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      setIsOnline(true);
     } catch (error) {
+      setIsOnline(false);
       const errorMessage: AiMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
@@ -195,6 +220,17 @@ export function AiAssistantPanel({ context, onClose }: Props) {
           </button>
         )}
       </header>
+
+      {/* THREAD INSIGHTS (from messages AI service) */}
+      {insights && (insights.summary || insights.insights.length > 0) ? (
+        <div className="ai-assistant-insights" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #2d2d3f', fontSize: '0.8rem' }}>
+          {insightsLoading ? <Loader label="Analyzing thread…" /> : null}
+          {insights.summary ? <p style={{ margin: '0 0 0.5rem' }}><strong>Summary:</strong> {insights.summary}</p> : null}
+          {insights.insights.slice(0, 2).map((line, i) => (
+            <p key={i} style={{ margin: '0.25rem 0', opacity: 0.85 }}>• {line}</p>
+          ))}
+        </div>
+      ) : null}
 
       {/* QUICK ACTIONS */}
       {messages.length === 0 && (
@@ -649,39 +685,4 @@ export function AiAssistantPanel({ context, onClose }: Props) {
       `}</style>
     </Card>
   );
-}
-
-// ============================================================================
-// MOCK AI RESPONSE (Replace with actual AI service)
-// ============================================================================
-
-async function mockAiResponse(userMessage: string, _context?: AssistantContext): Promise<string> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Simple mock responses based on keywords
-  const msg = userMessage.toLowerCase();
-
-  if (msg.includes('explain') || msg.includes('how does')) {
-    return 'Maylet XLab is an innovation platform that helps you manage projects from idea to funding. You can create projects, run experiments, build prototypes, collaborate with teams, and connect with the ecosystem.';
-  }
-
-  if (msg.includes('summarize')) {
-    return 'I can help you summarize conversations, but I need access to the conversation history first. Please make sure I have the right context.';
-  }
-
-  if (msg.includes('ideas') || msg.includes('brainstorm')) {
-    return 'Here are some ideas based on our discussion:\n\n1. Create a structured experiment to test your hypothesis\n2. Document your findings in the Innovation Vault\n3. Connect with mentors in the ecosystem for feedback\n4. Consider building a prototype to validate your concept';
-  }
-
-  if (msg.includes('research')) {
-    return 'The Research Center is your hub for academic research. You can:\n\n• Document research notes\n• Track literature reviews\n• Manage research findings\n• Link research to projects\n\nWould you like help with a specific research task?';
-  }
-
-  if (msg.includes('project')) {
-    return 'To create a new project:\n\n1. Go to Projects → Create New\n2. Add a descriptive name and description\n3. Select your sector\n4. Track progress as you work\n\nProjects help you organize experiments, prototypes, and funding pitches in one place.';
-  }
-
-  // Default response
-  return `I'm here to help! I can assist with:\n\n• Answering questions about the platform\n• Explaining features and workflows\n• Helping you navigate the system\n• Generating ideas and suggestions\n• Summarizing discussions\n\nWhat would you like to know?`;
 }

@@ -17,10 +17,82 @@ import type {
 } from '../types/validation.types';
 import type { Project } from '../../../types/project.types';
 
+const EMPTY_RESEARCH: ValidationEvidenceSummary['research'] = {
+  findingsCount: 0,
+  notesCount: 0,
+  documentsCount: 0,
+  literatureCount: 0,
+  interviewNotesCount: 0,
+  completionPct: 0,
+};
+
+const EMPTY_PROTOTYPES: ValidationEvidenceSummary['prototypes'] = {
+  count: 0,
+  successCount: 0,
+  withBuildCount: 0,
+  avgTestPassRate: 0,
+};
+
+const EMPTY_EXPERIMENTS: ValidationEvidenceSummary['experiments'] = {
+  count: 0,
+  completedCount: 0,
+  withResultsCount: 0,
+  marketTypeCount: 0,
+  userTypeCount: 0,
+};
+
+/** Merge partial/stale JSONB evidence from DB into a complete summary. */
+export function normalizeValidationEvidence(
+  raw: unknown,
+  projectId: string,
+  projectName?: string
+): ValidationEvidenceSummary {
+  const e = (raw && typeof raw === 'object' ? raw : {}) as Partial<ValidationEvidenceSummary>;
+  const research =
+    e.research && typeof e.research === 'object'
+      ? e.research
+      : ({} as Partial<ValidationEvidenceSummary['research']>);
+  const prototypes =
+    e.prototypes && typeof e.prototypes === 'object'
+      ? e.prototypes
+      : ({} as Partial<ValidationEvidenceSummary['prototypes']>);
+  const experiments =
+    e.experiments && typeof e.experiments === 'object'
+      ? e.experiments
+      : ({} as Partial<ValidationEvidenceSummary['experiments']>);
+
+  return {
+    projectId: String(e.projectId ?? projectId),
+    projectName: String(e.projectName ?? projectName ?? 'Project'),
+    research: {
+      findingsCount: Number(research.findingsCount ?? EMPTY_RESEARCH.findingsCount),
+      notesCount: Number(research.notesCount ?? EMPTY_RESEARCH.notesCount),
+      documentsCount: Number(research.documentsCount ?? EMPTY_RESEARCH.documentsCount),
+      literatureCount: Number(research.literatureCount ?? EMPTY_RESEARCH.literatureCount),
+      interviewNotesCount: Number(research.interviewNotesCount ?? EMPTY_RESEARCH.interviewNotesCount),
+      completionPct: Number(research.completionPct ?? EMPTY_RESEARCH.completionPct),
+    },
+    prototypes: {
+      count: Number(prototypes.count ?? EMPTY_PROTOTYPES.count),
+      successCount: Number(prototypes.successCount ?? EMPTY_PROTOTYPES.successCount),
+      withBuildCount: Number(prototypes.withBuildCount ?? EMPTY_PROTOTYPES.withBuildCount),
+      avgTestPassRate: Number(prototypes.avgTestPassRate ?? EMPTY_PROTOTYPES.avgTestPassRate),
+    },
+    experiments: {
+      count: Number(experiments.count ?? EMPTY_EXPERIMENTS.count),
+      completedCount: Number(experiments.completedCount ?? EMPTY_EXPERIMENTS.completedCount),
+      withResultsCount: Number(experiments.withResultsCount ?? EMPTY_EXPERIMENTS.withResultsCount),
+      marketTypeCount: Number(experiments.marketTypeCount ?? EMPTY_EXPERIMENTS.marketTypeCount),
+      userTypeCount: Number(experiments.userTypeCount ?? EMPTY_EXPERIMENTS.userTypeCount),
+    },
+  };
+}
+
 function mapRow(row: Record<string, unknown>, projectName?: string): ValidationRecord {
+  const projectId = String(row.project_id);
   return {
     id: String(row.id),
-    project_id: String(row.project_id),
+    project_id: projectId,
     user_id: String(row.user_id),
     project_name: projectName,
     scores: {
@@ -31,13 +103,7 @@ function mapRow(row: Record<string, unknown>, projectName?: string): ValidationR
       overall: Number(row.overall_score ?? 0),
     },
     decision: String(row.decision) as ValidationDecision,
-    evidence: (row.evidence as ValidationEvidenceSummary) ?? {
-      projectId: String(row.project_id),
-      projectName: projectName ?? 'Project',
-      research: { findingsCount: 0, notesCount: 0, documentsCount: 0, literatureCount: 0, interviewNotesCount: 0, completionPct: 0 },
-      prototypes: { count: 0, successCount: 0, withBuildCount: 0, avgTestPassRate: 0 },
-      experiments: { count: 0, completedCount: 0, withResultsCount: 0, marketTypeCount: 0, userTypeCount: 0 },
-    },
+    evidence: normalizeValidationEvidence(row.evidence, projectId, projectName),
     maya_insights: (row.maya_insights as ValidationMayaInsight[]) ?? [],
     reviewer_notes: row.reviewer_notes ? String(row.reviewer_notes) : null,
     promoted_at: row.promoted_at ? String(row.promoted_at) : null,
@@ -259,6 +325,7 @@ export function computeDashboardStats(records: ValidationRecord[]): ValidationDa
 }
 
 export const validationService = {
+  normalizeValidationEvidence,
   gatherValidationEvidence,
   isProjectEligibleForValidation,
   listEligibleProjects,

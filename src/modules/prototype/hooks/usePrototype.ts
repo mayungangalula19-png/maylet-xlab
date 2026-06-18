@@ -10,8 +10,10 @@ import {
   type PrototypeDashboardStats,
   type PrototypeFile,
   type PrototypeRecord,
+  type PrototypeScreenshot,
   type PrototypeTestRun,
 } from '../types/prototype.types';
+import { screenshotService } from '../services/screenshotService';
 import { gateService } from '../../research/services/gateService';
 import { canAuthorizePrototype } from '../../research/ai/gateEngine';
 
@@ -24,6 +26,7 @@ export function usePrototype(userId: string | undefined, prototypeId?: string, p
   const [builds, setBuilds] = useState<PrototypeBuild[]>([]);
   const [tests, setTests] = useState<PrototypeTestRun[]>([]);
   const [prototypeFiles, setPrototypeFiles] = useState<PrototypeFile[]>([]);
+  const [screenshots, setScreenshots] = useState<PrototypeScreenshot[]>([]);
   const [aiEval, setAiEval] = useState<PrototypeAiEvaluation | null>(null);
   const [gateOk, setGateOk] = useState(false);
   const [gateScope, setGateScope] = useState<string | null>(null);
@@ -50,15 +53,17 @@ export function usePrototype(userId: string | undefined, prototypeId?: string, p
     if (!userId || !prototypeId) return;
     if (!options?.silent) setLoading(true);
     try {
-      const [p, b, t, f] = await Promise.all([
+      const [p, b, t, f, shots] = await Promise.all([
         prototypeService.getById(prototypeId, userId),
         buildService.list(prototypeId),
         testingService.list(prototypeId),
         prototypeService.listFiles(prototypeId),
+        screenshotService.list(prototypeId),
       ]);
       setBuilds(b);
       setTests(t);
       setPrototypeFiles(f);
+      setScreenshots(shots);
       if (p) {
         setPrototype({ ...p, prototypeFiles: f });
         const buildRate = b.length ? b.filter((x) => x.status === 'completed').length / b.length : 0;
@@ -131,6 +136,7 @@ export function usePrototype(userId: string | undefined, prototypeId?: string, p
     builds,
     tests,
     prototypeFiles,
+    screenshots,
     aiEval,
     gateOk,
     gateScope,

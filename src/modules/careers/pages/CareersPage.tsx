@@ -3,8 +3,12 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import {
   buildMayaMatchSnapshot,
+  listPublishedCareerOpportunities,
+  PUBLISHED_CAREER_TYPE_ICONS,
+  PUBLISHED_CAREER_TYPE_LABELS,
   submitCareerApplication,
   validateResumeFile,
+  type PublishedCareerOpportunity,
 } from '../services/careers.service';
 import './Careers.css';
 
@@ -136,6 +140,7 @@ interface ApplicationForm {
   skills: string;
   portfolio: string;
   role: string;
+  careerId: string | null;
 }
 
 const EMPTY_FORM: ApplicationForm = {
@@ -144,6 +149,7 @@ const EMPTY_FORM: ApplicationForm = {
   skills: '',
   portfolio: '',
   role: '',
+  careerId: null,
 };
 
 export default function Careers() {
@@ -153,6 +159,24 @@ export default function Careers() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [publishedCareers, setPublishedCareers] = useState<PublishedCareerOpportunity[]>([]);
+  const [careersLoading, setCareersLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setCareersLoading(true);
+      const result = await listPublishedCareerOpportunities();
+      if (!cancelled) {
+        setPublishedCareers(result.data);
+        setCareersLoading(false);
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (user?.email) {
@@ -168,13 +192,23 @@ export default function Careers() {
   const displaySkills = mayaSnapshot.skills.length > 0 ? mayaSnapshot.skills : ['TypeScript', 'React'];
   const topMatches = mayaSnapshot.matches.slice(0, 3);
 
+  const roleOptions = useMemo(() => {
+    const publishedTitles = publishedCareers.map((c) => c.title);
+    const legacy = ROLE_OPTIONS.filter((r) => !publishedTitles.includes(r));
+    return [...publishedTitles, ...legacy];
+  }, [publishedCareers]);
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const applyForRole = (roleTitle: string) => {
-    setForm((prev) => ({ ...prev, role: roleTitle }));
+  const applyForRole = (roleTitle: string, careerId: string | null = null) => {
+    setForm((prev) => ({ ...prev, role: roleTitle, careerId }));
     scrollTo('apply');
+  };
+
+  const applyForOpportunity = (career: PublishedCareerOpportunity) => {
+    applyForRole(career.title, career.id);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -200,6 +234,7 @@ export default function Careers() {
       skills: form.skills,
       portfolio: form.portfolio,
       userId: user?.id ?? null,
+      careerId: form.careerId,
       mayaMatchSnapshot: snapshot,
       resumeFile,
     });
@@ -247,6 +282,57 @@ export default function Careers() {
 
         <section className="careers-section" id="roles">
           <div className="careers-section__head">
+            <div className="careers-kicker">Open opportunities</div>
+            <h2>
+              Live <span>openings</span>
+            </h2>
+            <p>
+              {careersLoading
+                ? 'Loading published roles from the platform…'
+                : publishedCareers.length > 0
+                  ? 'Apply directly to roles published by the Maylet XLab team.'
+                  : 'No live openings right now — explore general tracks below or check back soon.'}
+            </p>
+          </div>
+
+          {careersLoading ? (
+            <div className="careers-loading-grid" aria-busy="true">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="careers-card careers-card--skeleton" />
+              ))}
+            </div>
+          ) : publishedCareers.length > 0 ? (
+            <div className="careers-grid">
+              {publishedCareers.map((career) => (
+                <article
+                  key={career.id}
+                  className="careers-card careers-card--clickable careers-card--published"
+                  onClick={() => applyForOpportunity(career)}
+                  onKeyDown={(e) => e.key === 'Enter' && applyForOpportunity(career)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="careers-card__icon">
+                    {PUBLISHED_CAREER_TYPE_ICONS[career.type] ?? '💼'}
+                  </div>
+                  <h3>{career.title}</h3>
+                  <p>{career.description || 'Join the Maylet XLab innovation ecosystem.'}</p>
+                  <span className="careers-card__tag">
+                    {PUBLISHED_CAREER_TYPE_LABELS[career.type] ?? career.type} · {career.department}
+                  </span>
+                  <span className="careers-card__meta">
+                    {career.is_remote ? 'Remote' : career.location}
+                    {career.application_deadline
+                      ? ` · Apply by ${new Date(career.application_deadline).toLocaleDateString()}`
+                      : ''}
+                  </span>
+                  <span className="careers-card__apply">Apply for this opening →</span>
+                </article>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="careers-section__head careers-section__head--spaced">
             <div className="careers-kicker">Open tracks</div>
             <h2>
               Core <span>roles</span>
@@ -445,17 +531,40 @@ export default function Careers() {
                 <select
                   id="careers-role"
                   value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    const match = publishedCareers.find((c) => c.title === title);
+                    setForm({ ...form, role: title, careerId: match?.id ?? null });
+                  }}
                   required
                   disabled={submitting}
                 >
                   <option value="">Select a role</option>
-                  {ROLE_OPTIONS.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
+                  {publishedCareers.length > 0 && (
+                    <optgroup label="Published openings">
+                      {publishedCareers.map((career) => (
+                        <option key={career.id} value={career.title}>
+                          {career.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  <optgroup label="General tracks">
+                    {roleOptions
+                      .filter((role) => !publishedCareers.some((c) => c.title === role))
+                      .map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                  </optgroup>
                 </select>
+                {form.careerId && (
+                  <p className="careers-form__note">
+                    Linked to a published opening — your application will appear in admin analytics for
+                    this role.
+                  </p>
+                )}
               </div>
               <div>
                 <label htmlFor="careers-skills">Skills</label>

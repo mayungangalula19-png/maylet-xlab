@@ -1,8 +1,8 @@
 {
   "summary": {
-    "total": 160,
-    "KEEP": 160,
-    "ARCHIVE": 0,
+    "total": 144,
+    "KEEP": 143,
+    "ARCHIVE": 1,
     "DELETE_CANDIDATE": 0
   },
   "results": [
@@ -13,11 +13,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\dashboard\\pages\\AIAnalyzePage.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\dashboard\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -27,11 +23,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\dashboard\\pages\\AIDashboardPage.tsx",
-        "src\\modules\\dashboard\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -41,15 +33,18 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\marketing\\pages\\About.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\pages\\Press.tsx, src\\modules\\marketing\\pages\\About.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\index.ts, src\\modules\\funding\\pages\\FundingDetailPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/about)"
+    },
+    {
+      "file": "AdminDashboard.tsx",
+      "bucket": "ARCHIVE",
+      "route": "(none)",
+      "inRouter": false,
+      "inNav": false,
+      "lifecycle": false,
+      "imports": [],
+      "reasons": "Legacy shim with zero imports; canonical module still active in Router"
     },
     {
       "file": "Analytics.tsx",
@@ -58,44 +53,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\dashboard\\pages\\AnalyticsPage.tsx",
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\app\\Router.tsx",
-        "src\\components\\charts\\AnalyticsCharts.tsx",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\lib\\experiment\\experimentOps.ts",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\dashboard\\index.ts",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\dashboard\\components\\charts\\AnalyticsCharts.tsx",
-        "src\\modules\\experiment\\components\\ExperimentCenter.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentsPage.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\admin\\pages\\analytics\\AdminAnalytics.tsx",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\settings\\AdminRoles.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminAPIKeys.tsx",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\admin\\pages\\reports\\AdminReports.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\projects\\components\\command-center.css",
-        "src\\modules\\projects\\components\\AnalyticsCenter.tsx",
-        "src\\modules\\research\\pages\\ResearchWorkspace.tsx",
-        "src\\modules\\projects\\components\\index.ts",
-        "src\\modules\\projects\\components\\InnovationPipelineFunnel.tsx",
-        "src\\modules\\projects\\components\\PipelineAnalytics.tsx",
-        "src\\modules\\projects\\components\\ResearchIntelligence.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -105,18 +63,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\account\\pages\\Settings.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\account\\index.ts",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\account\\pages\\Settings.tsx, src\\modules\\account\\pages\\Billing.tsx, src\\modules\\account\\index.ts, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\marketing\\pages\\Privacy.tsx, src\\modules\\marketing\\pages\\Pricing.tsx, src\\modules\\marketing\\pages\\Help.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/settings/billing)"
     },
     {
       "file": "Blog.tsx",
@@ -125,18 +73,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\Blog.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.types.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.css",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\pages\\BlogPost.tsx, src\\modules\\marketing\\pages\\Blog.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\landing.types.ts, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\landing\\landing.css, src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/blog)"
     },
     {
       "file": "BlogPost.tsx",
@@ -145,13 +83,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\Blog.tsx",
-        "src\\modules\\marketing\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\pages\\BlogPost.tsx, src\\modules\\marketing\\pages\\Blog.tsx, src\\modules\\marketing\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/blog/:slug)"
     },
     {
       "file": "Careers.tsx",
@@ -160,18 +93,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\admin\\pages\\careers\\AdminCareers.tsx",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\careers\\index.ts",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\components\\AdminSidebar.tsx, src\\modules\\admin\\pages\\careers\\AdminCareers.tsx, src\\modules\\careers\\pages\\CareersPage.tsx, src\\modules\\careers\\index.ts, src\\modules\\admin\\index.ts, src\\modules\\ecosystem\\pages\\EcosystemPage.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/careers)"
     },
     {
       "file": "Commercialization.tsx",
@@ -180,52 +103,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\lib\\innovation\\navigation.ts",
-        "src\\lib\\innovation\\lifecycle.ts",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\funding\\pages\\CreatePitchPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Videos.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Guide.tsx",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\shared\\hooks\\useProjectControlCenter.ts",
-        "src\\modules\\projects\\components\\AnalyticsCenter.tsx",
-        "src\\modules\\shared\\hooks\\useInnovationCommandCenter.ts",
-        "src\\modules\\projects\\services\\projectControlCenter.ts",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\commercialization\\types\\commercialization.types.ts",
-        "src\\modules\\commercialization\\services\\commercialization.service.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\commercialization\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\projects\\pages\\EditProjectPage.tsx",
-        "src\\modules\\projects\\pages\\CreateProjectPage.tsx",
-        "src\\modules\\commercialization\\components\\CommercializationReadiness.tsx",
-        "src\\modules\\projects\\components\\index.ts",
-        "src\\modules\\projects\\components\\DashboardPrioritiesPanel.tsx",
-        "src\\modules\\projects\\components\\command-center.css",
-        "src\\modules\\projects\\components\\CommercializationReadiness.tsx",
-        "src\\modules\\projects\\components\\InnovationProjectCard.tsx",
-        "src\\modules\\projects\\components\\MayaInnovationAdvisor.tsx",
-        "src\\modules\\projects\\components\\InnovationPipelineFunnel.tsx",
-        "src\\modules\\projects\\components\\MayaCommandCenter.tsx",
-        "src\\modules\\marketing\\pages\\Demo.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingWorkflow.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -235,18 +113,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -256,27 +123,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\pages\\VerifyEmail.tsx",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\marketing\\pages\\Terms.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\pages\\Contact.tsx",
-        "src\\modules\\marketing\\pages\\marketing\\MarketingStubPage.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\projects\\pages\\ProjectsPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\pages\\VerifyEmail.tsx, src\\modules\\dashboard\\pages\\DashboardPage.tsx, src\\modules\\admin\\pages\\settings\\AdminSettings.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\funding\\pages\\FundingDetailPage.tsx, src\\modules\\marketing\\pages\\Terms.tsx, src\\modules\\marketing\\pages\\SecurityOverview.tsx, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\marketing\\pages\\Cookies.tsx, src\\modules\\marketing\\pages\\Contact.tsx, src\\modules\\marketing\\pages\\marketing\\MarketingStubPage.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\Privacy.tsx, src\\modules\\marketing\\pages\\Pricing.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\projects\\pages\\ProjectsPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/contact)"
     },
     {
       "file": "Cookies.tsx",
@@ -285,13 +133,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Privacy.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\pages\\Cookies.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Privacy.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/cookies)"
     },
     {
       "file": "CreateExperiment.tsx",
@@ -300,11 +143,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\experiment\\pages\\CreateExperimentPage.tsx",
-        "src\\modules\\experiment\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -314,11 +153,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\funding\\pages\\CreatePitchPage.tsx",
-        "src\\modules\\funding\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -328,18 +163,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\lib\\supabase\\projects.queries.ts",
-        "src\\modules\\projects\\types\\commandCenter.types.ts",
-        "src\\modules\\projects\\pages\\ProjectsPage.tsx",
-        "src\\modules\\projects\\pages\\CreateProjectPage.tsx",
-        "src\\modules\\projects\\index.ts",
-        "src\\modules\\projects\\components\\MayaCommandCenter.tsx",
-        "src\\modules\\projects\\components\\MayaInnovationAdvisor.tsx",
-        "src\\modules\\projects\\components\\ProjectFactsPanel.tsx",
-        "src\\modules\\projects\\components\\QuickActionsPanel.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -349,12 +173,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\teams\\pages\\Teams.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\teams\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -364,12 +183,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\validation\\index.ts",
-        "src\\modules\\validation\\hooks\\useValidation.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -379,67 +193,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\app\\Router.tsx",
-        "src\\app\\layouts\\DashboardLayout.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\lib\\supabase\\research.queries.ts",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\lib\\research\\utils.ts",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\modules\\validation\\types\\validation.types.ts",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\validation\\services\\validationService.ts",
-        "src\\modules\\admin\\pages\\analytics\\AdminAnalytics.tsx",
-        "src\\modules\\dashboard\\pages\\AnalyticsPage.tsx",
-        "src\\modules\\dashboard\\pages\\AIDashboardPage.tsx",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\dashboard\\index.ts",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\validation\\hooks\\useValidation.ts",
-        "src\\modules\\auth\\pages\\VerifyEmail.tsx",
-        "src\\modules\\shared\\layouts\\DashboardLayout.tsx",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\maya\\components\\MayaLayout.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentsPage.tsx",
-        "src\\modules\\shared\\hooks\\useInnovationCommandCenter.ts",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\marketplace\\pages\\Marketplace.tsx",
-        "src\\modules\\shared\\components\\common\\PageShell.tsx",
-        "src\\modules\\prototype\\types\\prototype.types.ts",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\prototype\\services\\prototypeService.ts",
-        "src\\modules\\marketing\\pages\\Demo.tsx",
-        "src\\modules\\projects\\hooks\\useProjectsDashboard.ts",
-        "src\\modules\\research\\hooks\\useResearch.ts",
-        "src\\modules\\research\\types\\research.types.ts",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\research\\components\\ResearchStats.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\research\\services\\researchService.ts",
-        "src\\modules\\prototype\\index.ts",
-        "src\\modules\\prototype\\pages\\PrototypesDashboard.tsx",
-        "src\\modules\\prototype\\hooks\\usePrototype.ts",
-        "src\\modules\\research\\index.ts",
-        "src\\modules\\research\\pages\\ResearchDashboard.tsx",
-        "src\\modules\\projects\\components\\DashboardSection.tsx",
-        "src\\modules\\projects\\components\\DashboardPrioritiesPanel.tsx",
-        "src\\modules\\projects\\components\\index.ts",
-        "src\\modules\\projects\\components\\command-center.css",
-        "src\\modules\\projects\\components\\OperationalOverview.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFinalCta.tsx",
-        "src\\modules\\prototype\\components\\PrototypeStats.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx",
-        "src\\modules\\projects\\components\\OperationalStatusGrid.tsx",
-        "src\\modules\\prototype\\components\\PrototypeLifecycle.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -449,20 +203,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminAPIKeys.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\Demo.tsx",
-        "src\\modules\\marketing\\pages\\Demo.css",
-        "src\\modules\\marketing\\pages\\resources\\Guide.tsx",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Videos.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\settings\\AdminAPIKeys.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Community.tsx, src\\modules\\marketing\\pages\\BlogPost.tsx, src\\modules\\marketing\\pages\\Demo.tsx, src\\modules\\marketing\\pages\\Demo.css, src\\modules\\marketing\\pages\\resources\\Guide.tsx, src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx, src\\modules\\marketing\\pages\\resources\\Videos.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/demo)"
     },
     {
       "file": "Documents.tsx",
@@ -471,47 +213,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\lib\\research\\utils.ts",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\lib\\supabase\\research.queries.ts",
-        "src\\modules\\documents\\services\\documents.service.ts",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\documents\\index.ts",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\funding\\pages\\CreatePitchPage.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\prototype\\services\\prototypeService.ts",
-        "src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx",
-        "src\\modules\\experiment\\pages\\CreateExperimentPage.tsx",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx",
-        "src\\modules\\enterprise\\pages\\EnterpriseVaultPage.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDelete.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\shared\\hooks\\useInnovationCommandCenter.ts",
-        "src\\modules\\projects\\services\\projectControlCenter.ts",
-        "src\\modules\\projects\\pages\\ProjectDetailPage.tsx",
-        "src\\modules\\projects\\pages\\EditProjectPage.tsx",
-        "src\\modules\\projects\\components\\DocumentsResearchPanel.tsx",
-        "src\\modules\\projects\\components\\CommandCenterKPIs.tsx",
-        "src\\modules\\research\\services\\documentService.ts",
-        "src\\modules\\projects\\components\\index.ts",
-        "src\\modules\\research\\index.ts",
-        "src\\modules\\research\\components\\DocumentUploader.tsx",
-        "src\\modules\\research\\ai\\prompts.ts",
-        "src\\modules\\research\\pages\\ResearchWorkspace.tsx",
-        "src\\modules\\research\\pages\\ResearchPlaybook.tsx",
-        "src\\modules\\research\\components\\ResearchStats.tsx",
-        "src\\modules\\research\\pages\\ResearchDocuments.tsx",
-        "src\\modules\\research\\pages\\ResearchDashboard.tsx",
-        "src\\modules\\projects\\components\\OperationalOverview.tsx",
-        "src\\modules\\projects\\components\\OperationalStatusPanels.tsx",
-        "src\\modules\\projects\\components\\OperationalStatusGrid.tsx",
-        "src\\modules\\projects\\components\\ResearchIntelligence.tsx",
-        "src\\modules\\projects\\components\\ResearchKnowledgeOverview.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -521,24 +223,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\marketing\\pages\\Blog.tsx",
-        "src\\modules\\ecosystem\\pages\\IncubatorPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\ecosystem\\pages\\AcademyPage.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.types.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.css",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingEcosystem.tsx",
-        "src\\modules\\projects\\components\\ExecutiveOverview.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -548,11 +233,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\projects\\pages\\EditProjectPage.tsx",
-        "src\\modules\\projects\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -562,34 +243,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\hooks\\useEnterpriseHub.ts",
-        "src\\app\\Router.tsx",
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\shared\\hooks\\useEnterpriseHub.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\enterprise\\index.ts",
-        "src\\modules\\experiment\\pages\\ExperimentsPage.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx",
-        "src\\modules\\enterprise\\pages\\EnterpriseVaultPage.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\marketplace\\pages\\Market.tsx",
-        "src\\modules\\projects\\pages\\EditProjectPage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -599,14 +253,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\lib\\experiment\\experimentOps.ts",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\experiments\\AdminExperimentDetail.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx",
-        "src\\modules\\experiment\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -616,51 +263,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\hooks\\useExperiments.ts",
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\modules\\admin\\pages\\settings\\AdminRoles.tsx",
-        "src\\lib\\innovation\\navigation.ts",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\modules\\admin\\pages\\reports\\AdminReports.tsx",
-        "src\\modules\\admin\\pages\\experiments\\AdminExperiments.tsx",
-        "src\\lib\\experiment\\experimentOps.ts",
-        "src\\lib\\experiment\\experimentOps.service.ts",
-        "src\\lib\\experiment\\experiment.service.ts",
-        "src\\modules\\validation\\services\\validationService.ts",
-        "src\\modules\\validation\\pages\\ValidationPage.tsx",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\dashboard\\pages\\AnalyticsPage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\experiment\\components\\ExpPrimitives.tsx",
-        "src\\modules\\experiment\\index.ts",
-        "src\\modules\\experiment\\pages\\CreateExperimentPage.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentsPage.tsx",
-        "src\\modules\\validation\\components\\ValidationEvidencePanel.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\projects\\services\\projectControlCenter.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\maya\\pages\\MayaAssistantPage.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\projects\\components\\CommandCenterKPIs.tsx",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\projects\\components\\OperationalOverview.tsx",
-        "src\\modules\\projects\\components\\OperationalStatusPanels.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Prompts.tsx",
-        "src\\modules\\projects\\components\\OperationalStatusGrid.tsx",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\shared\\hooks\\useExperiments.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -670,16 +273,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\Help.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\marketing\\pages\\Pricing.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\Help.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/faq)"
     },
     {
       "file": "FeatureDetail.tsx",
@@ -688,12 +283,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\FeatureDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\FeatureDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/features/:featureId)"
     },
     {
       "file": "Features.tsx",
@@ -702,23 +293,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\lib\\constants\\navLinks.ts",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\FeatureDetail.tsx",
-        "src\\modules\\marketing\\pages\\Features.tsx",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.css",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\lib\\constants\\navLinks.ts, src\\modules\\account\\pages\\Billing.tsx, src\\modules\\admin\\pages\\settings\\AdminSettings.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\FeatureDetail.tsx, src\\modules\\marketing\\pages\\Features.tsx, src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\landing\\landing.css, src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/features)"
     },
     {
       "file": "Feedback.tsx",
@@ -727,13 +303,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\ecosystem\\pages\\Mentorship.tsx",
-        "src\\modules\\feedback\\index.ts",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -743,13 +313,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\pages\\ForgotPassword.tsx",
-        "src\\modules\\auth\\index.ts",
-        "src\\modules\\auth\\components\\LoginForm.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\pages\\ForgotPassword.tsx, src\\modules\\auth\\index.ts, src\\modules\\auth\\components\\LoginForm.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/forgot-password)"
     },
     {
       "file": "FundingDetail.tsx",
@@ -758,11 +323,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\funding\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -772,12 +333,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\funding\\pages\\FundingHubPage.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\funding\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -787,15 +343,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\ecosystem\\pages\\Hackathons.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\marketing\\pages\\Community.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -805,45 +353,8 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\lib\\supabase\\projects.queries.ts",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\prototype\\services\\prototypeService.ts",
-        "src\\modules\\dashboard\\pages\\AnalyticsPage.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\validation\\services\\validationService.ts",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjects.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDelete.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\projects\\utils\\normalize.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\funding\\services\\funding.service.ts",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\projects\\services\\teamService.ts",
-        "src\\modules\\projects\\services\\projectControlCenter.ts",
-        "src\\modules\\maya\\pages\\MayaAssistantPage.tsx",
-        "src\\modules\\projects\\services\\activityService.ts",
-        "src\\modules\\projects\\pages\\ProjectDetailPage.tsx",
-        "src\\modules\\shared\\hooks\\useProjectControlCenter.ts",
-        "src\\modules\\teams\\pages\\Teams.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\enterprise\\services\\enterpriseHub.service.ts, src\\modules\\commercialization\\pages\\CommercializationPage.tsx, src\\modules\\admin\\pages\\AdminDashboard.tsx, src\\modules\\careers\\pages\\CareersPage.tsx, src\\lib\\supabase\\projects.queries.ts, src\\lib\\supabase\\commandCenter.queries.ts, src\\modules\\dashboard\\pages\\DashboardPage.tsx, src\\modules\\prototype\\services\\prototypeService.ts, src\\modules\\dashboard\\pages\\AnalyticsPage.tsx, src\\modules\\documents\\pages\\DocumentsPage.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\dashboard\\components\\AppSidebar.tsx, src\\modules\\validation\\services\\validationService.ts, src\\modules\\marketing\\pages\\Cookies.tsx, src\\modules\\admin\\pages\\projects\\AdminProjects.tsx, src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx, src\\modules\\marketing\\pages\\BlogPost.tsx, src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx, src\\modules\\admin\\pages\\projects\\AdminProjectDelete.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Resources.tsx, src\\modules\\marketing\\pages\\Privacy.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\funding\\pages\\FundingDetailPage.tsx, src\\modules\\projects\\utils\\normalize.ts, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\funding\\services\\funding.service.ts, src\\modules\\shared\\index.ts, src\\modules\\projects\\services\\teamService.ts, src\\modules\\projects\\services\\projectControlCenter.ts, src\\modules\\maya\\pages\\MayaAssistantPage.tsx, src\\modules\\projects\\services\\activityService.ts, src\\modules\\projects\\pages\\ProjectDetailPage.tsx, src\\modules\\shared\\hooks\\useProjectControlCenter.ts, src\\modules\\teams\\pages\\Teams.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/help)"
     },
     {
       "file": "InnovationVault.tsx",
@@ -852,13 +363,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\vault\\pages\\InnovationVault.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\vault\\index.ts",
-        "src\\modules\\projects\\components\\index.ts",
-        "src\\modules\\projects\\components\\InnovationVaultSummary.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -868,12 +373,8 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\LandingPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/)"
     },
     {
       "file": "LearningHub.tsx",
@@ -882,11 +383,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\ecosystem\\pages\\LearningHub.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\ecosystem\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -896,11 +393,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\research\\index.ts",
-        "src\\modules\\research\\pages\\LiteratureReview.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -910,16 +403,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\components\\LoginForm.tsx",
-        "src\\services\\auth.service.ts",
-        "src\\modules\\auth\\pages\\Login.tsx",
-        "src\\modules\\auth\\index.ts",
-        "src\\modules\\auth\\components\\LoginForm.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\components\\LoginForm.tsx, src\\services\\auth.service.ts, src\\modules\\auth\\pages\\Login.tsx, src\\modules\\auth\\index.ts, src\\modules\\auth\\components\\LoginForm.tsx, src\\modules\\admin\\pages\\settings\\AdminSettings.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/login)"
     },
     {
       "file": "Market.tsx",
@@ -928,63 +413,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\marketplace\\pages\\Market.tsx",
-        "src\\app\\Router.tsx",
-        "src\\components\\charts\\MarketCharts.tsx",
-        "src\\modules\\account\\pages\\Settings.tsx",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\lib\\innovation\\lifecycle.ts",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\validation\\components\\ValidationScorePanel.tsx",
-        "src\\modules\\validation\\components\\ValidationCard.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\validation\\components\\FundingReadinessPanel.tsx",
-        "src\\modules\\validation\\ai\\validationAI.engine.ts",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\commercialization\\components\\CommercializationReadiness.tsx",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\dashboard\\components\\charts\\MarketCharts.tsx",
-        "src\\modules\\dashboard\\pages\\AIAnalyzePage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\tools\\pages\\predictive\\InnovationTwin.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\commercialization\\services\\commercialization.service.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\ecosystem\\pages\\IncubatorPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\ecosystem\\pages\\AcademyPage.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\marketing\\pages\\Demo.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\marketing\\pages\\SystemStatus.tsx",
-        "src\\modules\\funding\\pages\\CreatePitchPage.tsx",
-        "src\\modules\\marketing\\pages\\marketing\\MarketingStubPage.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\tools\\pages\\co-founder\\CoFounderWizard.tsx",
-        "src\\modules\\marketing\\pages\\marketing\\AdvancedMarketingPage.tsx",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Videos.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Prompts.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Newsletter.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Guide.tsx",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx",
-        "src\\modules\\marketplace\\pages\\Marketplace.tsx",
-        "src\\modules\\marketplace\\pages\\marketplace\\MarketplaceListing.tsx",
-        "src\\modules\\marketplace\\index.ts",
-        "src\\modules\\maya\\ai\\prompts.ts",
-        "src\\modules\\projects\\pages\\ProjectDetailPage.tsx",
-        "src\\modules\\projects\\pages\\EditProjectPage.tsx",
-        "src\\modules\\maya\\components\\MayaContextPanel.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -994,16 +423,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\marketplace\\pages\\Marketplace.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\marketplace\\pages\\marketplace\\MarketplaceListing.tsx",
-        "src\\modules\\marketplace\\index.ts",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1013,12 +433,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\maya\\pages\\MayaAssistantPage.tsx",
-        "src\\app\\Router.tsx",
-        "src\\main.tsx",
-        "src\\modules\\maya\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1028,19 +443,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\ecosystem\\pages\\Mentorship.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\account\\pages\\Notifications.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminRoles.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1050,24 +453,8 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\account\\pages\\Messages.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\account\\index.ts",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\maya\\services\\maya.service.ts",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\maya\\pages\\MayaAssistantPage.tsx",
-        "src\\modules\\projects\\components\\MayaInsightCard.tsx",
-        "src\\modules\\maya\\hooks\\useMayaChat.ts",
-        "src\\modules\\maya\\ai\\context-builder.ts",
-        "src\\modules\\maya\\ai\\orchestrator.ts",
-        "src\\modules\\maya\\ai\\types.ts",
-        "src\\modules\\maya\\ai\\prompts.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\account\\pages\\Messages.tsx, src\\app\\Router.tsx, src\\modules\\account\\index.ts, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\ecosystem\\pages\\EcosystemPage.tsx, src\\modules\\dashboard\\components\\AppSidebar.tsx, src\\modules\\maya\\services\\maya.service.ts, src\\modules\\teams\\pages\\CreateTeam.tsx, src\\modules\\maya\\pages\\MayaAssistantPage.tsx, src\\modules\\projects\\components\\MayaInsightCard.tsx, src\\modules\\maya\\hooks\\useMayaChat.ts, src\\modules\\maya\\ai\\context-builder.ts, src\\modules\\maya\\ai\\orchestrator.ts, src\\modules\\maya\\ai\\types.ts, src\\modules\\maya\\ai\\prompts.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/messages)"
     },
     {
       "file": "NewPrototype.tsx",
@@ -1076,11 +463,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\prototype\\pages\\NewPrototype.tsx",
-        "src\\modules\\prototype\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1090,12 +473,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\NotFound.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\NotFound.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (*)"
     },
     {
       "file": "Notifications.tsx",
@@ -1104,22 +483,8 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\account\\pages\\Notifications.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\account\\index.ts",
-        "src\\modules\\account\\pages\\Settings.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\notifications\\AdminNotifications.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\projects\\hooks\\useProjectsDashboard.ts",
-        "src\\modules\\projects\\services\\notificationService.ts",
-        "src\\modules\\projects\\components\\InnovationAlertsPanel.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\account\\pages\\Notifications.tsx, src\\app\\Router.tsx, src\\modules\\admin\\components\\AdminSidebar.tsx, src\\modules\\account\\index.ts, src\\modules\\account\\pages\\Settings.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\notifications\\AdminNotifications.tsx, src\\modules\\dashboard\\components\\AppSidebar.tsx, src\\modules\\admin\\pages\\settings\\AdminSettings.tsx, src\\modules\\enterprise\\pages\\EnterprisePage.tsx, src\\modules\\projects\\hooks\\useProjectsDashboard.ts, src\\modules\\projects\\services\\notificationService.ts, src\\modules\\projects\\components\\InnovationAlertsPanel.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/notifications)"
     },
     {
       "file": "Press.tsx",
@@ -1128,15 +493,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\projects\\pages\\SaveIdea.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Press.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\projects\\pages\\SaveIdea.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/press)"
     },
     {
       "file": "Pricing.tsx",
@@ -1145,24 +503,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\lib\\constants\\navLinks.ts",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\marketplace\\pages\\Market.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.types.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.css",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingPricing.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\lib\\innovation\\dashboardAnalytics.ts, src\\lib\\constants\\navLinks.ts, src\\modules\\commercialization\\pages\\CommercializationPage.tsx, src\\modules\\marketplace\\pages\\Market.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\landing.types.ts, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\landing\\landing.css, src\\modules\\marketing\\pages\\Pricing.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingPricing.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/pricing)"
     },
     {
       "file": "Privacy.tsx",
@@ -1171,20 +513,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\components\\SignupForm.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\projects\\pages\\ProjectsPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\components\\SignupForm.tsx, src\\modules\\marketing\\pages\\SecurityOverview.tsx, src\\modules\\dashboard\\pages\\DashboardPage.tsx, src\\modules\\marketing\\pages\\Cookies.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Privacy.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\projects\\pages\\ProjectsPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/privacy)"
     },
     {
       "file": "Profile.tsx",
@@ -1193,40 +523,8 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\account\\pages\\Profile.tsx",
-        "src\\app\\Router.tsx",
-        "src\\hooks\\useProfile.ts",
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\lib\\research\\utils.ts",
-        "src\\modules\\account\\index.ts",
-        "src\\modules\\account\\pages\\Settings.tsx",
-        "src\\services\\auth.service.ts",
-        "src\\modules\\account\\pages\\Messages.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\lib\\supabase\\research.queries.ts",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\auth\\components\\SignupForm.tsx",
-        "src\\modules\\admin\\pages\\users\\AdminUsers.tsx",
-        "src\\modules\\research\\types\\research.types.ts",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\research\\services\\researchService.ts",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx",
-        "src\\modules\\research\\pages\\ResearchWorkspace.tsx",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\tools\\pages\\dna\\InnovationDNA.tsx",
-        "src\\modules\\research\\components\\ProblemDefinitionForm.tsx",
-        "src\\modules\\shared\\hooks\\useProfile.ts",
-        "src\\modules\\prototype\\types\\prototype.types.ts",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\prototype\\services\\prototypeService.ts",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\account\\pages\\Profile.tsx, src\\app\\Router.tsx, src\\hooks\\useProfile.ts, src\\types\\enterpriseHub.types.ts, src\\lib\\research\\utils.ts, src\\modules\\account\\index.ts, src\\modules\\account\\pages\\Settings.tsx, src\\services\\auth.service.ts, src\\modules\\account\\pages\\Messages.tsx, src\\modules\\documents\\pages\\DocumentsPage.tsx, src\\lib\\supabase\\research.queries.ts, src\\modules\\dashboard\\components\\AppSidebar.tsx, src\\modules\\auth\\components\\SignupForm.tsx, src\\modules\\admin\\pages\\users\\AdminUsers.tsx, src\\modules\\research\\types\\research.types.ts, src\\modules\\funding\\pages\\FundingDetailPage.tsx, src\\modules\\teams\\pages\\CreateTeam.tsx, src\\modules\\research\\services\\researchService.ts, src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx, src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx, src\\modules\\research\\pages\\ResearchWorkspace.tsx, src\\modules\\shared\\index.ts, src\\modules\\tools\\pages\\dna\\InnovationDNA.tsx, src\\modules\\research\\components\\ProblemDefinitionForm.tsx, src\\modules\\shared\\hooks\\useProfile.ts, src\\modules\\prototype\\types\\prototype.types.ts, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\enterprise\\services\\enterpriseHub.service.ts, src\\modules\\prototype\\services\\prototypeService.ts, src\\modules\\marketing\\pages\\Privacy.tsx, src\\modules\\ecosystem\\pages\\Support.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/profile)"
     },
     {
       "file": "ProjectDetail.tsx",
@@ -1235,13 +533,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx",
-        "src\\modules\\projects\\pages\\ProjectDetailPage.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\projects\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1251,86 +543,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\admin\\pages\\projects\\AdminProjects.tsx",
-        "src\\app\\Router.tsx",
-        "src\\services\\index.ts",
-        "src\\hooks\\useProjects.ts",
-        "src\\services\\projects.service.ts",
-        "src\\modules\\ai\\researchImpactEngine.ts",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\lib\\experiment\\experimentOps.service.ts",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\dashboard\\pages\\AnalyticsPage.tsx",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminRoles.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminAPIKeys.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\admin\\pages\\reports\\AdminReports.tsx",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx",
-        "src\\modules\\experiment\\pages\\CreateExperimentPage.tsx",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\lib\\supabase\\projects.queries.ts",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\modules\\validation\\services\\validationService.ts",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx",
-        "src\\lib\\research\\utils.ts",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDelete.tsx",
-        "src\\modules\\admin\\pages\\analytics\\AdminAnalytics.tsx",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\validation\\hooks\\useValidation.ts",
-        "src\\modules\\prototype\\components\\CreatePrototypeForm.tsx",
-        "src\\modules\\projects\\index.ts",
-        "src\\modules\\marketing\\pages\\About.tsx",
-        "src\\modules\\projects\\hooks\\useProjectsDashboard.ts",
-        "src\\modules\\marketing\\pages\\FeatureDetail.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\projects\\utils\\projectFilters.ts",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\Features.tsx",
-        "src\\modules\\projects\\hooks\\useAIProjects.ts",
-        "src\\modules\\teams\\pages\\TeamWorkspace.tsx",
-        "src\\modules\\projects\\types\\viewModel.types.ts",
-        "src\\modules\\teams\\pages\\Teams.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\funding\\pages\\CreatePitchPage.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\projects\\components\\CommandCenterKPIs.tsx",
-        "src\\modules\\projects\\components\\DashboardPrioritiesPanel.tsx",
-        "src\\modules\\projects\\components\\ExecutiveOverview.tsx",
-        "src\\modules\\projects\\services\\projectService.ts",
-        "src\\modules\\projects\\services\\aiProjectService.ts",
-        "src\\modules\\projects\\components\\InnovationPipelineFunnel.tsx",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx",
-        "src\\modules\\maya\\pages\\MayaAssistantPage.tsx",
-        "src\\modules\\projects\\pages\\ProjectsPage.tsx",
-        "src\\modules\\projects\\pages\\ProjectDetailPage.tsx",
-        "src\\modules\\projects\\pages\\CreateProjectPage.tsx",
-        "src\\modules\\research\\types\\research.types.ts",
-        "src\\modules\\research\\components\\ResearchStats.tsx",
-        "src\\modules\\research\\components\\ResearchImpactPanel.tsx",
-        "src\\modules\\shared\\hooks\\useProjects.ts",
-        "src\\modules\\maya\\hooks\\useMayaContext.ts",
-        "src\\modules\\projects\\components\\OperationalOverview.tsx",
-        "src\\modules\\projects\\components\\MayaCommandCenter.tsx",
-        "src\\modules\\research\\pages\\ResearchWorkspace.tsx",
-        "src\\modules\\projects\\components\\OperationalStatusGrid.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1340,11 +553,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\prototype\\index.ts",
-        "src\\modules\\prototype\\pages\\PrototypeBuilder.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1354,11 +563,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\prototype\\pages\\PrototypePreviewPage.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\prototype\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1368,13 +573,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\prototype\\index.ts",
-        "src\\modules\\prototype\\hooks\\usePrototypeTesting.ts",
-        "src\\modules\\prototype\\pages\\PrototypeWorkspace.tsx",
-        "src\\modules\\prototype\\pages\\PrototypeTesting.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1384,11 +583,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\prototype\\index.ts",
-        "src\\modules\\prototype\\pages\\PrototypeWorkspace.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1398,40 +593,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\app\\Router.tsx",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\prototypes\\AdminPrototypes.tsx",
-        "src\\modules\\admin\\pages\\reports\\AdminReports.tsx",
-        "src\\modules\\validation\\services\\validationService.ts",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\dashboard\\pages\\AnalyticsPage.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\validation\\components\\ValidationEvidencePanel.tsx",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\marketing\\pages\\Features.tsx",
-        "src\\modules\\marketing\\pages\\FeatureDetail.tsx",
-        "src\\modules\\experiment\\pages\\CreateExperimentPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketplace\\pages\\Marketplace.tsx",
-        "src\\modules\\prototype\\index.ts",
-        "src\\modules\\prototype\\hooks\\usePrototype.ts",
-        "src\\modules\\prototype\\pages\\UploadPrototypePage.tsx",
-        "src\\modules\\prototype\\pages\\PrototypeWorkspace.tsx",
-        "src\\modules\\prototype\\pages\\PrototypeTesting.tsx",
-        "src\\modules\\prototype\\pages\\PrototypesDashboard.tsx",
-        "src\\modules\\projects\\services\\projectControlCenter.ts",
-        "src\\modules\\prototype\\pages\\PrototypePreviewPage.tsx",
-        "src\\modules\\prototype\\pages\\PrototypeBuilder.tsx",
-        "src\\modules\\prototype\\pages\\NewPrototype.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1441,16 +603,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\pages\\Register.tsx",
-        "src\\modules\\auth\\index.ts",
-        "src\\modules\\ecosystem\\pages\\Hackathons.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\pages\\Register.tsx, src\\modules\\auth\\index.ts, src\\modules\\ecosystem\\pages\\Hackathons.tsx, src\\modules\\teams\\pages\\CreateTeam.tsx, src\\modules\\marketing\\pages\\resources\\Webinars.tsx, src\\modules\\funding\\pages\\FundingDetailPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/register)"
     },
     {
       "file": "ResearchCenter.tsx",
@@ -1459,9 +613,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1471,14 +623,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\lib\\supabase\\research.queries.ts",
-        "src\\modules\\research\\services\\documentService.ts",
-        "src\\modules\\research\\pages\\ResearchDocuments.tsx",
-        "src\\modules\\research\\index.ts",
-        "src\\modules\\prototype\\services\\prototypeService.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1488,11 +633,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\research\\index.ts",
-        "src\\modules\\research\\pages\\ResearchPlaybook.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1502,12 +643,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\research\\index.ts",
-        "src\\modules\\research\\pages\\ResearchWorkspace.tsx",
-        "src\\modules\\research\\types\\research.types.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1517,12 +653,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\index.ts",
-        "src\\modules\\auth\\pages\\ResetPassword.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\index.ts, src\\modules\\auth\\pages\\ResetPassword.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/reset-password)"
     },
     {
       "file": "Resources.tsx",
@@ -1531,22 +663,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\ecosystem\\pages\\LearningHub.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Guide.tsx",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.css",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\pages\\Press.tsx, src\\modules\\marketing\\pages\\Resources.tsx, src\\modules\\ecosystem\\pages\\LearningHub.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\resources\\Guide.tsx, src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\landing.css, src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx, src\\modules\\teams\\pages\\CreateTeam.tsx, src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources)"
     },
     {
       "file": "SaveIdea.tsx",
@@ -1555,11 +673,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\projects\\index.ts",
-        "src\\modules\\projects\\pages\\SaveIdea.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1569,29 +683,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\account\\index.ts",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\account\\pages\\Security.tsx",
-        "src\\modules\\account\\pages\\Settings.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\admin\\pages\\system\\AdminSecurity.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\Privacy.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\account\\index.ts, src\\modules\\admin\\components\\AdminSidebar.tsx, src\\modules\\account\\pages\\Billing.tsx, src\\modules\\admin\\pages\\AdminDashboard.tsx, src\\modules\\admin\\index.ts, src\\modules\\account\\pages\\Security.tsx, src\\modules\\account\\pages\\Settings.tsx, src\\modules\\admin\\pages\\settings\\AdminSettings.tsx, src\\modules\\admin\\pages\\system\\AdminSecurity.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\enterprise\\pages\\EnterprisePage.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Cookies.tsx, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\SecurityOverview.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\Privacy.tsx, src\\modules\\marketing\\pages\\Pricing.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/settings/security)"
     },
     {
       "file": "SecurityOverview.tsx",
@@ -1600,12 +693,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\marketing\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\pages\\SecurityOverview.tsx, src\\modules\\marketing\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/security)"
     },
     {
       "file": "Settings.tsx",
@@ -1614,25 +703,8 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\account\\pages\\Settings.tsx",
-        "src\\modules\\account\\pages\\Security.tsx",
-        "src\\modules\\account\\index.ts",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\components\\AdminSidebar.tsx",
-        "src\\modules\\admin\\pages\\system\\AdminSecurity.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\projects\\pages\\ProjectDetailPage.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\settings\\AdminSettings.tsx, src\\app\\Router.tsx, src\\modules\\account\\pages\\Settings.tsx, src\\modules\\account\\pages\\Security.tsx, src\\modules\\account\\index.ts, src\\modules\\admin\\pages\\AdminDashboard.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\components\\AdminSidebar.tsx, src\\modules\\admin\\pages\\system\\AdminSecurity.tsx, src\\modules\\dashboard\\components\\AppSidebar.tsx, src\\modules\\enterprise\\pages\\EnterprisePage.tsx, src\\modules\\marketing\\pages\\SecurityOverview.tsx, src\\modules\\marketing\\pages\\FAQ.tsx, src\\modules\\ecosystem\\pages\\Support.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\projects\\pages\\ProjectDetailPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/settings)"
     },
     {
       "file": "Support.tsx",
@@ -1641,27 +713,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\auth\\pages\\VerifyEmail.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\research\\services\\documentService.ts",
-        "src\\modules\\maya\\pages\\MayaAssistantPage.tsx",
-        "src\\modules\\projects\\pages\\CreateProjectPage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1671,12 +723,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\SystemStatus.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\SystemStatus.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/status)"
     },
     {
       "file": "TeamWorkspace.tsx",
@@ -1685,12 +733,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\teams\\pages\\TeamWorkspace.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\teams\\index.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1700,29 +743,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\teams\\pages\\Teams.tsx",
-        "src\\app\\Router.tsx",
-        "src\\hooks\\useTeams.ts",
-        "src\\lib\\supabase\\dbHelpers.ts",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\projects\\services\\projectService.ts",
-        "src\\modules\\projects\\pages\\CreateProjectPage.tsx",
-        "src\\modules\\teams\\services\\teams.service.ts",
-        "src\\modules\\teams\\pages\\TeamWorkspace.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\teams\\index.ts",
-        "src\\modules\\projects\\components\\OperationalStatusPanels.tsx",
-        "src\\modules\\projects\\components\\TeamCollaborationPanel.tsx",
-        "src\\modules\\shared\\index.ts",
-        "src\\modules\\shared\\hooks\\useTeams.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\marketing\\pages\\FAQ.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1732,17 +753,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\components\\SignupForm.tsx",
-        "src\\modules\\dashboard\\pages\\DashboardPage.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Terms.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\projects\\pages\\ProjectsPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\components\\SignupForm.tsx, src\\modules\\dashboard\\pages\\DashboardPage.tsx, src\\modules\\marketing\\pages\\BlogPost.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Terms.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\projects\\pages\\ProjectsPage.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/terms)"
     },
     {
       "file": "UploadPrototype.tsx",
@@ -1751,11 +763,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\prototype\\index.ts",
-        "src\\modules\\prototype\\pages\\UploadPrototypePage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1765,76 +773,7 @@
       "inRouter": true,
       "inNav": true,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\types\\projectWorkspace.types.ts",
-        "src\\lib\\experiment\\experimentOps.ts",
-        "src\\lib\\innovation\\dashboardAnalytics.ts",
-        "src\\lib\\supabase\\commandCenter.queries.ts",
-        "src\\lib\\innovation\\lifecycle.ts",
-        "src\\lib\\innovation\\navigation.ts",
-        "src\\lib\\innovation\\operational.ts",
-        "src\\lib\\innovation\\recommendations.ts",
-        "src\\modules\\careers\\services\\careers.service.ts",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\validation\\types\\validation.types.ts",
-        "src\\modules\\enterprise\\pages\\EnterprisePage.tsx",
-        "src\\modules\\marketing\\pages\\Demo.tsx",
-        "src\\modules\\validation\\services\\validationService.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\ecosystem\\pages\\AcademyPage.tsx",
-        "src\\modules\\ecosystem\\pages\\IncubatorPage.tsx",
-        "src\\modules\\validation\\pages\\ValidationPage.tsx",
-        "src\\modules\\validation\\pages\\ValidationDetail.tsx",
-        "src\\modules\\validation\\pages\\CreateValidation.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Prompts.tsx",
-        "src\\modules\\validation\\index.ts",
-        "src\\modules\\marketing\\pages\\resources\\Newsletter.tsx",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx",
-        "src\\modules\\funding\\pages\\FundingDetailPage.tsx",
-        "src\\modules\\documents\\pages\\DocumentsPage.tsx",
-        "src\\modules\\funding\\pages\\CreatePitchPage.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\commercialization\\pages\\CommercializationPage.tsx",
-        "src\\modules\\marketing\\pages\\FeatureDetail.tsx",
-        "src\\modules\\validation\\hooks\\useValidation.ts",
-        "src\\modules\\commercialization\\components\\CommercializationReadiness.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\validation\\components\\ValidationScorePanel.tsx",
-        "src\\modules\\feedback\\pages\\FeedbackPage.tsx",
-        "src\\modules\\validation\\components\\ValidationEvidencePanel.tsx",
-        "src\\modules\\validation\\components\\ValidationDecisionPanel.tsx",
-        "src\\modules\\validation\\components\\ValidationCard.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\validation\\components\\MayaValidationInsights.tsx",
-        "src\\modules\\marketing\\pages\\Features.tsx",
-        "src\\modules\\validation\\components\\FundingReadinessPanel.tsx",
-        "src\\modules\\validation\\ai\\validationAI.engine.ts",
-        "src\\modules\\experiment\\components\\ExpViews.tsx",
-        "src\\modules\\experiment\\components\\ExpPrimitives.tsx",
-        "src\\modules\\experiment\\components\\ExperimentCenter.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentsPage.tsx",
-        "src\\modules\\experiment\\pages\\ExperimentDetailPage.tsx",
-        "src\\modules\\experiment\\pages\\CreateExperimentPage.tsx",
-        "src\\modules\\dashboard\\components\\AppSidebar.tsx",
-        "src\\modules\\projects\\pages\\EditProjectPage.tsx",
-        "src\\modules\\projects\\pages\\CreateProjectPage.tsx",
-        "src\\modules\\projects\\services\\projectControlCenter.ts",
-        "src\\modules\\projects\\components\\InnovationProjectCard.tsx",
-        "src\\modules\\projects\\components\\InnovationPipelineFunnel.tsx",
-        "src\\modules\\projects\\components\\DashboardPrioritiesPanel.tsx",
-        "src\\modules\\projects\\components\\MayaCommandCenter.tsx",
-        "src\\modules\\teams\\pages\\CreateTeam.tsx",
-        "src\\modules\\projects\\components\\OperationalQueuesPanel.tsx",
-        "src\\modules\\shared\\hooks\\useInnovationCommandCenter.ts",
-        "src\\modules\\shared\\hooks\\useProjectControlCenter.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1844,12 +783,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\validation\\pages\\ValidationDetail.tsx",
-        "src\\modules\\validation\\index.ts",
-        "src\\modules\\validation\\hooks\\useValidation.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1859,13 +793,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\vault\\pages\\VaultDetail.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\vault\\index.ts",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\vault\\AdminVaultDetail.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1875,15 +803,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\modules\\vault\\pages\\VaultEntry.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\vault\\pages\\VaultDetail.tsx",
-        "src\\modules\\vault\\pages\\InnovationVault.tsx",
-        "src\\modules\\vault\\index.ts",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\enterprise\\pages\\EnterpriseVaultPage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -1893,12 +813,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\auth\\pages\\VerifyEmail.tsx",
-        "src\\modules\\auth\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\auth\\pages\\VerifyEmail.tsx, src\\modules\\auth\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/verify-email)"
     },
     {
       "file": "admin/AdminDashboard.tsx",
@@ -1907,12 +823,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\AdminDashboard.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\AdminDashboard.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/ai-monitor/AdminAIMonitor.tsx",
@@ -1921,12 +833,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\ai-monitor\\AdminAIMonitor.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\ai-monitor\\AdminAIMonitor.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/ai-monitor/AdminAIPredictions.tsx",
@@ -1935,12 +843,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\ai-monitor\\AdminAIPredictions.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\ai-monitor\\AdminAIPredictions.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/analytics/AdminAnalytics.tsx",
@@ -1949,12 +853,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\analytics\\AdminAnalytics.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\analytics\\AdminAnalytics.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/analytics/AdminExport.tsx",
@@ -1963,27 +863,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\analytics\\AdminExport.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\analytics\\AdminExport.tsx"
-    },
-    {
-      "file": "admin/analytics/AdminReports.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": true,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\reports\\AdminReports.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\analytics\\AdminReports.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\reports\\AdminReports.tsx, src\\app\\Router.tsx, src\\modules\\admin\\pages\\analytics\\AdminReports.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/careers/AdminCareerDetail.tsx",
@@ -1992,12 +873,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\careers\\AdminCareerDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\careers\\AdminCareerDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/careers/AdminCareers.tsx",
@@ -2006,12 +883,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\careers\\AdminCareers.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\careers\\AdminCareers.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/experiments/AdminExperimentDetail.tsx",
@@ -2020,12 +893,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\experiments\\AdminExperimentDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\experiments\\AdminExperimentDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/experiments/AdminExperiments.tsx",
@@ -2034,12 +903,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\experiments\\AdminExperiments.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\experiments\\AdminExperiments.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/innovators/AdminInnovatorDetail.tsx",
@@ -2048,12 +913,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\innovators\\AdminInnovatorDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\innovators\\AdminInnovatorDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/innovators/AdminInnovators.tsx",
@@ -2062,12 +923,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\innovators\\AdminInnovators.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\innovators\\AdminInnovators.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/investors/AdminInvestorDetail.tsx",
@@ -2076,12 +933,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\investors\\AdminInvestorDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\investors\\AdminInvestorDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/investors/AdminInvestorVerify.tsx",
@@ -2090,12 +943,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\investors\\AdminInvestorVerify.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\investors\\AdminInvestorVerify.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/investors/AdminInvestors.tsx",
@@ -2104,12 +953,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\investors\\AdminInvestors.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\investors\\AdminInvestors.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/mentors/AdminMentorAssign.tsx",
@@ -2118,12 +963,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\mentors\\AdminMentorAssign.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\mentors\\AdminMentorAssign.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/mentors/AdminMentorDetail.tsx",
@@ -2132,12 +973,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\mentors\\AdminMentorDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\mentors\\AdminMentorDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/mentors/AdminMentors.tsx",
@@ -2146,12 +983,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\mentors\\AdminMentors.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\mentors\\AdminMentors.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/moderation/AdminAppeals.tsx",
@@ -2160,12 +993,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\moderation\\AdminAppeals.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\moderation\\AdminAppeals.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/moderation/AdminFlags.tsx",
@@ -2174,12 +1003,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\moderation\\AdminFlags.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\moderation\\AdminFlags.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/moderation/AdminModeration.tsx",
@@ -2188,12 +1013,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\moderation\\AdminModeration.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\moderation\\AdminModeration.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/notifications/AdminBroadcast.tsx",
@@ -2202,12 +1023,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\notifications\\AdminBroadcast.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\notifications\\AdminBroadcast.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/notifications/AdminNotifications.tsx",
@@ -2216,12 +1033,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\notifications\\AdminNotifications.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\notifications\\AdminNotifications.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/payments/AdminPaymentDetail.tsx",
@@ -2230,12 +1043,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\payments\\AdminPaymentDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\payments\\AdminPaymentDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/payments/AdminPaymentRefund.tsx",
@@ -2244,12 +1053,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\payments\\AdminPaymentRefund.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\payments\\AdminPaymentRefund.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/payments/AdminPayments.tsx",
@@ -2258,12 +1063,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\payments\\AdminPayments.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\payments\\AdminPayments.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/projects/AdminProjectDelete.tsx",
@@ -2272,12 +1073,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDelete.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\projects\\AdminProjectDelete.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/projects/AdminProjectDetail.tsx",
@@ -2286,12 +1083,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\projects\\AdminProjectDetail.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/projects/AdminProjectReview.tsx",
@@ -2300,12 +1093,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/projects/AdminProjects.tsx",
@@ -2314,12 +1103,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\projects\\AdminProjects.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\projects\\AdminProjects.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/prototypes/AdminPrototypeDetail.tsx",
@@ -2328,12 +1113,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\prototypes\\AdminPrototypeDetail.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\prototypes\\AdminPrototypeDetail.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/prototypes/AdminPrototypes.tsx",
@@ -2342,12 +1123,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\prototypes\\AdminPrototypes.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\prototypes\\AdminPrototypes.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/reports/AdminReports.tsx",
@@ -2356,13 +1133,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\reports\\AdminReports.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\analytics\\AdminReports.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\reports\\AdminReports.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\analytics\\AdminReports.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/settings/AdminAPIKeys.tsx",
@@ -2371,12 +1143,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\settings\\AdminAPIKeys.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\app\\Router.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\settings\\AdminAPIKeys.tsx, src\\modules\\admin\\index.ts, src\\app\\Router.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/settings/AdminRoles.tsx",
@@ -2385,12 +1153,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\settings\\AdminRoles.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\settings\\AdminRoles.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/settings/AdminSettings.tsx",
@@ -2399,12 +1163,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\modules\\admin\\pages\\settings\\AdminSettings.tsx",
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\modules\\admin\\pages\\settings\\AdminSettings.tsx, src\\app\\Router.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/subscriptions/AdminSubscriptionDetail.tsx",
@@ -2413,12 +1173,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\subscriptions\\AdminSubscriptionDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\subscriptions\\AdminSubscriptionDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/subscriptions/AdminSubscriptions.tsx",
@@ -2427,12 +1183,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\subscriptions\\AdminSubscriptions.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\subscriptions\\AdminSubscriptions.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/system/AdminBackup.tsx",
@@ -2441,12 +1193,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\system\\AdminBackup.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\system\\AdminBackup.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/system/AdminLogs.tsx",
@@ -2455,12 +1203,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\system\\AdminLogs.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\system\\AdminLogs.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/system/AdminSecurity.tsx",
@@ -2469,12 +1213,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\system\\AdminSecurity.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\system\\AdminSecurity.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/system/AdminSystemMonitor.tsx",
@@ -2483,12 +1223,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\system\\AdminSystemMonitor.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\system\\AdminSystemMonitor.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/users/AdminUserCreate.tsx",
@@ -2497,12 +1233,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\users\\AdminUserCreate.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\users\\AdminUserCreate.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/users/AdminUserDetail.tsx",
@@ -2511,12 +1243,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\users\\AdminUserDetail.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\users\\AdminUserDetail.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/users/AdminUserEdit.tsx",
@@ -2525,12 +1253,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\users\\AdminUserEdit.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\users\\AdminUserEdit.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/users/AdminUsers.tsx",
@@ -2539,12 +1263,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\users\\AdminUsers.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\users\\AdminUsers.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/vault/AdminVault.tsx",
@@ -2553,13 +1273,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\index.ts",
-        "src\\modules\\admin\\pages\\vault\\AdminVaultDetail.tsx",
-        "src\\modules\\admin\\pages\\vault\\AdminVault.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\index.ts, src\\modules\\admin\\pages\\vault\\AdminVaultDetail.tsx, src\\modules\\admin\\pages\\vault\\AdminVault.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "admin/vault/AdminVaultDetail.tsx",
@@ -2568,12 +1283,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\admin\\pages\\vault\\AdminVaultDetail.tsx",
-        "src\\modules\\admin\\index.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\admin\\pages\\vault\\AdminVaultDetail.tsx, src\\modules\\admin\\index.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (admin)"
     },
     {
       "file": "co-founder/CoFounderWizard.tsx",
@@ -2582,11 +1293,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\tools\\index.ts",
-        "src\\modules\\tools\\pages\\co-founder\\CoFounderWizard.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2596,11 +1303,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\tools\\index.ts",
-        "src\\modules\\tools\\pages\\dna\\InnovationDNA.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2610,15 +1313,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\ecosystem\\pages\\AcademyPage.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2628,18 +1323,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\account\\pages\\Billing.tsx",
-        "src\\modules\\ecosystem\\pages\\Support.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemPage.tsx",
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\marketing\\pages\\Pricing.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2649,13 +1333,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\ecosystem\\index.ts",
-        "src\\modules\\ecosystem\\pages\\IncubatorPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingEcosystem.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2665,13 +1343,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\types\\enterpriseHub.types.ts",
-        "src\\modules\\enterprise\\services\\enterpriseHub.service.ts",
-        "src\\modules\\enterprise\\index.ts",
-        "src\\modules\\enterprise\\pages\\EnterpriseVaultPage.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2681,241 +1353,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\tools\\index.ts",
-        "src\\modules\\tools\\pages\\investor\\InvestorConnect.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
-    },
-    {
-      "file": "landing/LandingPage.tsx",
-      "bucket": "KEEP",
-      "route": "/",
-      "inRouter": true,
-      "inNav": true,
-      "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\LandingPage.tsx"
-    },
-    {
-      "file": "landing/components/AnimatedCounter.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingStats.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\AnimatedCounter.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\components\\LandingStats.tsx, src\\modules\\marketing\\pages\\landing\\components\\AnimatedCounter.tsx"
-    },
-    {
-      "file": "landing/components/LandingBlogResources.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx"
-    },
-    {
-      "file": "landing/components/LandingEcosystem.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingEcosystem.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingEcosystem.tsx"
-    },
-    {
-      "file": "landing/components/LandingFeatures.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx"
-    },
-    {
-      "file": "landing/components/LandingFinalCta.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFinalCta.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingFinalCta.tsx"
-    },
-    {
-      "file": "landing/components/LandingFooter.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFooter.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingFooter.tsx"
-    },
-    {
-      "file": "landing/components/LandingHeader.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingHeader.tsx"
-    },
-    {
-      "file": "landing/components/LandingHero.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingHero.tsx"
-    },
-    {
-      "file": "landing/components/LandingPricing.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingPricing.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingPricing.tsx"
-    },
-    {
-      "file": "landing/components/LandingStats.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingStats.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingStats.tsx"
-    },
-    {
-      "file": "landing/components/LandingTestimonials.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingTestimonials.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingTestimonials.tsx"
-    },
-    {
-      "file": "landing/components/LandingWorkflow.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\LandingPage.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingWorkflow.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\LandingPage.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingWorkflow.tsx"
-    },
-    {
-      "file": "landing/components/SectionHeading.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingEcosystem.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\SectionHeading.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingWorkflow.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingPricing.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingTestimonials.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\pages\\landing\\components\\LandingFeatures.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingEcosystem.tsx, src\\modules\\marketing\\pages\\landing\\components\\SectionHeading.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingWorkflow.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingPricing.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingTestimonials.tsx"
-    },
-    {
-      "file": "marketing/AdvancedMarketingPage.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx",
-        "src\\modules\\ecosystem\\pages\\IncubatorPage.tsx",
-        "src\\modules\\ecosystem\\pages\\AcademyPage.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\SystemStatus.tsx",
-        "src\\modules\\marketing\\pages\\Community.tsx",
-        "src\\modules\\marketing\\pages\\Press.tsx",
-        "src\\modules\\marketing\\pages\\Cookies.tsx",
-        "src\\modules\\marketing\\pages\\SecurityOverview.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Videos.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Prompts.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Newsletter.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Guide.tsx",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\marketing\\AdvancedMarketingPage.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\ecosystem\\pages\\EcosystemCommunityPage.tsx, src\\modules\\ecosystem\\pages\\IncubatorPage.tsx, src\\modules\\ecosystem\\pages\\AcademyPage.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\SystemStatus.tsx, src\\modules\\marketing\\pages\\Community.tsx, src\\modules\\marketing\\pages\\Press.tsx, src\\modules\\marketing\\pages\\Cookies.tsx, src\\modules\\marketing\\pages\\SecurityOverview.tsx, src\\modules\\marketing\\pages\\resources\\Webinars.tsx, src\\modules\\marketing\\pages\\resources\\Videos.tsx, src\\modules\\marketing\\pages\\resources\\Prompts.tsx, src\\modules\\marketing\\pages\\resources\\Newsletter.tsx, src\\modules\\marketing\\pages\\resources\\Guide.tsx, src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\marketing\\AdvancedMarketingPage.tsx"
-    },
-    {
-      "file": "marketing/MarketingStubPage.tsx",
-      "bucket": "KEEP",
-      "route": "(none)",
-      "inRouter": false,
-      "inNav": false,
-      "lifecycle": false,
-      "imports": [
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\marketing\\MarketingStubPage.tsx"
-      ],
-      "reasons": "Imported by: src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\marketing\\MarketingStubPage.tsx"
     },
     {
       "file": "marketplace/MarketplaceListing.tsx",
@@ -2924,11 +1363,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketplace\\index.ts",
-        "src\\modules\\marketplace\\pages\\marketplace\\MarketplaceListing.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2938,11 +1373,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\tools\\index.ts",
-        "src\\modules\\tools\\pages\\patent\\PatentAssistant.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2952,11 +1383,7 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": true,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\tools\\index.ts",
-        "src\\modules\\tools\\pages\\predictive\\InnovationTwin.tsx"
-      ],
+      "imports": [],
       "reasons": "Innovation lifecycle route (user-protected from deletion)"
     },
     {
@@ -2966,12 +1393,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\resources\\CaseStudies.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources/case-studies)"
     },
     {
       "file": "resources/Guide.tsx",
@@ -2980,21 +1403,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\ecosystem\\pages\\AcademyPage.tsx",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\marketing\\pages\\BlogPost.tsx",
-        "src\\modules\\marketing\\pages\\Blog.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Guide.tsx",
-        "src\\modules\\careers\\pages\\CareersPage.tsx",
-        "src\\modules\\marketing\\pages\\Help.tsx",
-        "src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\ecosystem\\pages\\AcademyPage.tsx, src\\modules\\marketing\\pages\\Resources.tsx, src\\modules\\marketing\\pages\\BlogPost.tsx, src\\modules\\marketing\\pages\\Blog.tsx, src\\modules\\marketing\\pages\\resources\\Guide.tsx, src\\modules\\careers\\pages\\CareersPage.tsx, src\\modules\\marketing\\pages\\Help.tsx, src\\modules\\marketing\\pages\\landing\\components\\LandingBlogResources.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\admin\\pages\\projects\\AdminProjectReview.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources/guide)"
     },
     {
       "file": "resources/Newsletter.tsx",
@@ -3003,16 +1413,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\marketing\\pages\\Blog.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Newsletter.tsx",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\Resources.tsx, src\\modules\\marketing\\pages\\Blog.tsx, src\\modules\\marketing\\pages\\resources\\Webinars.tsx, src\\modules\\marketing\\pages\\resources\\Newsletter.tsx, src\\modules\\marketing\\pages\\landing\\landing.data.ts"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources/newsletter)"
     },
     {
       "file": "resources/Prompts.tsx",
@@ -3021,12 +1423,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\resources\\Prompts.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\resources\\Prompts.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources/prompts)"
     },
     {
       "file": "resources/Videos.tsx",
@@ -3035,13 +1433,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\ecosystem\\pages\\LearningHub.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Videos.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\ecosystem\\pages\\LearningHub.tsx, src\\modules\\marketing\\pages\\resources\\Videos.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources/videos)"
     },
     {
       "file": "resources/Webinars.tsx",
@@ -3050,14 +1443,8 @@
       "inRouter": true,
       "inNav": false,
       "lifecycle": false,
-      "imports": [
-        "src\\app\\Router.tsx",
-        "src\\modules\\marketing\\index.ts",
-        "src\\modules\\marketing\\pages\\landing\\landing.data.ts",
-        "src\\modules\\marketing\\pages\\Resources.tsx",
-        "src\\modules\\marketing\\pages\\resources\\Webinars.tsx"
-      ],
-      "reasons": "Imported by: src\\app\\Router.tsx, src\\modules\\marketing\\index.ts, src\\modules\\marketing\\pages\\landing\\landing.data.ts, src\\modules\\marketing\\pages\\Resources.tsx, src\\modules\\marketing\\pages\\resources\\Webinars.tsx"
+      "imports": [],
+      "reasons": "Active route in Router.tsx (/resources/webinars)"
     }
   ]
 }

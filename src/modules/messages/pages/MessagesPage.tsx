@@ -1,12 +1,24 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Loader, PageContainer } from '../../../design-system';
+import { invokeMayaChat } from '../../../lib/maya/mayaChat.service';
 import { AiAssistantPanel } from '../components/AiAssistantPanel';
 import { ChatWindow } from '../components/ChatWindow';
 import { ConversationList } from '../components/ConversationList';
-import { MessageInput } from '../components/MessageInput';
+import { MessageInput, type ComposerPayload } from '../components/MessageInput';
 import { NewConversationModal } from '../components/NewConversationModal';
 import { useMessages } from '../hooks/useMessages';
 import '../messages.css';
+
+const AI_ASSIST_PROMPTS: Record<string, string> = {
+  rewrite: 'Rewrite the following message for clarity and professionalism. Return only the rewritten message.',
+  improve: 'Improve the grammar and tone of this message. Return only the improved message.',
+  summarize: 'Summarize this draft into key bullet points. Return only the summary.',
+  gen_questions: 'Generate 3 research questions based on this draft. Return only the questions.',
+  gen_validation: 'Generate validation criteria from this draft. Return only the criteria.',
+  gen_funding: 'Structure this draft as a concise funding request. Return only the request.',
+  gen_commercialization: 'Add commercialization recommendations to this draft. Return the full revised message.',
+  gen_ideas: 'Expand this draft with 3 related innovation ideas. Return only the ideas.',
+};
 
 export default function MessagesPage() {
   const {
@@ -14,34 +26,80 @@ export default function MessagesPage() {
     userId,
     conversations,
     messages,
+    aiPanel,
     activeConversationId,
     activeConversation,
     setActiveConversationId,
     sending,
     typingUserIds,
     realtimeConnected,
-    seedMode,
     messagesEndRef,
-    sendMessage,
+    sendComposer,
     handleTyping,
     startDm,
+    createWorkspace,
     searchUsers,
     retry,
     newConversationModal,
+    openNewConversationModal,
   } = useMessages();
 
   const [draft, setDraft] = useState('');
+  const pendingPayloadRef = useRef<ComposerPayload | null>(null);
 
   const typingNames =
     activeConversation?.members
       .filter((m) => typingUserIds.includes(m.id))
       .map((m) => m.name) ?? [];
 
-  const handleSend = () => {
-    if (!draft.trim()) return;
-    void sendMessage(draft);
+  const handleSubmitPayload = useCallback((payload: ComposerPayload) => {
+    pendingPayloadRef.current = payload;
+  }, []);
+
+  const handleSend = useCallback(() => {
+    const payload =
+      pendingPayloadRef.current ??
+      (draft.trim()
+        ? {
+            content: draft,
+            messageType: 'standard' as const,
+            priority: 'normal' as const,
+            attachments: [],
+            mentionedIds: [],
+            metadata: {},
+          }
+        : null);
+
+    pendingPayloadRef.current = null;
+    if (!payload?.content.trim()) return;
+
+    void sendComposer(payload);
     setDraft('');
-  };
+  }, [draft, sendComposer]);
+
+  const handleSearchMentions = useCallback(
+    async (query: string) => {
+      const users = await searchUsers(query);
+      return users.map((u) => ({
+        id: u.id,
+        name: u.name,
+        avatarUrl: u.avatar ?? undefined,
+      }));
+    },
+    [searchUsers]
+  );
+
+  const openCreateWorkspace = useCallback(() => {
+    openNewConversationModal({ id: '', name: '', avatar: null });
+  }, [openNewConversationModal]);
+
+  const handleAiAssist = useCallback(async (action: string, content: string) => {
+    const instruction = AI_ASSIST_PROMPTS[action] ?? `Assist with: ${action}`;
+    return invokeMayaChat([
+      { role: 'system', content: 'You are MAYA, the Maylet XLab messaging assistant.' },
+      { role: 'user', content: `${instruction}\n\n---\n${content}` },
+    ]);
+  }, []);
 
   if (authLoading) {
     return (
@@ -61,7 +119,6 @@ export default function MessagesPage() {
             <span className={realtimeConnected ? 'msg-live msg-live--on' : 'msg-live'}>
               {realtimeConnected ? 'Live' : 'Connecting…'}
             </span>
-            {seedMode ? ' · Demo mode (run migration 20240612000028_messaging_schema.sql)' : ''}
           </p>
         </div>
       </header>
@@ -71,7 +128,7 @@ export default function MessagesPage() {
           state={conversations}
           activeId={activeConversationId}
           onSelect={setActiveConversationId}
-          onNewMessage={() => newConversationModal.open({ id: '', name: '', avatar: null })}
+          onNewMessage={openCreateWorkspace}
           onRetry={retry}
         />
 
@@ -88,6 +145,7 @@ export default function MessagesPage() {
             onSend={handleSend}
             onTyping={handleTyping}
             onRetry={retry}
+            onCreateWorkspace={openCreateWorkspace}
           />
           {activeConversation && (
             <MessageInput
@@ -96,6 +154,9 @@ export default function MessagesPage() {
               onChange={setDraft}
               onSend={handleSend}
               onTyping={handleTyping}
+              onSubmitPayload={handleSubmitPayload}
+              searchMentions={handleSearchMentions}
+              onAiAssist={handleAiAssist}
               conversationId={activeConversationId ?? undefined}
               conversationType={activeConversation.type}
             />
@@ -108,6 +169,8 @@ export default function MessagesPage() {
             userId: userId || undefined,
             pageContext: 'messages',
           }}
+          insights={aiPanel.data}
+          insightsLoading={aiPanel.loading}
         />
       </div>
 
@@ -116,6 +179,7 @@ export default function MessagesPage() {
         onClose={newConversationModal.close}
         onSelectUser={startDm}
         searchUsers={searchUsers}
+        onCreateWorkspace={createWorkspace}
       />
     </PageContainer>
   );

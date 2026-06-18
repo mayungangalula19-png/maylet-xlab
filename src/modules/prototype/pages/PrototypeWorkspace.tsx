@@ -7,6 +7,7 @@ import { PrototypeLifecycle } from '../components/PrototypeLifecycle';
 import { PrototypeUpload } from '../components/PrototypeUpload';
 import { ResearchLinkPanel } from '../components/ResearchLinkPanel';
 import { TestResultsPanel } from '../components/TestResultsPanel';
+import { VisualProofSection } from '../components/VisualProofSection';
 import { VersionHistory } from '../components/VersionHistory';
 import { usePrototype } from '../hooks/usePrototype';
 import { usePrototypeTesting } from '../hooks/usePrototypeTesting';
@@ -26,6 +27,7 @@ export default function PrototypeWorkspace() {
     builds,
     tests,
     prototypeFiles,
+    screenshots,
     aiEval,
     loading,
     error,
@@ -140,6 +142,12 @@ export default function PrototypeWorkspace() {
           </p>
         </div>
         <div className="proto-header-actions">
+          <Link to={`/prototypes/${id}/edit`} className="proto-btn proto-btn--ghost">
+            Edit
+          </Link>
+          <Link to={`/prototypes/${id}/testing/edit`} className="proto-btn proto-btn--ghost">
+            Edit testing
+          </Link>
           <Link to={`/prototypes/${id}/testing`} className="proto-btn proto-btn--secondary">
             Run test
           </Link>
@@ -164,6 +172,16 @@ export default function PrototypeWorkspace() {
       {promoteError ? <p className="proto-error">{promoteError}</p> : null}
 
       <PrototypeLifecycle prototype={prototype} />
+
+      {user?.id ? (
+        <VisualProofSection
+          prototypeId={id}
+          userId={user.id}
+          prototypeName={prototype.name}
+          screenshots={screenshots}
+          onChange={() => refresh({ silent: true })}
+        />
+      ) : null}
 
       <div className="proto-workspace-grid proto-workspace-grid--top">
         <AIEvaluationPanel

@@ -5,29 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../../lib/supabase/client';
-
-// ============================================================
-// TYPES
-// ============================================================
-interface ReportData {
-  totalUsers: number;
-  totalProjects: number;
-  totalExperiments: number;
-  totalPrototypes: number;
-  totalRevenue: number;
-  monthlyRevenue: number;
-  newUsersThisMonth: number;
-  newProjectsThisMonth: number;
-  activeUsers: number;
-  projectsByStatus: {
-    idea: number;
-    experiment: number;
-    prototype: number;
-    launched: number;
-  };
-  projectsBySector: Record<string, number>;
-  revenueByMonth: { month: string; amount: number }[];
-}
+import { fetchAdminReportData, type AdminReportData } from '../../services/adminReports.service';
 
 // ============================================================
 // REPORT CARD COMPONENT
@@ -48,7 +26,7 @@ const ReportCard = ({ title, value, icon, color, onClick }: { title: string; val
 const AdminReports = () => {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
-  const [reportData, setReportData] = useState<ReportData>({
+  const [reportData, setReportData] = useState<AdminReportData>({
     totalUsers: 0,
     totalProjects: 0,
     totalExperiments: 0,
@@ -86,89 +64,8 @@ const AdminReports = () => {
       
       setAdminName(profile?.full_name || session.user.email?.split('@')[0] || 'Admin');
 
-      // Get date ranges
-      const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      // All report queries run in parallel instead of sequentially
-      const [
-        { count: totalUsers },
-        { count: totalProjects },
-        { count: totalExperiments },
-        { count: totalPrototypes },
-        { data: payments },
-        { count: newUsersThisMonth },
-        { count: newProjectsThisMonth },
-        { count: activeUsers },
-        { data: projectsMetaData },
-      ] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('projects').select('*', { count: 'exact', head: true }),
-        supabase.from('experiments').select('*', { count: 'exact', head: true }),
-        supabase.from('prototypes').select('*', { count: 'exact', head: true }),
-        supabase.from('payments').select('amount, created_at'),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
-        supabase.from('projects').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', sevenDaysAgo.toISOString()),
-        supabase.from('projects').select('status, sector'),
-      ]);
-
-      const totalRevenue = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-
-      // Monthly Revenue
-      const monthlyRevenue = payments?.filter(p => new Date(p.created_at) >= firstDayOfMonth)
-        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-
-      // Projects by Status (single status+sector query shared by both breakdowns)
-      const projectsByStatus = {
-        idea: projectsMetaData?.filter(p => p.status === 'Idea').length || 0,
-        experiment: projectsMetaData?.filter(p => p.status === 'Experiment').length || 0,
-        prototype: projectsMetaData?.filter(p => p.status === 'Prototype').length || 0,
-        launched: projectsMetaData?.filter(p => p.status === 'Launched').length || 0,
-      };
-
-      // Projects by Sector
-      const projectsBySector: Record<string, number> = {};
-      projectsMetaData?.forEach(p => {
-        if (p.sector) {
-          projectsBySector[p.sector] = (projectsBySector[p.sector] || 0) + 1;
-        }
-      });
-
-      // Revenue by Month (last 6 months)
-      const revenueByMonth: { month: string; amount: number }[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const monthName = date.toLocaleString('default', { month: 'short' });
-        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-        
-        const monthRevenue = payments?.filter(p => {
-          const pDate = new Date(p.created_at);
-          return pDate >= monthStart && pDate <= monthEnd;
-        }).reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-        
-        revenueByMonth.push({ month: monthName, amount: monthRevenue });
-      }
-
-      setReportData({
-        totalUsers: totalUsers || 0,
-        totalProjects: totalProjects || 0,
-        totalExperiments: totalExperiments || 0,
-        totalPrototypes: totalPrototypes || 0,
-        totalRevenue,
-        monthlyRevenue,
-        newUsersThisMonth: newUsersThisMonth || 0,
-        newProjectsThisMonth: newProjectsThisMonth || 0,
-        activeUsers: activeUsers || 0,
-        projectsByStatus,
-        projectsBySector,
-        revenueByMonth,
-      });
+      const data = await fetchAdminReportData();
+      setReportData(data);
 
     } catch (error) {
       console.error('Error fetching report data:', error);

@@ -296,12 +296,19 @@ export async function fetchResearchDashboard(userId: string): Promise<{
 
   return {
     stats,
-    projects: projectList.map((p, i) => ({
-      id: p.id,
-      name: p.name,
-      sector: p.sector,
-      completionRate: snapshots[i]?.completionRate ?? 0,
-    })),
+    projects: projectList.map((p, i) => {
+      const snapshot = snapshots[i];
+      return {
+        id: p.id,
+        name: p.name,
+        sector: p.sector,
+        completionRate: snapshot?.completionRate ?? 0,
+        notesCount: snapshot?.notes.length ?? 0,
+        findingsCount: snapshot?.findings.length ?? 0,
+        literatureCount: snapshot?.literature.length ?? 0,
+        documentsCount: snapshot?.documents.length ?? 0,
+      };
+    }),
   };
 }
 

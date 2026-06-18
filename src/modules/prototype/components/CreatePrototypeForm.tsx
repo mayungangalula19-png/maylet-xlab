@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
+import { useWorkflowGuard } from '../../workflow';
+import '../../workflow/workflow.css';
 import { createPrototype } from '../services/prototypeService';
 import type { CreatedPrototype } from '../types/prototype.types';
 
@@ -35,6 +37,11 @@ export function CreatePrototypeForm({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [projectId, setProjectId] = useState(defaultProjectId ?? '');
+  const gateProjectId = projectId || defaultProjectId || undefined;
+  const { allowed: gateAllowed, reason: gateReason, loading: gateLoading } = useWorkflowGuard(
+    gateProjectId,
+    'prototype'
+  );
   const [researchId, setResearchId] = useState(defaultResearchId ?? '');
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [researchOptions, setResearchOptions] = useState<ResearchOption[]>([]);
@@ -78,6 +85,10 @@ export function CreatePrototypeForm({
       setError('Prototype name is required');
       return;
     }
+    if (gateProjectId && !gateAllowed) {
+      setError(gateReason ?? 'Research gate approval required');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -110,6 +121,13 @@ export function CreatePrototypeForm({
     <form className="proto-create-form" onSubmit={handleSubmit}>
       <h3 className="proto-create-form__title">Create Prototype</h3>
       <p className="proto-create-form__hint">Start a new innovation build from research or a project.</p>
+
+      {gateProjectId && !gateLoading && !gateAllowed ? (
+        <div className="wf-guard-banner wf-guard-banner--block" role="alert">
+          {gateReason}{' '}
+          <Link to={`/research/${gateProjectId}?tab=gate`}>Complete gate review →</Link>
+        </div>
+      ) : null}
 
       <div className="proto-field">
         <label htmlFor="proto-name">Prototype name *</label>
@@ -185,7 +203,11 @@ export function CreatePrototypeForm({
             Cancel
           </button>
         ) : null}
-        <button type="submit" className="proto-btn proto-btn--primary" disabled={loading || !name.trim()}>
+        <button
+          type="submit"
+          className="proto-btn proto-btn--primary"
+          disabled={loading || gateLoading || !name.trim() || Boolean(gateProjectId && !gateAllowed)}
+        >
           {loading ? 'Creating…' : 'Create prototype'}
         </button>
       </div>

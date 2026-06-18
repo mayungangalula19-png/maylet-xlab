@@ -300,13 +300,16 @@ const AdminRoles = () => {
         return;
       }
 
-      // Update user role
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: assignRole })
-        .eq('id', userData.id);
+      // Update user role via secured RPC (direct update blocked by DB trigger)
+      const { data: rpcResult, error } = await supabase.rpc('admin_assign_role', {
+        p_user_id: userData.id,
+        p_role: assignRole,
+      });
 
       if (error) throw error;
+      if (rpcResult && typeof rpcResult === 'object' && 'ok' in rpcResult && !rpcResult.ok) {
+        throw new Error(String((rpcResult as { error?: string }).error ?? 'Role assignment failed'));
+      }
 
       // Refresh data
       await fetchRolesData();

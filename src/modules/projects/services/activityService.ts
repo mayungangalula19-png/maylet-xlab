@@ -77,6 +77,10 @@ async function fetchTeamActivities(
   if (teamError) {
     if (/recursion/i.test(teamError.message)) {
       console.warn('[projects] team_activities blocked by RLS — apply migration 20240612000006');
+    } else if (/schema cache/i.test(teamError.message) || /Could not find the table/i.test(teamError.message)) {
+      console.warn(
+        '[projects] team_activities table missing — run migration 20240615000011_team_activities_ensure.sql'
+      );
     } else {
       console.warn('[projects] team activities unavailable:', teamError.message);
     }

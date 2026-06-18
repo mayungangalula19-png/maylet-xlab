@@ -2,6 +2,7 @@ import { memo, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AdminSidebar } from '../../admin/components/AdminSidebar';
 import { ContentLoader } from '../components/common/ContentLoader';
+import '../../admin/admin.css';
 
 /**
  * Layout for all admin pages.

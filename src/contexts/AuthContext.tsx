@@ -1,9 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { useAuthState } from '../modules/shared/hooks/useAuthState';
-import { supabase } from '../lib/supabase/client';
-import { ensureProfileRole } from '../services/auth.service';
-import { getCached, setCached } from '../lib/utils/queryCache';
+import { resolveUserRole } from '../services/auth.service';
+import { dedupeAsync, invalidateCache, setCached } from '../lib/utils/queryCache';
 
 export interface AuthContextValue {
   session: Session | null;
@@ -25,48 +24,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user || !session) {
       setRole(null);
       setRoleLoading(false);
+      invalidateCache('profile-role:');
       return;
     }
 
     const cacheKey = `profile-role:${user.id}`;
-    const cached = getCached<string>(cacheKey);
-    if (cached) {
-      setRole(cached);
-      return;
-    }
-
     let cancelled = false;
     setRoleLoading(true);
-    void (async () => {
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
 
-        let nextRole = data?.role ?? null;
-
-        if (!nextRole) {
-          nextRole = await ensureProfileRole(user.id, user.user_metadata);
-        }
-
-        if (!nextRole) {
-          const retry = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .maybeSingle();
-          nextRole = retry.data?.role ?? 'innovator';
-        }
-
+    void dedupeAsync(cacheKey, async () => resolveUserRole(user.id, user.user_metadata))
+      .then((nextRole) => {
         if (cancelled) return;
         setRole(nextRole);
-        setCached(cacheKey, nextRole, 300_000);
-      } finally {
+        setCached(cacheKey, nextRole, 60_000);
+      })
+      .finally(() => {
         if (!cancelled) setRoleLoading(false);
-      }
-    })();
+      });
 
     return () => {
       cancelled = true;

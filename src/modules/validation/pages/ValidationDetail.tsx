@@ -68,6 +68,7 @@ export default function ValidationDetailPage() {
           <p>Review scores, evidence, and funding readiness decision.</p>
         </div>
         <div className="icc-page-actions">
+          <Link to={`/validation/${record.id}/edit`} className="val-btn val-btn--primary">Edit</Link>
           <Link to={`/projects/${record.project_id}`} className="val-btn val-btn--ghost">Project</Link>
           <Link to="/validation" className="val-btn val-btn--secondary">Back</Link>
         </div>

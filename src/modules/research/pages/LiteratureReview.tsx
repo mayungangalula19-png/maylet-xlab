@@ -143,9 +143,10 @@ export default function LiteratureReview() {
       </div>
 
       <div className="research-glass research-panel" style={{ marginTop: '1rem' }}>
-        <h2>Sources ({snapshot.literature.length})</h2>
+        <h2>Sources</h2>
         <LiteratureTable
           items={snapshot.literature}
+          disabled={saving}
           onDelete={async (id) => {
             await withSaving(() => literatureService.remove(id));
           }}
