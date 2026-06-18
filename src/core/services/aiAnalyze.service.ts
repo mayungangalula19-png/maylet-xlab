@@ -9,6 +9,9 @@ export interface AnalysisResult {
   summary: string;
 }
 
+/**
+ * Builds the analysis prompt for the AI.
+ */
 function buildAnalysisPrompt(input: {
   ideaName: string;
   description: string;
@@ -33,50 +36,32 @@ Return a JSON object with exactly these fields:
 Only output valid JSON. No extra text.`;
 }
 
+/**
+ * Parses the AI response, extracting JSON even if wrapped in markdown.
+ */
 function parseAnalysisJson(raw: string): AnalysisResult {
   const trimmed = raw.trim();
+  // Extract JSON from markdown code block if present
   const jsonBlock = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? trimmed;
   const parsed = JSON.parse(jsonBlock) as AnalysisResult;
+  // Basic validation
   if (typeof parsed.score !== 'number' || !parsed.summary) {
     throw new Error('AI response was not a valid analysis payload.');
   }
   return parsed;
 }
 
-async function analyzeViaOpenRouter(prompt: string): Promise<string> {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY?.trim();
-  if (!apiKey) throw new Error('OPENROUTER_KEY_MISSING');
-
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'deepseek/deepseek-r1:free',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
-    }),
-  });
-
-  if (!response.ok) {
-    const errData = (await response.json().catch(() => ({}))) as { error?: { message?: string } };
-    throw new Error(errData.error?.message || `OpenRouter API error (${response.status})`);
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error('OpenRouter returned no content');
-  return content;
-}
-
-async function analyzeViaMayaGroq(prompt: string): Promise<string> {
+/**
+ * Calls the Groq AI via the Maya chat service.
+ */
+async function analyzeViaGroq(prompt: string): Promise<string> {
   return invokeMayaChat([{ role: 'user', content: prompt }], 'groq');
 }
 
+/**
+ * Main function – analyzes a startup idea using Groq.
+ * Requires VITE_GROQ_API_KEY in the environment.
+ */
 export async function analyzeIdea(input: {
   ideaName: string;
   description: string;
@@ -84,41 +69,25 @@ export async function analyzeIdea(input: {
   industry: string;
 }): Promise<AnalysisResult> {
   const prompt = buildAnalysisPrompt(input);
-  const hasOpenRouter = Boolean(import.meta.env.VITE_OPENROUTER_API_KEY?.trim());
-  const hasGroq = Boolean(import.meta.env.VITE_GROQ_API_KEY?.trim());
 
-  if (!hasOpenRouter && !hasGroq) {
+  // Check for Groq API key
+  const hasGroq = Boolean(import.meta.env.VITE_GROQ_API_KEY?.trim());
+  if (!hasGroq) {
     throw new Error(
-      'No AI provider configured. Add VITE_OPENROUTER_API_KEY or VITE_GROQ_API_KEY to your .env file (see .env.example).'
+      'Missing VITE_GROQ_API_KEY. Please add your Groq API key to the .env file.'
     );
   }
 
   let content: string | null = null;
-  let lastError: Error | null = null;
-
-  if (hasOpenRouter) {
-    try {
-      content = await analyzeViaOpenRouter(prompt);
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      if (!hasGroq) throw lastError;
-    }
-  }
-
-  if (!content && hasGroq) {
-    try {
-      content = await analyzeViaMayaGroq(prompt);
-    } catch (err) {
-      const groqErr = err instanceof Error ? err : new Error(String(err));
-      if (lastError) {
-        throw new Error(`${lastError.message}. Groq fallback also failed: ${groqErr.message}`);
-      }
-      throw groqErr;
-    }
+  try {
+    content = await analyzeViaGroq(prompt);
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Groq analysis failed: ${errorMsg}`);
   }
 
   if (!content) {
-    throw lastError ?? new Error('Analysis failed with no AI response.');
+    throw new Error('Analysis failed with no AI response.');
   }
 
   return parseAnalysisJson(content);
