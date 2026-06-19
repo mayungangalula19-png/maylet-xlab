@@ -27,7 +27,7 @@ const Register = lazy(() => import('../modules/auth/pages/Register'));
 const ForgotPassword = lazy(() => import('../modules/auth/pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('../modules/auth/pages/ResetPassword'));
 const VerifyEmail = lazy(() => import('../modules/auth/pages/VerifyEmail'));
-const AuthCallback = lazy(() => import('../pages/auth/AuthCallback'));
+const AuthCallback = lazy(() => import('../modules/auth/pages/AuthCallback'));
 
 
 const Features = lazy(() =>
@@ -242,9 +242,9 @@ export const Router = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-<Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
+
 
         {/* ========== PUBLIC MARKETING PAGES ========== */}
         <Route path="/features" element={<Features />} />
