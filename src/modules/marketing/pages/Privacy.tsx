@@ -16,7 +16,7 @@ const Privacy = () => {
           <h1>Privacy Policy</h1>
           <p className="last-updated">Last Updated: {lastUpdated}</p>
           <p className="intro">
-            At Maylet XLab, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, 
+            At Maylet XLab, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose,
             and safeguard your information when you use our platform. Please read this privacy policy carefully.
           </p>
         </div>
@@ -90,7 +90,7 @@ const Privacy = () => {
         <section id="section-4" className="privacy-section">
           <h2>4. Data Security</h2>
           <p>
-            We implement appropriate technical and organizational measures to protect your personal information against 
+            We implement appropriate technical and organizational measures to protect your personal information against
             accidental or unlawful destruction, loss, alteration, unauthorized disclosure, or access.
           </p>
           <ul>
@@ -100,7 +100,7 @@ const Privacy = () => {
             <li><strong>Regular Audits:</strong> We conduct regular security audits and vulnerability assessments.</li>
           </ul>
           <p>
-            However, no method of transmission over the Internet or method of electronic storage is 100% secure. 
+            However, no method of transmission over the Internet or method of electronic storage is 100% secure.
             While we strive to use commercially acceptable means to protect your personal information, we cannot guarantee its absolute security.
           </p>
         </section>
@@ -139,7 +139,7 @@ const Privacy = () => {
             <li><strong>Session Cookies:</strong> Temporary cookies that expire when you close your browser.</li>
           </ul>
           <p>
-            You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. 
+            You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
             However, if you do not accept cookies, you may not be able to use some portions of our platform.
           </p>
         </section>
@@ -156,7 +156,7 @@ const Privacy = () => {
             <li><strong>Google Analytics:</strong> For usage analytics (you can opt-out).</li>
           </ul>
           <p>
-            These third-party services have their own privacy policies, and we encourage you to review them. 
+            These third-party services have their own privacy policies, and we encourage you to review them.
             We are not responsible for the privacy practices of these third-party services.
           </p>
         </section>
@@ -165,12 +165,12 @@ const Privacy = () => {
         <section id="section-8" className="privacy-section">
           <h2>8. International Data Transfers</h2>
           <p>
-            Maylet XLab is based in Tanzania, but we may transfer your data to servers located in other countries 
-            (including the United States and European Union) to provide our services. By using our platform, 
+            Maylet XLab is based in Tanzania, but we may transfer your data to servers located in other countries
+            (including the United States and European Union) to provide our services. By using our platform,
             you consent to the transfer of your information to countries with different data protection laws.
           </p>
           <p>
-            We take appropriate safeguards to ensure that your data is protected in accordance with this Privacy Policy, 
+            We take appropriate safeguards to ensure that your data is protected in accordance with this Privacy Policy,
             including using standard contractual clauses approved by the European Commission.
           </p>
         </section>
@@ -180,7 +180,7 @@ const Privacy = () => {
           <h2>9. Data Retention</h2>
           <p>
             We retain your personal information for as long as your account is active or as needed to provide you with services.
-            We may also retain and use your information as necessary to comply with our legal obligations, resolve disputes, 
+            We may also retain and use your information as necessary to comply with our legal obligations, resolve disputes,
             and enforce our agreements.
           </p>
           <ul>
@@ -196,9 +196,9 @@ const Privacy = () => {
         <section id="section-10" className="privacy-section">
           <h2>10. Children's Privacy</h2>
           <p>
-            Our platform is not directed to children under the age of 13. We do not knowingly collect personal information 
-            from children under 13. If you are a parent or guardian and you are aware that your child has provided us with 
-            personal information, please contact us. If we become aware that we have collected personal information from 
+            Our platform is not directed to children under the age of 13. We do not knowingly collect personal information
+            from children under 13. If you are a parent or guardian and you are aware that your child has provided us with
+            personal information, please contact us. If we become aware that we have collected personal information from
             a child under age 13 without verification of parental consent, we will take steps to remove that information.
           </p>
           <p>
@@ -210,12 +210,12 @@ const Privacy = () => {
         <section id="section-11" className="privacy-section">
           <h2>11. Changes to This Privacy Policy</h2>
           <p>
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new 
+            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
             Privacy Policy on this page and updating the "Last Updated" date at the top.
           </p>
           <p>
-            You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy 
-            are effective when they are posted on this page. For material changes, we will provide additional notice 
+            You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy
+            are effective when they are posted on this page. For material changes, we will provide additional notice
             (such as an email notification).
           </p>
         </section>
@@ -227,8 +227,8 @@ const Privacy = () => {
           <p>
             <strong>Maylet Technology Ltd.</strong><br />
             Email: <a href="mailto:privacy@mayletxlab.com">privacy@mayletxlab.com</a><br />
-            Phone: +255 797567001<br />
-            Address: Dar es Salaam, Tanzania
+            Phone: +255 757 938 827<br />
+            Address: Arusha, Tanzania
           </p>
           <p>
             For data protection inquiries, you may also contact our Data Protection Officer at <a href="mailto:dpo@mayletxlab.com">dpo@mayletxlab.com</a>.

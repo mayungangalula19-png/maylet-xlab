@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
-import type { ServerEvent } from '../../types/events.js';
+import type { ServerEvent } from '../types/events.js';
 import type { WorkspaceEvent } from '../types/workspace.types.js';
-import { logger } from '../../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 const WS_CHANNEL = 'maylet:messaging:events';
 const AGENT_CHANNEL = 'maylet:workspace:events';

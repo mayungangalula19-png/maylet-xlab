@@ -6,14 +6,12 @@ import {
   ECOSYSTEM_PROGRAMS,
   FOOTER_NAV,
   INNOVATION_FLOW,
-  PLATFORM_STATS,
   PRICING_PLANS,
   RESOURCE_LINKS,
   TESTIMONIALS,
 } from './landing.data';
 import { LandingHeader } from './components/LandingHeader';
 import { LandingHero } from './components/LandingHero';
-import { LandingStats } from './components/LandingStats';
 import { LandingFeatures } from './components/LandingFeatures';
 import { LandingWorkflow } from './components/LandingWorkflow';
 import { LandingEcosystem } from './components/LandingEcosystem';
@@ -77,7 +75,6 @@ export default function LandingPage() {
       />
 
       <LandingHero steps={INNOVATION_FLOW} testimonials={TESTIMONIALS} isAuthenticated={!!user} />
-      <LandingStats stats={PLATFORM_STATS} />
       <LandingFeatures features={CORE_FEATURES} />
       <LandingWorkflow steps={INNOVATION_FLOW} />
       <LandingEcosystem programs={ECOSYSTEM_PROGRAMS} />

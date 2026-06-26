@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 const About = () => {
   const teamMembers = [
     { name: 'Engineer Mayunga', role: 'Founder & Lead Developer', bio: 'Full-stack engineer passionate about innovation and technology in Africa.', avatar: 'EM', color: '#7c5fe6' },
-    { name: 'Amina Kimaro', role: 'Head of Innovation', bio: 'AgriTech specialist with 10+ years of experience in startup incubation.', avatar: 'AK', color: '#4fd1c5' },
-    { name: 'David Mwangi', role: 'Technical Lead', bio: 'Full-stack developer and open source contributor.', avatar: 'DM', color: '#48bb78' },
-    { name: 'Sarah Okonkwo', role: 'Product Manager', bio: 'Product strategist focused on user-centered design.', avatar: 'SO', color: '#f093fb' },
+    { name: 'Amedinana Charles', role: 'Head of Innovation', bio: 'AgriTech specialist with 10+ years of experience in startup incubation.', avatar: 'AK', color: '#4fd1c5' },
+    { name: 'Faustine Jonas', role: 'Technical Lead', bio: 'Full-stack developer and open source contributor.', avatar: 'DM', color: '#48bb78' },
+    { name: 'Ibrahim ndonsi', role: 'Product Manager', bio: 'Product strategist focused on user-centered design.', avatar: 'SO', color: '#f093fb' },
   ];
 
   const values = [
@@ -17,7 +17,7 @@ const About = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%)', color: '#ffffff', fontFamily: 'Inter, sans-serif' }}>
-      
+
       {/* Hero Section */}
       <div style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '800px', margin: '0 auto' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(124,95,230,0.12)', border: '1px solid rgba(124,95,230,0.25)', borderRadius: '40px', padding: '0.4rem 1rem', fontSize: '0.8rem', color: '#9b7ff0', marginBottom: '1rem' }}>

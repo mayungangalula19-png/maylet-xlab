@@ -286,8 +286,8 @@ const Terms = () => {
           <p>
             <strong>Maylet Technology Ltd.</strong><br />
             Email: legal@mayletxlab.com<br />
-            Phone: +255 797567001<br />
-            Address: Dar es Salaam, Tanzania
+            Phone: +255 757 938 827<br />
+            Address: Arusha, Tanzania
           </p>
         </section>
 

@@ -42,26 +42,19 @@ export function LandingHero({ steps, testimonials, isAuthenticated }: Props) {
             </>
           )}
         </div>
-        <div className="lp-hero-proof">
-          <div className="lp-proof-avatars">
-            {testimonials.slice(0, 5).map((t, i) => (
-              <span key={t.id} style={{ zIndex: 5 - i }}>
-                {t.avatar}
-              </span>
-            ))}
-          </div>
-          <div className="lp-proof-text">
-            Join <strong>10,000+</strong> innovators building the future
-          </div>
-        </div>
       </section>
 
       <section className="lp-hero-visual fade-in-up lp-delay-1">
-        <div className="lp-visual-portal">
-          <div className="lp-visual-center">X</div>
-          <div className="lp-visual-pulse" />
-          <div className="lp-visual-orb lp-visual-orb--1" />
-          <div className="lp-visual-orb lp-visual-orb--2" />
+        <div
+          className="lp-visual-portal"
+          style={{
+            backgroundImage: 'url("/images/maylet%20xlab.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+
         </div>
         <div className="lp-flow-grid">
           {steps.map((step, idx) => (

@@ -1,5 +1,5 @@
-import type { AgentHandler, AgentInsight, WorkspaceContext } from '../../types/workspace.types.js';
-import { AiReasoningService } from '../../aiReasoning.service.js';
+import type { AgentHandler, AgentInsight, WorkspaceContext } from '../types/workspace.types.js';
+import { AiReasoningService } from '../aiReasoning.service.js';
 
 const reasoning = new AiReasoningService();
 

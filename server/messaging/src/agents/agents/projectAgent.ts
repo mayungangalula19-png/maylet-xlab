@@ -1,4 +1,4 @@
-import type { AgentHandler, AgentInsight, WorkspaceContext } from '../../types/workspace.types.js';
+import type { AgentHandler, AgentInsight, WorkspaceContext } from '../types/workspace.types.js';
 
 export const projectAgent: AgentHandler = {
   id: 'project',

@@ -7,7 +7,7 @@ import './styles/globals.css';
 
 // Preconnect to the Supabase origin so the first API/auth request skips
 // DNS + TCP + TLS setup (URL only known at build time, so injected here).
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseUrl = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_SUPABASE_URL as string | undefined);
 if (supabaseUrl) {
   try {
     const link = document.createElement('link');

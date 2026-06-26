@@ -1,9 +1,9 @@
-// C:\Users\user\maylet-xlab\src\app\routes\MayaAssistantPage.tsx
+// src/modules/maya/pages/MayaAssistantPage.tsx
 // MAYA AI Assistant – Real AI integration with GROQ
 // Supports project context, conversation memory.
-// Fixed: timestamp stored as ISO string, converted to Date on load.
+// Fully responsive: works on mobile, tablet, and desktop.
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase/client';
 import { invokeMayaChat } from '../../../lib/maya/mayaChat.service';
@@ -23,7 +23,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  timestamp: string; // Store as ISO string for serialization
+  timestamp: string; // ISO string
 }
 
 interface Conversation {
@@ -48,12 +48,11 @@ You help innovators validate ideas, run experiments, build prototypes, and secur
 Answer clearly and concisely, always suggesting next steps.`;
 };
 
-// Helper to format timestamp for display
 const formatTime = (isoString: string) => {
   try {
     const date = new Date(isoString);
     if (isNaN(date.getTime())) return '';
-    return date.toLocaleTimeString();
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } catch {
     return '';
   }
@@ -70,7 +69,10 @@ const MayaAssistantPage = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Mobile sidebar state
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
 
   // Fetch user's projects
@@ -107,7 +109,7 @@ const MayaAssistantPage = () => {
         const parsed = JSON.parse(stored) as Conversation[];
         setConversations(parsed);
         if (parsed.length > 0) setActiveConversationId(parsed[0].id);
-      } catch (e) {}
+      } catch (e) { /* ignore parse errors */ }
     }
   }, []);
 
@@ -117,13 +119,25 @@ const MayaAssistantPage = () => {
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [activeConversation?.messages]);
+  }, [activeConversation?.messages, scrollToBottom]);
+
+  // Auto-grow textarea
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    // Auto-resize
+    const ta = e.target;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  };
+
+  // Close mobile sidebar on outside click
+  const closeMobileSidebar = useCallback(() => setMobileSidebarOpen(false), []);
 
   const createNewConversation = () => {
     const newConv: Conversation = {
@@ -134,6 +148,12 @@ const MayaAssistantPage = () => {
     };
     setConversations(prev => [newConv, ...prev]);
     setActiveConversationId(newConv.id);
+    setMobileSidebarOpen(false);
+  };
+
+  const selectConversation = (id: string) => {
+    setActiveConversationId(id);
+    setMobileSidebarOpen(false); // close drawer after selection on mobile
   };
 
   const sendMessage = async () => {
@@ -146,7 +166,11 @@ const MayaAssistantPage = () => {
       timestamp: new Date().toISOString(),
     };
 
-    // Update conversation with user message
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
     let currentConv = activeConversation;
     if (!currentConv) {
       const newId = Date.now().toString();
@@ -194,14 +218,14 @@ const MayaAssistantPage = () => {
         )
       );
     } catch (err) {
-      console.error('Groq API request failed:', err);
+      console.error('MAYA AI request failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to get response from AI');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -210,157 +234,149 @@ const MayaAssistantPage = () => {
 
   return (
     <div className="maya-container">
-      <main className="maya-main">
-        <div className="maya-header">
+      {/* ── Header ── */}
+      <div className="maya-header">
+        <button
+          className="maya-sidebar-toggle"
+          onClick={() => setMobileSidebarOpen(o => !o)}
+          aria-label="Toggle conversations"
+        >
+          💬
+        </button>
+        <div className="maya-header-text">
           <h1>🤖 MAYA AI Assistant</h1>
-          <p>Your innovation co-pilot – ask anything about your projects, experiments, or startup journey</p>
+          <p>Your innovation co-pilot – ask anything about your projects</p>
         </div>
+      </div>
 
-        <div className="maya-workspace">
-          <aside className="maya-sidebar">
-            <div className="project-selector">
-              <label>📁 Project Context</label>
-              <select
-                value={selectedProjectId || ''}
-                onChange={(e) => setSelectedProjectId(e.target.value || null)}
+      {/* ── Mobile overlay ── */}
+      <div
+        className={`maya-sidebar-overlay ${mobileSidebarOpen ? 'is-open' : ''}`}
+        onClick={closeMobileSidebar}
+        aria-hidden="true"
+      />
+
+      {/* ── Workspace ── */}
+      <div className="maya-workspace">
+
+        {/* ── Sidebar ── */}
+        <aside className={`maya-sidebar ${mobileSidebarOpen ? 'is-open' : ''}`}>
+          <div className="project-selector">
+            <label>📁 Project Context</label>
+            <select
+              value={selectedProjectId || ''}
+              onChange={(e) => setSelectedProjectId(e.target.value || null)}
+            >
+              <option value="">General (no project context)</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name} ({p.sector})</option>
+              ))}
+            </select>
+            <p className="context-hint">
+              {selectedProject ? `Context: ${selectedProject.name}` : 'General innovation advice'}
+            </p>
+          </div>
+
+          <div className="conversations-header">
+            <span>📋 Conversations</span>
+            <button onClick={createNewConversation} className="new-chat-btn">+ New</button>
+          </div>
+
+          <div className="conversations-list">
+            {conversations.map(conv => (
+              <button
+                key={conv.id}
+                className={`conv-item ${activeConversationId === conv.id ? 'active' : ''}`}
+                onClick={() => selectConversation(conv.id)}
               >
-                <option value="">General (no project context)</option>
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} ({p.sector})</option>
-                ))}
-              </select>
-              <p className="context-hint">
-                {selectedProject ? `Using context: ${selectedProject.name}` : 'General innovation advice'}
-              </p>
-            </div>
-
-            <div className="conversations-header">
-              <span>📋 Conversations</span>
-              <button onClick={createNewConversation} className="new-chat-btn">+ New</button>
-            </div>
-            <div className="conversations-list">
-              {conversations.map(conv => (
-                <button
-                  key={conv.id}
-                  className={`conv-item ${activeConversationId === conv.id ? 'active' : ''}`}
-                  onClick={() => setActiveConversationId(conv.id)}
-                >
-                  <span>💬</span>
-                  <span className="conv-title">
-                    {conv.messages[0]?.content.slice(0, 30) || 'New conversation'}
-                  </span>
-                </button>
-              ))}
-              {conversations.length === 0 && (
-                <div className="empty-conv">No conversations yet. Start a new one!</div>
-              )}
-            </div>
-          </aside>
-
-          <div className="chat-area">
-            <div className="messages-container">
-              {activeConversation?.messages.length === 0 && (
-                <div className="welcome-message">
-                  <div className="welcome-icon">✨</div>
-                  <h3>How can MAYA help you today?</h3>
-                  <p>Try asking about:</p>
-                  <div className="suggestions">
-                    <button onClick={() => setInput('How do I validate my startup idea?')}>💡 Validate an idea</button>
-                    <button onClick={() => setInput('What experiments should I run for my project?')}>🧪 Experiments</button>
-                    <button onClick={() => setInput('How can I improve my pitch deck?')}>📈 Fundraising tips</button>
-                  </div>
-                </div>
-              )}
-              {activeConversation?.messages.map((msg) => (
-                <div key={msg.id} className={`message ${msg.role}`}>
-                  <div className="message-avatar">{msg.role === 'user' ? '👤' : '🤖'}</div>
-                  <div className="message-content">
-                    <div className="message-text">{msg.content}</div>
-                    <div className="message-time">{formatTime(msg.timestamp)}</div>
-                  </div>
-                </div>
-              ))}
-              {loading && (
-                <div className="message assistant">
-                  <div className="message-avatar">🤖</div>
-                  <div className="message-content">
-                    <div className="typing-indicator">
-                      <span></span><span></span><span></span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {error && (
-                <div className="error-message">
-                  ⚠️ {error}. Please try again later.
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div className="input-area">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask MAYA anything about your innovation journey..."
-                rows={3}
-                disabled={loading}
-              />
-              <button onClick={sendMessage} disabled={loading || !input.trim()}>
-                {loading ? 'Thinking...' : 'Send →'}
+                <span>💬</span>
+                <span className="conv-title">
+                  {conv.messages[0]?.content.slice(0, 28) || 'New conversation'}
+                </span>
               </button>
-            </div>
+            ))}
+            {conversations.length === 0 && (
+              <div className="empty-conv">No conversations yet. Start one!</div>
+            )}
+          </div>
+        </aside>
+
+        {/* ── Chat Area ── */}
+        <div className="chat-area">
+          <div className="messages-container">
+            {/* Welcome state */}
+            {(!activeConversation || activeConversation.messages.length === 0) && (
+              <div className="welcome-message">
+                <div className="welcome-icon">✨</div>
+                <h3>How can MAYA help you today?</h3>
+                <p>Try asking about:</p>
+                <div className="suggestions">
+                  <button onClick={() => setInput('How do I validate my startup idea?')}>
+                    💡 Validate an idea
+                  </button>
+                  <button onClick={() => setInput('What experiments should I run for my project?')}>
+                    🧪 Experiments
+                  </button>
+                  <button onClick={() => setInput('How can I improve my pitch deck?')}>
+                    📈 Fundraising tips
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Messages */}
+            {activeConversation?.messages.map((msg) => (
+              <div key={msg.id} className={`message ${msg.role}`}>
+                <div className="message-avatar">
+                  {msg.role === 'user' ? '👤' : '🤖'}
+                </div>
+                <div className="message-content">
+                  <div className="message-text">{msg.content}</div>
+                  <div className="message-time">{formatTime(msg.timestamp)}</div>
+                </div>
+              </div>
+            ))}
+
+            {/* Loading indicator */}
+            {loading && (
+              <div className="message assistant">
+                <div className="message-avatar">🤖</div>
+                <div className="message-content">
+                  <div className="typing-indicator">
+                    <span /><span /><span />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
+            {error && (
+              <div className="error-message">
+                ⚠️ {error}. Please try again later.
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* ── Input ── */}
+          <div className="input-area">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask MAYA anything about your innovation journey..."
+              rows={1}
+              disabled={loading}
+            />
+            <button onClick={sendMessage} disabled={loading || !input.trim()}>
+              {loading ? '...' : 'Send →'}
+            </button>
           </div>
         </div>
-      </main>
 
-      <style>{`
-        /* (same styles as before – omitted for brevity, but keep all existing CSS) */
-        .maya-container { display: flex; min-height: 100vh; background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%); }
-        .maya-main { flex: 1; margin-left: 0; padding: 2rem; transition: margin-left 0.3s ease; }
-        @media (max-width: 768px) { .maya-main { margin-left: 0; padding: 1rem; padding-top: 5rem; } }
-        .maya-header { margin-bottom: 2rem; }
-        .maya-header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, #9b7ff0); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .maya-header p { color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
-        .maya-workspace { display: flex; gap: 1.5rem; height: calc(100vh - 160px); min-height: 500px; }
-        .maya-sidebar { width: 280px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
-        .project-selector label { font-size: 0.7rem; text-transform: uppercase; color: #7c5fe6; letter-spacing: 1px; display: block; margin-bottom: 0.25rem; }
-        .project-selector select { width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; }
-        .context-hint { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; }
-        .conversations-header { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
-        .new-chat-btn { background: #7c5fe6; border: none; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; cursor: pointer; }
-        .conversations-list { display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; }
-        .conv-item { background: rgba(255,255,255,0.05); border: none; border-radius: 12px; padding: 0.6rem; text-align: left; color: white; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
-        .conv-item.active { background: #7c5fe6; }
-        .conv-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .empty-conv { color: rgba(255,255,255,0.4); text-align: center; font-size: 0.8rem; padding: 1rem; }
-        .chat-area { flex: 1; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
-        .messages-container { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
-        .message { display: flex; gap: 0.75rem; align-items: flex-start; }
-        .message.user .message-avatar { background: #7c5fe6; }
-        .message.assistant .message-avatar { background: #2fd4ff; }
-        .message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); }
-        .message-content { flex: 1; background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 16px; }
-        .message.user .message-content { background: rgba(124,95,230,0.2); }
-        .message-text { white-space: pre-wrap; line-height: 1.5; font-size: 0.9rem; }
-        .message-time { font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.25rem; }
-        .typing-indicator { display: flex; gap: 4px; padding: 0.25rem 0; }
-        .typing-indicator span { width: 8px; height: 8px; background: white; border-radius: 50%; animation: bounce 1.4s infinite; }
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
-        .welcome-message { text-align: center; padding: 2rem; }
-        .welcome-icon { font-size: 3rem; margin-bottom: 1rem; }
-        .suggestions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
-        .suggestions button { background: rgba(255,255,255,0.1); border: none; padding: 0.5rem 1rem; border-radius: 30px; color: white; cursor: pointer; transition: all 0.2s; }
-        .suggestions button:hover { background: #7c5fe6; }
-        .input-area { padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 1rem; }
-        .input-area textarea { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 0.75rem; color: white; resize: none; }
-        .input-area button { background: linear-gradient(135deg, #7c5fe6, #2fd4ff); border: none; padding: 0 1.5rem; border-radius: 40px; font-weight: 600; cursor: pointer; color: #0a0d1a; }
-        .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .error-message { background: rgba(252,129,129,0.2); border: 1px solid #fc8181; border-radius: 12px; padding: 0.75rem; color: #fc8181; margin: 0.5rem 0; }
-      `}</style>
+      </div>
     </div>
   );
 };

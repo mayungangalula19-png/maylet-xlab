@@ -34,8 +34,8 @@ const Contact = () => {
         <div className="contact-info">
           <h3>Other ways to reach us</h3>
           <div className="info-item">📧 support@mayletxlab.com</div>
-          <div className="info-item">📞 +255 123 456 789</div>
-          <div className="info-item">📍 Dar es Salaam, Tanzania</div>
+          <div className="info-item">📞 +255 757 938 827</div>
+          <div className="info-item">📍 Arusha, Tanzania</div>
         </div>
       </div>
       <style>{`

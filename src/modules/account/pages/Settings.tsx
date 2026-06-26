@@ -25,7 +25,7 @@ interface UserProfile {
 }
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'account' | 'api' | 'billing'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'account' | 'api' | 'billing' | 'help' | 'feedback'>('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -262,6 +262,13 @@ const Settings = () => {
           </button>
           <button className={`nav-item ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>
             <span className="nav-icon">⚙️</span> Account
+          </button>
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0.5rem 0' }} />
+          <button className={`nav-item ${activeTab === 'feedback' ? 'active' : ''}`} onClick={() => setActiveTab('feedback')}>
+            <span className="nav-icon">💬</span> Feedback
+          </button>
+          <button className={`nav-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
+            <span className="nav-icon">🛠️</span> Help & Support
           </button>
         </nav>
 
@@ -538,6 +545,46 @@ const Settings = () => {
                 <button className="btn-outline">Export as JSON</button>
                 <button className="btn-outline">Export as CSV</button>
               </div>
+            </div>
+          </div>
+        )}
+        {/* Help & Support Tab */}
+        {activeTab === 'help' && (
+          <div className="settings-card">
+            <h2>Help & Support</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '1.5rem' }}>Find answers, contact support, or browse documentation.</p>
+            <div className="security-section">
+              <h3>📖 Documentation</h3>
+              <p>Browse guides, tutorials, and API references.</p>
+              <a href="/resources" className="btn-outline" style={{ display: 'inline-block', marginTop: '0.5rem' }}>View Documentation →</a>
+            </div>
+            <div className="security-section">
+              <h3>❓ FAQ</h3>
+              <p>Find answers to the most common questions.</p>
+              <a href="/faq" className="btn-outline" style={{ display: 'inline-block', marginTop: '0.5rem' }}>Browse FAQ →</a>
+            </div>
+            <div className="security-section">
+              <h3>✉️ Contact Support</h3>
+              <p>Can't find what you need? Reach out to our team.</p>
+              <a href="/contact" className="btn-outline" style={{ display: 'inline-block', marginTop: '0.5rem' }}>Contact Us →</a>
+            </div>
+          </div>
+        )}
+
+        {/* Feedback Tab */}
+        {activeTab === 'feedback' && (
+          <div className="settings-card">
+            <h2>Feedback</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '1.5rem' }}>Share your thoughts, report bugs, or suggest new features.</p>
+            <div className="security-section">
+              <h3>💡 Feature Requests</h3>
+              <p>Have an idea that would make Maylet XLab better? We'd love to hear it.</p>
+              <a href="/feedback" className="btn-primary" style={{ display: 'inline-block', marginTop: '0.5rem' }}>Submit Feedback →</a>
+            </div>
+            <div className="security-section">
+              <h3>🐛 Report a Bug</h3>
+              <p>Found something broken? Let us know so we can fix it.</p>
+              <a href="/contact" className="btn-outline" style={{ display: 'inline-block', marginTop: '0.5rem' }}>Report Bug →</a>
             </div>
           </div>
         )}

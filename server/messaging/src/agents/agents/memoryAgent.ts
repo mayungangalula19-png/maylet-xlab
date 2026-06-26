@@ -1,6 +1,6 @@
-import type { AgentHandler, AgentInsight, MemoryRecord, WorkspaceContext } from '../../types/workspace.types.js';
-import type { MemoryEngine } from '../../memoryEngine.js';
-import { AiReasoningService } from '../../aiReasoning.service.js';
+import type { AgentHandler, AgentInsight, MemoryRecord, WorkspaceContext } from '../types/workspace.types.js';
+import type { MemoryEngine } from '../memoryEngine.js';
+import { AiReasoningService } from '../aiReasoning.service.js';
 
 const reasoning = new AiReasoningService();
 
