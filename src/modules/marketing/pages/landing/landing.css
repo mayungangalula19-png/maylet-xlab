@@ -5,6 +5,7 @@
   font-family: 'Inter', sans-serif;
   color: #f7f9ff;
   overflow-x: hidden;
+  overflow-y: visible; /* Ruhusu scrolling wima */
   scroll-behavior: smooth;
 }
 
@@ -263,9 +264,11 @@
   background: rgba(0, 0, 0, 0.6);
   opacity: 0;
   transition: opacity 0.25s ease;
+  pointer-events: none; /* usizuie scrolling wakati imefichwa */
 }
 .lp-mobile-menu--open .lp-mobile-menu__backdrop {
   opacity: 1;
+  pointer-events: auto;
 }
 .lp-mobile-menu__panel {
   position: fixed;
@@ -1157,4 +1160,29 @@
   .lp-flow-grid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* ============================================================
+   🚨 FIX: Hakikisha scrolling inafanya kazi daima
+   ============================================================ */
+html,
+body {
+  overflow-y: auto !important;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hakikisha backdrop ya mobile menu haizui scrolling wakati imefungwa */
+.lp-mobile-menu__backdrop {
+  pointer-events: none;
+}
+.lp-mobile-menu--open .lp-mobile-menu__backdrop {
+  pointer-events: auto;
+}
+
+/* Hakikisha panel ya menu inaweza kusogea ikiwa na maandishi mengi */
+.lp-mobile-menu__panel {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }

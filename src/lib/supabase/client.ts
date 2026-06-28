@@ -1,12 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const isDev = import.meta.env.DEV;
+// In development, use the Vite proxy with an absolute URL.
+// In production, use the real Supabase URL.
+const supabaseUrl = import.meta.env.DEV
+  ? `${window.location.origin}/supabase`  // e.g., http://localhost:5173/supabase
+  : import.meta.env.VITE_SUPABASE_URL;
 
-const supabaseUrl = isDev ? 'http://localhost:3001' : import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = isDev ? 'mock-anon-key' : import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!isDev && (!supabaseUrl || !supabaseAnonKey)) {
+if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl || 'http://localhost:3001', supabaseAnonKey || 'mock-anon-key');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

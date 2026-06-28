@@ -13,6 +13,15 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // ============ ADD PROXY HERE ============
+    proxy: {
+      '/supabase': {
+        target: 'https://bonglgozhezuwfkyypsg.supabase.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/supabase/, ''),
+      },
+    },
+    // ==========================================
   },
   build: {
     chunkSizeWarningLimit: 500,

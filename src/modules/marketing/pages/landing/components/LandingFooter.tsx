@@ -40,7 +40,7 @@ export function LandingFooter({ columns }: Props) {
       </div>
 
       <div className="lp-footer__bottom">
-        <span>© {year} Maylet XLab. All rights reserved.</span>
+        <span>© {year} Maylet technology Ltd. All rights reserved.</span>
         <div className="lp-footer__social">
           <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
             𝕏

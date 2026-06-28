@@ -27,36 +27,44 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Track scroll for header transparency
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Handle body overflow to prevent background scroll when mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
     return () => {
       document.body.style.overflow = '';
     };
   }, [mobileOpen]);
 
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileOpen]);
+
+  // Close menu on Escape key
   useEffect(() => {
     if (!mobileOpen) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileOpen(false);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
     };
-
-    const onResize = () => {
-      if (window.innerWidth > 768) setMobileOpen(false);
-    };
-
     window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('resize', onResize);
-    };
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, [mobileOpen]);
 
   const closeMobile = () => setMobileOpen(false);
@@ -70,7 +78,7 @@ export default function LandingPage() {
       <LandingHeader
         scrolled={scrolled}
         mobileOpen={mobileOpen}
-        onToggleMobile={() => setMobileOpen((open) => !open)}
+        onToggleMobile={() => setMobileOpen((prev) => !prev)}
         onCloseMobile={closeMobile}
       />
 
