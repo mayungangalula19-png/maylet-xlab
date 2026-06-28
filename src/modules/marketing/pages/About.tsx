@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 const About = () => {
   const teamMembers = [
     { name: 'Engineer Mayunga', role: 'Founder & Lead Developer', bio: 'Full-stack engineer passionate about innovation and technology in Africa.', avatar: 'EM', color: '#7c5fe6' },
-    { name: 'Amedinana Charles', role: 'Head of Innovation', bio: 'AgriTech specialist with 10+ years of experience in startup incubation.', avatar: 'AK', color: '#4fd1c5' },
-    { name: 'Faustine Jonas', role: 'Technical Lead', bio: 'Full-stack developer and open source contributor.', avatar: 'DM', color: '#48bb78' },
-    { name: 'Ibrahim ndonsi', role: 'Product Manager', bio: 'Product strategist focused on user-centered design.', avatar: 'SO', color: '#f093fb' },
+    { name: 'Amedinana Charles', role: 'Head of Innovation', bio: 'AgriTech specialist with 10+ years of experience in startup incubation.', avatar: 'AC', color: '#4fd1c5' },
+    { name: 'Faustine Jonas', role: 'Technical Lead', bio: 'Full-stack developer and open source contributor.', avatar: 'FJ', color: '#48bb78' },
+    { name: 'Ibrahim ndonsi', role: 'Product Manager', bio: 'Product strategist focused on user-centered design.', avatar: 'IN', color: '#f093fb' },
   ];
 
   const values = [
