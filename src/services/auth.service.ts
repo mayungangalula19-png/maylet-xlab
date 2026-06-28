@@ -10,11 +10,13 @@ type EnsureProfileResult = {
 
 /** Read the signed-in user's role from the database. */
 export async function fetchMyRole(): Promise<string | null> {
+  console.log('[fetchMyRole] Calling RPC get_my_role...');
   const { data, error } = await supabase.rpc('get_my_role');
   if (error) {
-    console.warn('[auth.service] get_my_role:', error.message);
+    console.warn('[fetchMyRole] RPC error:', error.message);
     return null;
   }
+  console.log('[fetchMyRole] RPC returned:', data);
   return typeof data === 'string' && data.length > 0 ? data : null;
 }
 
@@ -27,9 +29,21 @@ export async function resolveUserRole(
   userId: string,
   metadata?: Record<string, unknown>
 ): Promise<string> {
-  const rpcRole = await fetchMyRole();
-  if (rpcRole) return rpcRole;
+  console.log('[resolveUserRole] === START ===');
+  console.log('[resolveUserRole] userId:', userId);
+  console.log('[resolveUserRole] metadata:', metadata);
 
+  // 1️⃣ Attempt RPC
+  console.log('[resolveUserRole] Step 1: Trying RPC...');
+  const rpcRole = await fetchMyRole();
+  console.log('[resolveUserRole] RPC result:', rpcRole);
+  if (rpcRole) {
+    console.log('[resolveUserRole] ✅ Returning RPC role:', rpcRole);
+    return rpcRole;
+  }
+
+  // 2️⃣ Direct query to profiles
+  console.log('[resolveUserRole] Step 2: Direct query to profiles...');
   const { data, error } = await supabase
     .from('profiles')
     .select('role')
@@ -37,13 +51,28 @@ export async function resolveUserRole(
     .maybeSingle();
 
   if (error) {
-    console.warn('[auth.service] profiles.role:', error.message);
+    console.warn('[resolveUserRole] Direct query error:', error.message);
+  } else {
+    console.log('[resolveUserRole] Direct query result:', data);
   }
 
-  if (data?.role) return String(data.role);
+  if (data?.role) {
+    console.log('[resolveUserRole] ✅ Returning direct query role:', data.role);
+    return String(data.role);
+  }
 
+  // 3️⃣ Fallback to ensure_profile
+  console.log('[resolveUserRole] Step 3: Falling back to ensure_profile...');
   const ensured = await ensureProfileRole(userId, metadata);
-  return ensured ?? 'innovator';
+  console.log('[resolveUserRole] ensureProfile result:', ensured);
+  if (ensured) {
+    console.log('[resolveUserRole] ✅ Returning ensured role:', ensured);
+    return ensured;
+  }
+
+  // 4️⃣ Default
+  console.log('[resolveUserRole] ⚠️ No role found, defaulting to "innovator"');
+  return 'innovator';
 }
 
 export async function ensureProfileRole(
@@ -52,6 +81,7 @@ export async function ensureProfileRole(
 ): Promise<string | null> {
   return dedupeAsync(`ensure-profile:${userId}`, async () => {
     const fullName = typeof metadata?.full_name === 'string' ? metadata.full_name.trim() : null;
+    console.log('[ensureProfileRole] Creating/updating profile with name:', fullName);
 
     const { data, error } = await supabase.rpc('ensure_profile', {
       p_full_name: fullName,
@@ -59,7 +89,7 @@ export async function ensureProfileRole(
 
     if (error) {
       console.warn(
-        '[auth.service] ensure_profile rpc:',
+        '[ensureProfileRole] RPC error:',
         error.message,
         error.details ?? '',
         error.hint ?? ''
@@ -69,10 +99,11 @@ export async function ensureProfileRole(
 
     const result = data as EnsureProfileResult | null;
     if (!result?.ok) {
-      console.warn('[auth.service] ensure_profile:', result?.error ?? 'unknown error');
+      console.warn('[ensureProfileRole] RPC returned not ok:', result?.error ?? 'unknown');
       return null;
     }
 
+    console.log('[ensureProfileRole] ✅ Profile ensured, role:', result.role);
     return result.role ?? 'innovator';
   });
 }

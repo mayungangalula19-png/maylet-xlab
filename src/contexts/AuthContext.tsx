@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { useAuthState } from '../modules/shared/hooks/useAuthState';
 import { resolveUserRole } from '../services/auth.service';
@@ -11,6 +19,7 @@ export interface AuthContextValue {
   role: string | null;
   roleLoading: boolean;
   isAdmin: boolean;
+  refreshRole: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -18,8 +27,46 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { session, user, loading } = useAuthState();
   const [role, setRole] = useState<string | null>(null);
-  const [roleLoading, setRoleLoading] = useState(false);
+  const [roleLoading, setRoleLoading] = useState<boolean>(false);
 
+  // ── Fetch role ──
+  const fetchRole = useCallback(
+    async (userId: string) => {
+      const cacheKey = `profile-role:${userId}`;
+      // Invalidate cache to force fresh fetch
+      invalidateCache(cacheKey);
+      console.log('[AuthContext] Fetching role for user:', userId);
+
+      try {
+        const nextRole = await dedupeAsync(cacheKey, async () => {
+          return resolveUserRole(userId, user?.user_metadata);
+        });
+        console.log('[AuthContext] Role resolved:', nextRole);
+        setRole(nextRole);
+        setCached(cacheKey, nextRole, 60_000);
+        return nextRole;
+      } catch (error) {
+        console.error('[AuthContext] Error fetching role:', error);
+        setRole(null);
+        return null;
+      }
+    },
+    [user?.user_metadata]
+  );
+
+  // ── Refresh role (manual) ──
+  const refreshRole = useCallback(async () => {
+    if (!user) return;
+    console.log('[AuthContext] Manual refreshRole called');
+    setRoleLoading(true);
+    try {
+      await fetchRole(user.id);
+    } finally {
+      setRoleLoading(false);
+    }
+  }, [user, fetchRole]);
+
+  // ── Fetch role on user change ──
   useEffect(() => {
     if (!user || !session) {
       setRole(null);
@@ -28,30 +75,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const cacheKey = `profile-role:${user.id}`;
-    let cancelled = false;
+    let isMounted = true;
     setRoleLoading(true);
 
-    void dedupeAsync(cacheKey, async () => resolveUserRole(user.id, user.user_metadata))
-      .then((nextRole) => {
-        if (cancelled) return;
-        setRole(nextRole);
-        setCached(cacheKey, nextRole, 60_000);
+    fetchRole(user.id)
+      .catch((err) => {
+        if (isMounted) {
+          console.error('[AuthContext] Unhandled fetch error:', err);
+          setRole(null);
+        }
       })
       .finally(() => {
-        if (!cancelled) setRoleLoading(false);
+        if (isMounted) {
+          console.log('[AuthContext] Setting roleLoading to false');
+          setRoleLoading(false);
+        }
       });
 
     return () => {
-      cancelled = true;
+      isMounted = false;
     };
-  }, [user?.id, session]);
+  }, [user?.id, session, fetchRole]);
 
+  // ── Computed ──
   const isAdmin = role === 'admin' || role === 'super_admin';
 
-  const value = useMemo(
-    () => ({ session, user, loading, role, roleLoading, isAdmin }),
-    [session, user, loading, role, roleLoading, isAdmin]
+  // ── Log role changes ──
+  useEffect(() => {
+    console.log('[AuthContext] Role changed:', role);
+    console.log('[AuthContext] isAdmin:', isAdmin);
+  }, [role, isAdmin]);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      session,
+      user,
+      loading,
+      role,
+      roleLoading,
+      isAdmin,
+      refreshRole,
+    }),
+    [session, user, loading, role, roleLoading, isAdmin, refreshRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -59,6 +124,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuthContext = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuthContext must be used within AuthProvider');
+  if (!ctx) {
+    throw new Error('useAuthContext must be used within AuthProvider');
+  }
   return ctx;
 };

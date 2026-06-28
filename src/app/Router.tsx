@@ -5,7 +5,7 @@
 //   DashboardLayout (AppSidebar) and AdminLayout (AdminSidebar).
 //   Pages never render their own sidebar.
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import { ProtectedRoute } from '../modules/shared/components/common/ProtectedRoute';
@@ -28,7 +28,6 @@ const ForgotPassword = lazy(() => import('../modules/auth/pages/ForgotPassword')
 const ResetPassword = lazy(() => import('../modules/auth/pages/ResetPassword'));
 const VerifyEmail = lazy(() => import('../modules/auth/pages/VerifyEmail'));
 const AuthCallback = lazy(() => import('../pages/auth/AuthCallback'));
-
 
 const Features = lazy(() =>
   import('../modules/marketing/pages/Features').then((m) => ({ default: m.Features }))
@@ -197,19 +196,37 @@ const AdminCareerApplications = lazy(() => import('../modules/admin/pages/career
 const AdminCareerDetail = lazy(() => import('../modules/admin/pages/careers/AdminCareerDetail'));
 
 // ============================================================
-// ADMIN ROUTE GUARD COMPONENT
+// ADMIN ROUTE GUARD COMPONENT (with debugging & auto-refresh)
 // ============================================================
 const AdminRoute = () => {
-  const { user, loading: authLoading, isAdmin, roleLoading } = useAuthContext();
+  const { user, loading: authLoading, isAdmin, roleLoading, refreshRole } = useAuthContext();
 
+  // Log current state for debugging
+  console.log('[AdminRoute] isAdmin:', isAdmin);
+  console.log('[AdminRoute] roleLoading:', roleLoading);
+  console.log('[AdminRoute] user:', user?.id);
+
+  // If role is not loaded yet, show loading
   if (authLoading || (user && roleLoading)) {
+    console.log('[AdminRoute] Waiting for role to load...');
     return <div className="admin-loading">Loading Admin Panel...</div>;
   }
 
+  // Try refreshing role if user exists but isAdmin is false
+  useEffect(() => {
+    if (user && !isAdmin && !roleLoading && !authLoading) {
+      console.log('[AdminRoute] Role not admin, attempting refresh...');
+      refreshRole();
+    }
+  }, [user, isAdmin, roleLoading, authLoading, refreshRole]);
+
+  // If still not admin after potential refresh, redirect
   if (!user || !isAdmin) {
+    console.warn('[AdminRoute] Redirecting to /dashboard because isAdmin is false');
     return <Navigate to="/dashboard" replace />;
   }
 
+  console.log('[AdminRoute] ✅ Access granted to admin panel');
   return <Outlet />;
 };
 
