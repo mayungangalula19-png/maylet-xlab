@@ -15,9 +15,11 @@
 html, body {
   margin: 0;
   padding: 0;
+  /* Allow vertical scrolling (wheel + touch) */
   overflow-x: hidden;
+  overflow-y: auto;
   /* Prevent iOS bounce that can confuse layouts */
-  overscroll-behavior: none;
+overscroll-behavior-y: contain;
 }
 
 body {
@@ -25,9 +27,8 @@ body {
   background: #0a0a0f;
   color: white;
   -webkit-tap-highlight-color: transparent;
-  /* Prevent horizontal scroll globally */
-  max-width: 100vw;
 }
+
 
 /* Layout shell — sidebar is fixed; content offset here (not per-page). */
 .layout-content {

@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
-import type { FlowStep, Testimonial } from '../landing.types';
+import type { FlowStep } from '../landing.types';
 
 interface Props {
   steps: FlowStep[];
-  testimonials: Testimonial[];
+  testimonials: unknown[];
   isAuthenticated: boolean;
 }
 
-export function LandingHero({ steps, testimonials, isAuthenticated }: Props) {
+
+export function LandingHero({ steps, isAuthenticated }: Props) {
   return (
     <main id="main-content" className="lp-hero">
       <section className="lp-hero-copy fade-in-up">

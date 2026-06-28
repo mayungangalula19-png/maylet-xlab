@@ -113,7 +113,10 @@ export const AdminSidebar = memo(function AdminSidebar() {
           .sidebar.mobile-open { transform: translateX(0); }
           .sidebar-overlay { display: block; }
           body[data-sidebar-mobile-open='1'] .sidebar-overlay { opacity: 1; pointer-events: auto; }
+          /* Do not lock body scroll permanently; allow vertical scrolling */
+          body[data-sidebar-mobile-open='1'] { overflow-x: hidden; }
         }
+
       `}</style>
     </>
   );
