@@ -1,0 +1,9 @@
+flutter_native_splash:
+  color: "#0A0E1A"
+  image: "assets/images/splush screen.png"
+  fullscreen: true
+  android_12:
+    image: "assets/images/splush screen.png"
+    icon_background_color: "#0A0E1A"
+  android: true
+  ios: true

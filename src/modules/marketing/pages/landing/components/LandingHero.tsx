@@ -7,7 +7,6 @@ interface Props {
   isAuthenticated: boolean;
 }
 
-
 export function LandingHero({ steps, isAuthenticated }: Props) {
   return (
     <main id="main-content" className="lp-hero">
