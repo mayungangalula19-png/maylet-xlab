@@ -26,6 +26,13 @@ import '../features/funding/screens/investor_deal_room_screen.dart';
 import '../features/messages/screens/messages_list_screen.dart';
 import '../features/messages/screens/chat_screen.dart';
 import '../features/marketing/screens/marketing_dashboard_screen.dart';
+import '../features/validation/screens/validation_screen.dart';
+import '../features/research/screens/research_center_screen.dart';
+import '../features/commercialization/screens/commercialization_screen.dart';
+import '../features/enterprise/screens/enterprise_screen.dart';
+import '../features/enterprise/screens/enterprise_vault_screen.dart';
+import '../features/ecosystem/screens/hackathons_screen.dart';
+import '../features/ecosystem/screens/learning_hub_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/auth/services/auth_service.dart';
 import 'supabase_client.dart';
@@ -200,6 +207,34 @@ class AppRouter {
                 builder: (context, state) => const ChatScreen(),
               ),
             ],
+          ),
+          GoRoute(
+            path: 'validation',
+            builder: (context, state) => const ValidationScreen(),
+          ),
+          GoRoute(
+            path: 'research',
+            builder: (context, state) => const ResearchCenterScreen(),
+          ),
+          GoRoute(
+            path: 'commercialization',
+            builder: (context, state) => const CommercializationScreen(),
+          ),
+          GoRoute(
+            path: 'enterprise',
+            builder: (context, state) => const EnterpriseScreen(),
+          ),
+          GoRoute(
+            path: 'enterprise-vault',
+            builder: (context, state) => const EnterpriseVaultScreen(),
+          ),
+          GoRoute(
+            path: 'hackathons',
+            builder: (context, state) => const HackathonsScreen(),
+          ),
+          GoRoute(
+            path: 'learning-hub',
+            builder: (context, state) => const LearningHubScreen(),
           ),
         ],
       ),

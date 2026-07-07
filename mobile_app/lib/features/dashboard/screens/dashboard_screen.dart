@@ -556,6 +556,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () { Navigator.pop(context); context.push('/messages'); },
             ),
             const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text('INNOVATION', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.2)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.fact_check_outlined),
+              title: const Text('Validation'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/validation'); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.biotech),
+              title: const Text('Research Center'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/research'); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.rocket_launch),
+              title: const Text('Commercialization'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/commercialization'); },
+            ),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text('ENTERPRISE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.2)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.business),
+              title: const Text('Enterprise Hub'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/enterprise'); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.shield),
+              title: const Text('Enterprise Vault'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/enterprise-vault'); },
+            ),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text('COMMUNITY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.2)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.emoji_events),
+              title: const Text('Hackathons'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/hackathons'); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.library_books),
+              title: const Text('Learning Hub'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/learning-hub'); },
+            ),
+            const Divider(),
             _drawerItem(Icons.person, 'Profile', 6),
             ListTile(
               leading: const Icon(Icons.logout),
