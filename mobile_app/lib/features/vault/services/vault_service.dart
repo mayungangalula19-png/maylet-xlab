@@ -30,6 +30,10 @@ class VaultService {
     return VaultEntry.fromJson(data);
   }
 
+  Future<void> updateVaultEntry(String id, Map<String, dynamic> updates) async {
+    await _client.from('vault_entries').update(updates).eq('id', id);
+  }
+
   Future<void> deleteVaultEntry(String id) async {
     await _client.from('vault_entries').delete().eq('id', id);
   }

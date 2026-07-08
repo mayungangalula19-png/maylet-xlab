@@ -189,10 +189,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _quickActionPill(icon: Icons.store, label: 'Marketplace', color: const Color(0xFFD97706), onTap: () => context.push('/marketplace')),
-              _quickActionPill(icon: Icons.work, label: 'Careers', color: const Color(0xFF059669), onTap: () => context.push('/careers')),
-              _quickActionPill(icon: Icons.account_balance, label: 'Deal Room', color: const Color(0xFF2563EB), onTap: () => context.push('/deal-room')),
-              _quickActionPill(icon: Icons.article, label: 'Newsletter', color: const Color(0xFFDB2777), onTap: () {}),
+              _quickActionPill(icon: Icons.store, label: 'Marketplace', color: const Color(0xFFD97706), onTap: () => context.push('/dashboard/marketplace')),
+              _quickActionPill(icon: Icons.work, label: 'Careers', color: const Color(0xFF059669), onTap: () => context.push('/dashboard/careers')),
+              _quickActionPill(icon: Icons.account_balance, label: 'Deal Room', color: const Color(0xFF2563EB), onTap: () => context.push('/dashboard/deal-room')),
+              _quickActionPill(icon: Icons.article, label: 'Newsletter', color: const Color(0xFFDB2777), onTap: () => context.push('/dashboard/newsletter')),
             ],
           ),
           const SizedBox(height: 24),
@@ -528,6 +528,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () { Navigator.pop(context); context.push('/dashboard/analytics'); },
             ),
             _drawerItem(Icons.smart_toy, 'MAYA AI', 7),
+            ListTile(
+              leading: const Icon(Icons.folder_open),
+              title: const Text('Documents Vault'),
+              onTap: () { Navigator.pop(context); context.push('/dashboard/documents'); },
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.store),

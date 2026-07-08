@@ -14,6 +14,7 @@ class _HackathonsScreenState extends State<HackathonsScreen> {
   String _statusFilter = 'all';
   String _modeFilter = 'all';
   final Set<String> _registered = {};
+  String? _error;
 
   List<Map<String, dynamic>> get _filtered => _hackathons.where((h) {
     if (_statusFilter != 'all' && h['status'] != _statusFilter) return false;
@@ -30,37 +31,21 @@ class _HackathonsScreenState extends State<HackathonsScreen> {
   Future<void> _fetchHackathons() async {
     try {
       final res = await SupabaseConfig.client.from('hackathons').select('*').order('start_date', ascending: true);
-      setState(() { _hackathons = List<Map<String, dynamic>>.from(res); _loading = false; });
-    } catch (_) {
-      // Show demo data if table doesn't exist
-      setState(() {
-        _hackathons = [
-          {
-            'id': '1', 'title': 'InnovateTZ 2024 Hackathon', 'description': 'Build solutions for sustainable agriculture and food security in East Africa.',
-            'status': 'upcoming', 'mode': 'hybrid', 'start_date': '2024-11-15', 'end_date': '2024-11-17',
-            'prize_pool': 5000000, 'registered_count': 45, 'max_participants': 100, 'location': 'Dar es Salaam', 'organizer': 'Maylet XLab'
-          },
-          {
-            'id': '2', 'title': 'HealthTech Africa Hackathon', 'description': 'Reimagine healthcare delivery for rural and underserved communities.',
-            'status': 'ongoing', 'mode': 'online', 'start_date': '2024-10-25', 'end_date': '2024-10-27',
-            'prize_pool': 2000000, 'registered_count': 78, 'max_participants': 80, 'location': null, 'organizer': 'AfriHealth'
-          },
-          {
-            'id': '3', 'title': 'Climate Innovation Challenge', 'description': 'Create tech solutions to address climate change in Sub-Saharan Africa.',
-            'status': 'completed', 'mode': 'offline', 'start_date': '2024-09-01', 'end_date': '2024-09-03',
-            'prize_pool': 10000000, 'registered_count': 120, 'max_participants': 120, 'location': 'Nairobi', 'organizer': 'GreenTech Kenya'
-          },
-        ];
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() { _hackathons = List<Map<String, dynamic>>.from(res); _loading = false; });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() { _error = e.toString(); _loading = false; });
+      }
     }
   }
 
   Color _statusColor(String? status) {
     switch (status) {
-      case 'upcoming': return const Color(0xFFF6C90E);
-      case 'ongoing': return const Color(0xFF2FD4FF);
-      case 'completed': return Colors.green;
+      case 'upcoming': return const Color(0xFFf6c90e); // yellow
+      case 'ongoing': return const Color(0xFF2fd4ff); // cyan
+      case 'completed': return const Color(0xFF48bb78); // green
       default: return Colors.grey;
     }
   }
@@ -75,193 +60,335 @@ class _HackathonsScreenState extends State<HackathonsScreen> {
   }
 
   void _showDetail(Map<String, dynamic> h) {
+    final statusColor = _statusColor(h['status']);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: Colors.transparent,
       builder: (_) => DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.7,
-        builder: (_, controller) => ListView(
-          controller: controller,
-          padding: const EdgeInsets.all(24),
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(h['title'] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: _statusColor(h['status']).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-                child: Text(h['status']?.toUpperCase() ?? '', style: TextStyle(color: _statusColor(h['status']), fontSize: 12, fontWeight: FontWeight.bold)),
-              ),
-            ]),
-            const SizedBox(height: 16),
-            _detailRow('Organizer', h['organizer'] ?? ''),
-            _detailRow('Dates', '${h['start_date'] ?? ''} → ${h['end_date'] ?? ''}'),
-            _detailRow('Mode', '${h['mode'] ?? ''}${h['location'] != null ? " · ${h['location']}" : ""}'),
-            _detailRow('Prize Pool', 'TZS ${((h['prize_pool'] ?? 0) as int).toString()}'),
-            _detailRow('Participants', '${h['registered_count'] ?? 0} / ${h['max_participants'] ?? '∞'}'),
-            const SizedBox(height: 12),
-            const Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text(h['description'] ?? ''),
-            const SizedBox(height: 24),
-            if (h['status'] != 'completed')
-              ElevatedButton(
-                onPressed: _registered.contains(h['id']) ? null : () {
-                  setState(() => _registered.add(h['id']));
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Registered successfully!')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _registered.contains(h['id']) ? Colors.green : const Color(0xFF6C3AED),
-                  minimumSize: const Size.fromHeight(48),
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, controller) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF1A1A2E),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: ListView(
+            controller: controller,
+            padding: const EdgeInsets.all(24),
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
                 ),
-                child: Text(_registered.contains(h['id']) ? '✓ Registered' : 'Register Now'),
               ),
-          ],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: Text(h['title'] ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white))),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
+                    child: Text(h['status']?.toUpperCase() ?? '', style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              
+              _detailSection('Organizer', h['organizer'] ?? ''),
+              _detailSection('Dates', '${h['start_date'] ?? ''}  →  ${h['end_date'] ?? ''}'),
+              _detailSection('Mode', '${(h['mode'] ?? '').toString().capitalize()} ${h['location'] != null ? " · ${h['location']}" : ""}'),
+              _detailSection('Prize Pool', '\$${((h['prize_pool'] ?? 0) as num).toStringAsFixed(0)}'),
+              _detailSection('Participants', '${h['registered_count'] ?? 0} / ${h['max_participants'] ?? 'Unlimited'}'),
+              
+              const SizedBox(height: 12),
+              const Text('Description', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 14)),
+              const SizedBox(height: 8),
+              Text(h['description'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5)),
+              const SizedBox(height: 32),
+              
+              if (h['status'] != 'completed')
+                StatefulBuilder(
+                  builder: (context, setStateModal) {
+                    final isReg = _registered.contains(h['id']);
+                    return ElevatedButton(
+                      onPressed: isReg ? null : () {
+                        setState(() => _registered.add(h['id']));
+                        setStateModal(() {});
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registered successfully!')));
+                        Future.delayed(const Duration(seconds: 1), () {
+                          if (context.mounted) Navigator.pop(context);
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isReg ? const Color(0xFF48bb78) : const Color(0xFF7c5fe6),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                      child: Text(isReg ? '✓ Already Registered' : 'Register Now', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    );
+                  }
+                ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close', style: TextStyle(color: Colors.grey)),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  Widget _detailSection(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SizedBox(width: 100, child: Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500))),
-        Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500))),
-      ]),
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 110, child: Text(label, style: const TextStyle(color: Colors.white54, fontSize: 14))),
+          Expanded(child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500))),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('🏆 Hackathons')),
-      body: Column(
-        children: [
-          // Filters
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _statusFilter,
-                    decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
-                    items: ['all', 'upcoming', 'ongoing', 'completed'].map((s) => DropdownMenuItem(value: s, child: Text(s == 'all' ? 'All Status' : s.capitalize()))).toList(),
-                    onChanged: (v) => setState(() => _statusFilter = v!),
+      backgroundColor: const Color(0xFF0A0A0F),
+      body: CustomScrollView(
+        slivers: [
+          // Header
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Text('🏆', style: TextStyle(fontSize: 28)),
+                      SizedBox(width: 8),
+                      Text('Hackathons', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
                   ),
+                  const SizedBox(height: 4),
+                  const Text('Discover and join innovation competitions to build, pitch, and win', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                  const SizedBox(height: 24),
+
+                  // Filters
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _statusFilter,
+                              dropdownColor: const Color(0xFF1A1A2E),
+                              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                              isExpanded: true,
+                              style: const TextStyle(color: Colors.white),
+                              items: ['all', 'upcoming', 'ongoing', 'completed']
+                                  .map((s) => DropdownMenuItem(value: s, child: Text(s == 'all' ? 'All Status' : s.capitalize())))
+                                  .toList(),
+                              onChanged: (v) => setState(() => _statusFilter = v!),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _modeFilter,
+                              dropdownColor: const Color(0xFF1A1A2E),
+                              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                              isExpanded: true,
+                              style: const TextStyle(color: Colors.white),
+                              items: ['all', 'online', 'offline', 'hybrid']
+                                  .map((m) => DropdownMenuItem(value: m, child: Text(m == 'all' ? 'All Modes' : m.capitalize())))
+                                  .toList(),
+                              onChanged: (v) => setState(() => _modeFilter = v!),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Content
+          if (_loading)
+            const SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: Color(0xFF7c5fe6))))
+          else if (_error != null)
+            SliverFillRemaining(child: Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red))))
+          else if (_filtered.isEmpty)
+            const SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('🏆', style: TextStyle(fontSize: 48)),
+                    SizedBox(height: 16),
+                    Text('No hackathons found', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text('Check back later for upcoming competitions.', style: TextStyle(color: Colors.grey)),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _modeFilter,
-                    decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
-                    items: ['all', 'online', 'offline', 'hybrid'].map((m) => DropdownMenuItem(value: m, child: Text(m == 'all' ? 'All Modes' : m.capitalize()))).toList(),
-                    onChanged: (v) => setState(() => _modeFilter = v!),
-                  ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _hackathonCard(_filtered[index]),
+                  childCount: _filtered.length,
+                ),
+              ),
+            ),
+            
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+        ],
+      ),
+    );
+  }
+
+  Widget _hackathonCard(Map<String, dynamic> h) {
+    final statusColor = _statusColor(h['status']);
+    final isReg = _registered.contains(h['id']);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header / Banner
+          Container(
+            height: 90,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1A2E),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              image: h['image_url'] != null && h['image_url'].toString().isNotEmpty
+                  ? DecorationImage(image: NetworkImage(h['image_url']), fit: BoxFit.cover, opacity: 0.4)
+                  : null,
+            ),
+            child: const Center(child: Text('🏆', style: TextStyle(fontSize: 40))),
+          ),
+          
+          // Body
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: Text(h['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white))),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
+                      child: Text(h['status']?.toUpperCase() ?? '', style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  (h['description'] ?? '').toString().length > 100 ? '${(h['description'] ?? '').toString().substring(0, 100)}...' : h['description'] ?? '',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                
+                // Meta Grid
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: [
+                    _metaIconText(Icons.calendar_today, '${h['start_date'] ?? ''} - ${h['end_date'] ?? ''}'),
+                    _metaIconText(_modeIcon(h['mode']), (h['mode'] ?? '').toString().capitalize()),
+                    if (h['location'] != null) _metaIconText(Icons.location_on, h['location']),
+                    _metaIconText(Icons.emoji_events, '\$${((h['prize_pool'] ?? 0) as num).toStringAsFixed(0)}'),
+                    _metaIconText(Icons.group, '${h['registered_count'] ?? 0}/${h['max_participants'] ?? '∞'}'),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _showDetail(h),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          elevation: 0,
+                        ),
+                        child: const Text('View Details', style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    if (h['status'] != 'completed') ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isReg ? null : () => setState(() => _registered.add(h['id'])),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isReg ? const Color(0xFF48bb78) : const Color(0xFF7c5fe6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            elevation: 0,
+                          ),
+                          child: Text(isReg ? '✓ Registered' : 'Register', style: const TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ]
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _filtered.isEmpty
-                    ? const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Text('🏆', style: TextStyle(fontSize: 48)),
-                        SizedBox(height: 12),
-                        Text('No hackathons found', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text('Check back later for upcoming competitions.', style: TextStyle(color: Colors.grey)),
-                      ]))
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: _filtered.length,
-                        itemBuilder: (_, i) {
-                          final h = _filtered[i];
-                          final statusColor = _statusColor(h['status']);
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(colors: [const Color(0xFF1a1a2e), const Color(0xFF16213e)]),
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                  ),
-                                  child: const Center(child: Text('🏆', style: TextStyle(fontSize: 36))),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Expanded(child: Text(h['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-                                          child: Text(h['status']?.toUpperCase() ?? '', style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
-                                        ),
-                                      ]),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        (h['description'] ?? '').toString().length > 80 ? '${(h['description'] ?? '').toString().substring(0, 80)}...' : h['description'] ?? '',
-                                        style: const TextStyle(color: Colors.grey, fontSize: 13),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Wrap(spacing: 12, children: [
-                                        Row(mainAxisSize: MainAxisSize.min, children: [
-                                          const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
-                                          const SizedBox(width: 4),
-                                          Text('${h['start_date'] ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                        ]),
-                                        Row(mainAxisSize: MainAxisSize.min, children: [
-                                          Icon(_modeIcon(h['mode']), size: 12, color: Colors.grey),
-                                          const SizedBox(width: 4),
-                                          Text(h['mode'] ?? '', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                        ]),
-                                        Row(mainAxisSize: MainAxisSize.min, children: [
-                                          const Icon(Icons.group, size: 12, color: Colors.grey),
-                                          const SizedBox(width: 4),
-                                          Text('${h['registered_count']}/${h['max_participants'] ?? '∞'}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                        ]),
-                                      ]),
-                                      const SizedBox(height: 10),
-                                      Row(children: [
-                                        Expanded(
-                                          child: OutlinedButton(
-                                            onPressed: () => _showDetail(h),
-                                            child: const Text('View Details'),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        if (h['status'] != 'completed')
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              onPressed: _registered.contains(h['id']) ? null : () => setState(() => _registered.add(h['id'])),
-                                              style: ElevatedButton.styleFrom(backgroundColor: _registered.contains(h['id']) ? Colors.green : const Color(0xFF6C3AED)),
-                                              child: Text(_registered.contains(h['id']) ? '✓ Registered' : 'Register'),
-                                            ),
-                                          ),
-                                      ]),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _metaIconText(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: Colors.grey),
+        const SizedBox(width: 6),
+        Text(text, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
     );
   }
 }

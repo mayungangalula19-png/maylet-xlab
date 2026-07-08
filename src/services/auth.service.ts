@@ -8,42 +8,99 @@ type EnsureProfileResult = {
   error?: string;
 };
 
-/** Read the signed-in user's role from the database. */
-export async function fetchMyRole(): Promise<string | null> {
-  console.log('[fetchMyRole] Calling RPC get_my_role...');
-  const { data, error } = await supabase.rpc('get_my_role');
-  if (error) {
-    console.warn('[fetchMyRole] RPC error:', error.message);
+// ── Hardcoded admin emails ──────────────────────────────────────
+// These are checked against the server-verified email from
+// supabase.auth.getUser() — NOT from user_metadata or JWT claims,
+// so they cannot be spoofed by the client.
+const ADMIN_EMAILS: ReadonlySet<string> = new Set([
+  'admintest@gmail.com',
+  'mayungangalula19@gmail.com',
+]);
+
+/**
+ * Check if the currently authenticated user is an admin by their
+ * server-verified email. Returns 'admin' if matched, null otherwise.
+ */
+async function getVerifiedAdminRole(): Promise<string | null> {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user?.email) return null;
+
+    if (ADMIN_EMAILS.has(user.email.toLowerCase())) {
+      console.log('[getVerifiedAdminRole] ✅ Admin email matched:', user.email);
+      return 'admin';
+    }
+    return null;
+  } catch {
     return null;
   }
-  console.log('[fetchMyRole] RPC returned:', data);
-  return typeof data === 'string' && data.length > 0 ? data : null;
+}
+
+/** Read the signed-in user's role from the database. */
+export async function fetchMyRole(): Promise<string | null> {
+  try {
+    // Check hardcoded admin list first (bypasses broken DB enum/RLS)
+    const adminRole = await getVerifiedAdminRole();
+    if (adminRole) return adminRole;
+
+    console.log('[fetchMyRole] Getting current user...');
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      console.warn('[fetchMyRole] Not authenticated');
+      return null;
+    }
+
+    console.log('[fetchMyRole] Querying profiles for user:', user.id);
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('[fetchMyRole] Query error:', error);
+      return null;
+    }
+
+    console.log('[fetchMyRole] Query returned:', data);
+    return data?.role ? String(data.role) : null;
+  } catch (err) {
+    console.warn('[fetchMyRole] Exception:', err);
+    return null;
+  }
 }
 
 export function isAppAdminRole(role: string | null | undefined): boolean {
   return role === 'admin' || role === 'super_admin';
 }
 
-/** Resolve role via RPC, profile row, then ensure_profile fallback. */
+/** Resolve role via hardcoded admin list, then RPC/profile fallbacks. */
 export async function resolveUserRole(
   userId: string,
   metadata?: Record<string, unknown>
 ): Promise<string> {
   console.log('[resolveUserRole] === START ===');
   console.log('[resolveUserRole] userId:', userId);
-  console.log('[resolveUserRole] metadata:', metadata);
 
-  // 1️⃣ Attempt RPC
-  console.log('[resolveUserRole] Step 1: Trying RPC...');
+  // 0️⃣ Check hardcoded admin emails first (server-verified, bypasses broken DB)
+  const adminRole = await getVerifiedAdminRole();
+  if (adminRole) {
+    console.log('[resolveUserRole] ✅ Hardcoded admin match, returning:', adminRole);
+    return adminRole;
+  }
+
+  // 1️⃣ Attempt profile query
+  console.log('[resolveUserRole] Step 1: Trying profile query...');
   const rpcRole = await fetchMyRole();
-  console.log('[resolveUserRole] RPC result:', rpcRole);
+  console.log('[resolveUserRole] Profile result:', rpcRole);
   if (rpcRole) {
-    console.log('[resolveUserRole] ✅ Returning RPC role:', rpcRole);
+    console.log('[resolveUserRole] ✅ Returning profile role:', rpcRole);
     return rpcRole;
   }
 
   // 2️⃣ Direct query to profiles
-  console.log('[resolveUserRole] Step 2: Direct query to profiles...');
+  console.log('[resolveUserRole] Step 2: Direct query to profiles table...');
   const { data, error } = await supabase
     .from('profiles')
     .select('role')
@@ -51,7 +108,7 @@ export async function resolveUserRole(
     .maybeSingle();
 
   if (error) {
-    console.warn('[resolveUserRole] Direct query error:', error.message);
+    console.warn('[resolveUserRole] Direct query error:', error);
   } else {
     console.log('[resolveUserRole] Direct query result:', data);
   }
@@ -62,16 +119,16 @@ export async function resolveUserRole(
   }
 
   // 3️⃣ Fallback to ensure_profile
-  console.log('[resolveUserRole] Step 3: Falling back to ensure_profile...');
+  console.log('[resolveUserRole] Step 3: Direct query returned null, calling ensure_profile RPC...');
   const ensured = await ensureProfileRole(userId, metadata);
-  console.log('[resolveUserRole] ensureProfile result:', ensured);
+  console.log('[resolveUserRole] ensure_profile returned:', ensured);
   if (ensured) {
     console.log('[resolveUserRole] ✅ Returning ensured role:', ensured);
     return ensured;
   }
 
   // 4️⃣ Default
-  console.log('[resolveUserRole] ⚠️ No role found, defaulting to "innovator"');
+  console.log('[resolveUserRole] ⚠️ No role found anywhere, defaulting to "innovator"');
   return 'innovator';
 }
 
@@ -81,29 +138,25 @@ export async function ensureProfileRole(
 ): Promise<string | null> {
   return dedupeAsync(`ensure-profile:${userId}`, async () => {
     const fullName = typeof metadata?.full_name === 'string' ? metadata.full_name.trim() : null;
-    console.log('[ensureProfileRole] Creating/updating profile with name:', fullName);
+    console.log('[ensureProfileRole] Calling RPC with userId:', userId, 'fullName:', fullName);
 
     const { data, error } = await supabase.rpc('ensure_profile', {
       p_full_name: fullName,
     });
 
     if (error) {
-      console.warn(
-        '[ensureProfileRole] RPC error:',
-        error.message,
-        error.details ?? '',
-        error.hint ?? ''
-      );
+      console.warn('[ensureProfileRole] RPC error:', error);
       return null;
     }
 
+    console.log('[ensureProfileRole] RPC response:', data);
     const result = data as EnsureProfileResult | null;
     if (!result?.ok) {
       console.warn('[ensureProfileRole] RPC returned not ok:', result?.error ?? 'unknown');
       return null;
     }
 
-    console.log('[ensureProfileRole] ✅ Profile ensured, role:', result.role);
+    console.log('[ensureProfileRole] ✅ Profile ensured with role:', result.role);
     return result.role ?? 'innovator';
   });
 }

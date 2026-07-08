@@ -76,7 +76,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     let isMounted = true;
+    // Immediately set loading=true so AdminRoute waits for us
     setRoleLoading(true);
+    console.log('[AuthContext] User detected, setting roleLoading=true, fetching role...');
 
     fetchRole(user.id)
       .catch((err) => {

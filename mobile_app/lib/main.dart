@@ -12,15 +12,28 @@ import 'features/prototypes/services/prototype_service.dart';
 import 'features/funding/services/funding_service.dart';
 import 'features/analytics/services/analytics_service.dart';
 import 'features/maya_ai/services/maya_ai_service.dart';
+import 'features/validation/services/validation_service.dart';
+import 'features/research/services/research_service.dart';
+import 'features/documents/services/document_service.dart';
+import 'features/messages/services/messages_service.dart';
+import 'features/commercialization/services/commercialization_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   
   await SupabaseConfig.initialize();
   final prefs = await SharedPreferences.getInstance();
   final hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
+
+  // Add 2-second delay then remove splash smoothly
+  Future.delayed(const Duration(seconds: 2), () {
+    FlutterNativeSplash.remove();
+  });
 
   runApp(
     MultiProvider(
@@ -54,6 +67,21 @@ void main() async {
         ),
         Provider<MayaAiService>(
           create: (_) => MayaAiService(),
+        ),
+        Provider<ValidationService>(
+          create: (_) => ValidationService(),
+        ),
+        Provider<ResearchService>(
+          create: (_) => ResearchService(),
+        ),
+        Provider<DocumentService>(
+          create: (_) => DocumentService(),
+        ),
+        Provider<MessagesService>(
+          create: (_) => MessagesService(),
+        ),
+        Provider<CommercializationService>(
+          create: (_) => CommercializationService(),
         ),
       ],
       child: MayletXLabApp(hasSeenIntro: hasSeenIntro),

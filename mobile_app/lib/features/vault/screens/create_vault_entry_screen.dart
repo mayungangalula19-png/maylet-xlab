@@ -17,8 +17,8 @@ class _CreateVaultEntryScreenState extends State<CreateVaultEntryScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _contentController = TextEditingController();
-  
-  bool _isConfidential = true;
+  final _tagsController = TextEditingController();
+
   bool _isPublic = false;
   bool _isLoading = false;
 
@@ -27,25 +27,29 @@ class _CreateVaultEntryScreenState extends State<CreateVaultEntryScreen> {
 
     setState(() => _isLoading = true);
 
-    try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) throw Exception('Not authenticated');
+    final user = context.read<AuthService>().currentUser;
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
 
+    final service = context.read<VaultService>();
+    try {
       final entry = VaultEntry(
-        id: '', // Supabase generates this
+        id: '',
         userId: user.id,
-        title: _titleController.text,
-        description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
-        content: _contentController.text.isEmpty ? null : _contentController.text,
-        tags: [],
-        isConfidential: _isConfidential,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        content: _contentController.text.trim().isEmpty ? null : _contentController.text.trim(),
+        tags: _tagsController.text.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList(),
+        isConfidential: true,
         isPublic: _isPublic,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      await context.read<VaultService>().createVaultEntry(entry);
-      
+      await service.createVaultEntry(entry);
+
       if (mounted) {
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -70,57 +74,103 @@ class _CreateVaultEntryScreenState extends State<CreateVaultEntryScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _contentController.dispose();
+    _tagsController.dispose();
     super.dispose();
+  }
+
+  Widget _field(String label, TextEditingController ctrl, {int maxLines = 1, String? hint, bool required = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: const TextStyle(color: Color(0xFF7c5fe6), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: ctrl,
+          maxLines: maxLines,
+          style: const TextStyle(color: Colors.white),
+          validator: required ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null : null,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.white24),
+            filled: true,
+            fillColor: Colors.black.withValues(alpha: 0.5),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF7c5fe6))),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Store in Vault')),
+      backgroundColor: const Color(0xFF0A0A0F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0A0A0F),
+        elevation: 0,
+        leading: IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => context.pop()),
+        title: const Text('Add New Vault Entry', style: TextStyle(color: Colors.white)),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
-            ),
+            _field('Title *', _titleController, required: true),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Short Description'),
-              maxLines: 2,
-            ),
+            _field('Short Description', _descriptionController, maxLines: 2),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _contentController,
-              decoration: const InputDecoration(
-                labelText: 'Secret Content / Document',
-                alignLabelWithHint: true,
+            _field('Content / Details *', _contentController, maxLines: 6, hint: 'Describe your idea, invention, or innovation in detail...', required: true),
+            const SizedBox(height: 16),
+            _field('Tags (comma separated)', _tagsController, hint: 'e.g., AI, blockchain, agritech'),
+            const SizedBox(height: 20),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
               ),
-              maxLines: 6,
-            ),
-            const SizedBox(height: 24),
-            SwitchListTile(
-              title: const Text('Confidential'),
-              subtitle: const Text('Mark this as highly sensitive IP'),
-              value: _isConfidential,
-              onChanged: (val) => setState(() => _isConfidential = val),
-            ),
-            SwitchListTile(
-              title: const Text('Public Access'),
-              subtitle: const Text('Allow others in workspace to view'),
-              value: _isPublic,
-              onChanged: (val) => setState(() => _isPublic = val),
+              child: Row(
+                children: [
+                  Switch(
+                    value: _isPublic,
+                    onChanged: (v) => setState(() => _isPublic = v),
+                    activeThumbColor: const Color(0xFF2fd4ff),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Public visibility', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text(
+                          _isPublic ? 'Others can see this entry' : 'Only you can see this entry',
+                          style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submit,
-              child: _isLoading 
-                ? const CircularProgressIndicator()
-                : const Text('Lock in Vault'),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7c5fe6),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: _isLoading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Save to Vault', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
             ),
           ],
         ),

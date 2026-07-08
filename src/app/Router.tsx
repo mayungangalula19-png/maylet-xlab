@@ -5,7 +5,7 @@
 //   DashboardLayout (AppSidebar) and AdminLayout (AdminSidebar).
 //   Pages never render their own sidebar.
 
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState, useRef } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import { ProtectedRoute } from '../modules/shared/components/common/ProtectedRoute';
@@ -200,30 +200,42 @@ const AdminCareerDetail = lazy(() => import('../modules/admin/pages/careers/Admi
 // ============================================================
 const AdminRoute = () => {
   const { user, loading: authLoading, isAdmin, roleLoading, refreshRole } = useAuthContext();
+  const hasAttemptedRefresh = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Log current state for debugging
-  console.log('[AdminRoute] isAdmin:', isAdmin);
-  console.log('[AdminRoute] roleLoading:', roleLoading);
-  console.log('[AdminRoute] user:', user?.id);
+  console.log('[AdminRoute] Current state:', { isAdmin, roleLoading, authLoading, userId: user?.id, refreshing });
 
-  // If role is not loaded yet, show loading
-  if (authLoading || (user && roleLoading)) {
-    console.log('[AdminRoute] Waiting for role to load...');
+  // After initial load, if user exists but is not admin, try ONE refresh
+  useEffect(() => {
+    if (!authLoading && !roleLoading && user && !isAdmin && !hasAttemptedRefresh.current) {
+      hasAttemptedRefresh.current = true;
+      console.log('[AdminRoute] Role loaded but not admin, attempting one-time refresh...');
+      setRefreshing(true);
+      refreshRole().finally(() => setRefreshing(false));
+    }
+  }, [authLoading, roleLoading, user, isAdmin, refreshRole]);
+
+  // Reset the refresh flag when user changes (e.g., different login)
+  useEffect(() => {
+    hasAttemptedRefresh.current = false;
+  }, [user?.id]);
+
+  // If still loading auth, role, or performing a refresh, show loading
+  if (authLoading || roleLoading || refreshing) {
+    console.log('[AdminRoute] Still loading (authLoading=' + authLoading + ', roleLoading=' + roleLoading + ', refreshing=' + refreshing + '), showing loading screen...');
     return <div className="admin-loading">Loading Admin Panel...</div>;
   }
 
-  // Try refreshing role if user exists but isAdmin is false
-  useEffect(() => {
-    if (user && !isAdmin && !roleLoading && !authLoading) {
-      console.log('[AdminRoute] Role not admin, attempting refresh...');
-      refreshRole();
-    }
-  }, [user, isAdmin, roleLoading, authLoading, refreshRole]);
-
-  // If still not admin after potential refresh, redirect
-  if (!user || !isAdmin) {
-    console.warn('[AdminRoute] Redirecting to /dashboard because isAdmin is false');
+  // If not authenticated, or if we are certain they are not admin (after refresh attempt)
+  if (!user || (!isAdmin && hasAttemptedRefresh.current && !refreshing)) {
+    console.warn('[AdminRoute] User not authenticated or not admin after refresh, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // If we are about to refresh, we should also show loading and not render Outlet yet
+  if (!isAdmin) {
+     return <div className="admin-loading">Loading Admin Panel...</div>;
   }
 
   console.log('[AdminRoute] ✅ Access granted to admin panel');

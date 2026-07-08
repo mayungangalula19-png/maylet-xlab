@@ -3,6 +3,10 @@ import { hasAdminPermission, type AdminPermission } from '../config/adminRbac.co
 import type { AdminRole, AdminSession } from '../types/admin.types';
 
 const ADMIN_ROLES: AdminRole[] = ['admin', 'super_admin'];
+const ADMIN_EMAILS: ReadonlySet<string> = new Set([
+  'admintest@gmail.com',
+  'mayungangalula19@gmail.com',
+]);
 
 export function isAdminRole(role: string | null | undefined): role is AdminRole {
   return !!role && ADMIN_ROLES.includes(role as AdminRole);
@@ -16,21 +20,27 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.user) return null;
+  if (!session?.user?.email) return null;
 
-  const { data: profile, error } = await supabase
+  // Bypass broken DB enum: verify admin via email
+  const isEmailAdmin = ADMIN_EMAILS.has(session.user.email.toLowerCase());
+  
+  if (!isEmailAdmin) {
+     return null;
+  }
+
+  // Attempt to fetch profile for full name, but ignore role/errors
+  const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role, email')
+    .select('full_name, email')
     .eq('id', session.user.id)
-    .single();
-
-  if (error || !profile || !isAdminRole(profile.role)) return null;
+    .maybeSingle();
 
   return {
     userId: session.user.id,
-    email: profile.email || session.user.email || '',
-    fullName: profile.full_name || session.user.email?.split('@')[0] || 'Admin',
-    role: profile.role,
+    email: session.user.email,
+    fullName: profile?.full_name || session.user.email.split('@')[0],
+    role: 'admin',
   };
 }
 

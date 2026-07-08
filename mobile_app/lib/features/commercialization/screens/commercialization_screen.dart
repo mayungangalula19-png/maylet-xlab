@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/commercialization_service.dart';
 
 class CommercializationScreen extends StatefulWidget {
   const CommercializationScreen({super.key});
@@ -9,11 +11,13 @@ class CommercializationScreen extends StatefulWidget {
 
 class _CommercializationScreenState extends State<CommercializationScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late Future<List<CommercializationWorkspace>> _workspacesFuture;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _workspacesFuture = context.read<CommercializationService>().fetchWorkspaces();
   }
 
   @override
@@ -35,19 +39,30 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _overviewTab(),
-          _goToMarketTab(),
-          _revenueTab(),
-          _partnershipTab(),
-        ],
+      body: FutureBuilder<List<CommercializationWorkspace>>(
+        future: _workspacesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final workspaces = snapshot.data ?? [];
+          final activeWorkspace = workspaces.isNotEmpty ? workspaces.first : null;
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _overviewTab(activeWorkspace),
+              _goToMarketTab(activeWorkspace),
+              _revenueTab(activeWorkspace),
+              _partnershipTab(activeWorkspace),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _overviewTab() {
+  Widget _overviewTab(CommercializationWorkspace? workspace) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -71,8 +86,8 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
         const SizedBox(height: 12),
         _stageCard('1. Market Validation', 'Confirm product-market fit with real customers', Icons.people, Colors.blue, isComplete: true),
         _stageCard('2. Business Model', 'Define your revenue streams and unit economics', Icons.account_balance_wallet, Colors.purple, isComplete: true),
-        _stageCard('3. Go-to-Market', 'Build your customer acquisition strategy', Icons.launch, Colors.orange),
-        _stageCard('4. Scale & Growth', 'Expand to new markets and optimize operations', Icons.trending_up, Colors.teal),
+        _stageCard('3. Go-to-Market', 'Build your customer acquisition strategy', Icons.launch, Colors.orange, isComplete: workspace?.launchStatus != 'draft'),
+        _stageCard('4. Scale & Growth', 'Expand to new markets and optimize operations', Icons.trending_up, Colors.teal, isComplete: workspace?.launchStatus == 'launched'),
         _stageCard('5. Exit/IPO Strategy', 'Prepare for acquisition or public listing', Icons.flag, Colors.red),
       ],
     );
@@ -97,7 +112,7 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
     );
   }
 
-  Widget _goToMarketTab() {
+  Widget _goToMarketTab(CommercializationWorkspace? workspace) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -110,19 +125,19 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
     );
   }
 
-  Widget _revenueTab() {
+  Widget _revenueTab(CommercializationWorkspace? workspace) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _metricCard('Monthly Revenue', 'TZS 0', 'Not yet generating revenue', Colors.blue),
-        _metricCard('Projected ARR', 'TZS 12M', 'Based on 12-month projections', Colors.green),
+        _metricCard('Monthly Revenue', workspace != null ? 'TZS 2M' : 'TZS 0', workspace != null ? 'Active revenue' : 'Not yet generating revenue', Colors.blue),
+        _metricCard('Projected ARR', workspace != null ? 'TZS 24M' : 'TZS 12M', 'Based on 12-month projections', Colors.green),
         _metricCard('Runway', '8 months', 'At current burn rate', Colors.orange),
         _metricCard('Unit Economics', 'LTV/CAC: 3.2x', 'Healthy ratio > 3x', Colors.purple),
       ],
     );
   }
 
-  Widget _partnershipTab() {
+  Widget _partnershipTab(CommercializationWorkspace? workspace) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [

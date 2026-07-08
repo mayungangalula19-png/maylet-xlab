@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../models/project.dart';
 import '../services/project_service.dart';
-import 'workflow_engine_screen.dart';
-import 'documents_screen.dart';
-import 'research_validation_screen.dart';
+
+// Tabs
+import 'tabs/project_overview_tab.dart';
+import 'tabs/project_tasks_tab.dart';
+import 'tabs/project_team_tab.dart';
+import 'documents_screen.dart'; // Using the existing one for Documents
+import 'tabs/project_ai_lab_tab.dart';
+import 'tabs/project_funding_tab.dart';
+import 'tabs/project_settings_tab.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final String projectId;
@@ -23,68 +28,88 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _projectFuture = context.read<ProjectService>().getProject(widget.projectId);
+    _refreshProject();
   }
 
-  Future<void> _deleteProject(BuildContext context) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Project'),
-        content: const Text('Are you sure you want to delete this project? This action cannot be undone.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true), 
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  void _refreshProject() {
+    setState(() {
+      _projectFuture = context.read<ProjectService>().getProject(widget.projectId);
+    });
+  }
 
-    if (confirm == true && context.mounted) {
-      try {
-        await context.read<ProjectService>().deleteProject(widget.projectId);
-        if (context.mounted) {
-          context.pop(); // Go back to list
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting project: $e')),
-          );
-        }
-      }
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'launched': return Colors.green;
+      case 'prototype': return const Color(0xFF7c5fe6);
+      case 'experiment': return const Color(0xFF2fd4ff);
+      case 'idea': return const Color(0xFFf6c90e);
+      default: return Colors.grey;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 7, // Overview, Tasks, Team, Documents, AI Lab, Funding, Settings
       child: Scaffold(
+        backgroundColor: const Color(0xFF0A0A0F),
         appBar: AppBar(
-          title: const Text('Innovation Editor'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {},
-              tooltip: 'Project Settings',
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _deleteProject(context),
-              tooltip: 'Delete Project',
-            ),
-          ],
+          backgroundColor: const Color(0xFF0A0A0F),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.pop(),
+          ),
+          title: FutureBuilder<Project>(
+            future: _projectFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        snapshot.data!.name, 
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (snapshot.data!.status != null)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(snapshot.data!.status!).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _getStatusColor(snapshot.data!.status!).withValues(alpha: 0.5)),
+                        ),
+                        child: Text(
+                          snapshot.data!.status!.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: _getStatusColor(snapshot.data!.status!),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }
+              return const Text('Loading...', style: TextStyle(color: Colors.white));
+            },
+          ),
           bottom: const TabBar(
             isScrollable: true,
+            indicatorColor: Color(0xFF7c5fe6),
+            labelColor: Color(0xFF7c5fe6),
+            unselectedLabelColor: Colors.grey,
             tabs: [
               Tab(text: 'Overview'),
-              Tab(text: 'Workflow'),
-              Tab(text: 'Validation'),
+              Tab(text: 'Tasks'),
+              Tab(text: 'Team'),
               Tab(text: 'Documents'),
-              Tab(text: 'Experiments'),
+              Tab(text: 'AI Lab'),
+              Tab(text: 'Funding'),
+              Tab(text: 'Settings'),
             ],
           ),
         ),
@@ -94,69 +119,25 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error loading project: ${snapshot.error}'));
+              return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
             } else if (!snapshot.hasData) {
-              return const Center(child: Text('Project not found'));
+              return const Center(child: Text('Project not found', style: TextStyle(color: Colors.grey)));
             }
 
             final project = snapshot.data!;
             return TabBarView(
               children: [
-                _buildOverviewTab(project),
-                WorkflowEngineScreen(projectId: project.id),
-                ResearchValidationScreen(projectId: project.id),
+                ProjectOverviewTab(project: project, onRefresh: _refreshProject),
+                ProjectTasksTab(projectId: project.id),
+                ProjectTeamTab(projectId: project.id, projectName: project.name),
                 DocumentsScreen(projectId: project.id),
-                const Center(child: Text('Experiments Module (Coming soon)')),
+                ProjectAILabTab(projectId: project.id, projectName: project.name),
+                ProjectFundingTab(projectId: project.id, projectName: project.name),
+                ProjectSettingsTab(project: project),
               ],
             );
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildOverviewTab(Project project) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            project.name,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              if (project.status != null)
-                Chip(
-                  label: Text(project.status!.toUpperCase()),
-                  color: WidgetStatePropertyAll(Colors.blue.withValues(alpha: 0.1)),
-                  labelStyle: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                ),
-              const SizedBox(width: 8),
-              if (project.sector != null)
-                Chip(
-                  avatar: const Icon(Icons.category, size: 16),
-                  label: Text(project.sector!),
-                ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Text('Executive Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(
-            project.description?.isNotEmpty == true ? project.description! : 'No description provided.',
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 32),
-          const Divider(),
-          const SizedBox(height: 16),
-          Text(
-            'Last Updated: ${DateFormat.yMMMMEEEEd().format(project.updatedAt)}',
-            style: const TextStyle(color: Colors.grey),
-          ),
-        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import '../features/projects/screens/create_project_screen.dart';
 import '../features/projects/screens/project_detail_screen.dart';
 import '../features/teams/screens/create_team_screen.dart';
 import '../features/experiments/screens/create_experiment_screen.dart';
+import '../features/experiments/screens/experiment_detail_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/vault/screens/create_vault_entry_screen.dart';
 import '../features/vault/screens/vault_detail_screen.dart';
@@ -27,7 +28,11 @@ import '../features/messages/screens/messages_list_screen.dart';
 import '../features/messages/screens/chat_screen.dart';
 import '../features/marketing/screens/marketing_dashboard_screen.dart';
 import '../features/validation/screens/validation_screen.dart';
+import '../features/validation/screens/validation_detail_screen.dart';
 import '../features/research/screens/research_center_screen.dart';
+import '../features/research/screens/research_workspace_screen.dart';
+import '../features/documents/screens/documents_screen.dart';
+import '../features/documents/screens/document_detail_screen.dart';
 import '../features/commercialization/screens/commercialization_screen.dart';
 import '../features/enterprise/screens/enterprise_screen.dart';
 import '../features/enterprise/screens/enterprise_vault_screen.dart';
@@ -132,6 +137,13 @@ class AppRouter {
             builder: (context, state) => const CreateExperimentScreen(),
           ),
           GoRoute(
+            path: 'experiments/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return ExperimentDetailScreen(experimentId: id);
+            },
+          ),
+          GoRoute(
             path: 'profile',
             builder: (context, state) => const ProfileScreen(),
           ),
@@ -204,17 +216,56 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: 'chat',
-                builder: (context, state) => const ChatScreen(),
+                builder: (context, state) {
+                  final conversationId = state.extra as String? ?? '';
+                  return ChatScreen(conversationId: conversationId);
+                },
               ),
             ],
           ),
           GoRoute(
             path: 'validation',
             builder: (context, state) => const ValidationScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return ValidationDetailScreen(validationId: id);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'research',
             builder: (context, state) => const ResearchCenterScreen(),
+            routes: [
+              GoRoute(
+                path: ':projectId',
+                builder: (context, state) {
+                  final id = state.pathParameters['projectId']!;
+                  return ResearchWorkspaceScreen(projectId: id);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'documents',
+            builder: (context, state) => const DocumentsScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  // We extract the passed document list from extra
+                  final docs = state.extra as List<dynamic>? ?? [];
+                  return DocumentDetailScreen(
+                    documentId: id,
+                    allDocs: docs.cast(), // Will cast to List<EnterpriseDocument> implicitly
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'commercialization',

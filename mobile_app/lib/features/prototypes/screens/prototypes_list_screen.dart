@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../auth/services/auth_service.dart';
 import '../models/prototype.dart';
 import '../services/prototype_service.dart';
-import '../../auth/services/auth_service.dart';
 
 class PrototypesListScreen extends StatefulWidget {
   const PrototypesListScreen({super.key});
@@ -32,12 +32,19 @@ class _PrototypesListScreenState extends State<PrototypesListScreen> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'concept': return Colors.grey;
-      case 'designing': return Colors.blue;
-      case 'building': return Colors.orange;
-      case 'testing': return Colors.purple;
-      case 'complete': return Colors.green;
-      default: return Colors.grey;
+      case 'success':
+      case 'complete':
+        return Colors.green;
+      case 'testing':
+        return Colors.purple;
+      case 'building':
+        return Colors.orange;
+      case 'draft':
+        return Colors.blueGrey;
+      case 'archived':
+        return Colors.grey;
+      default:
+        return Colors.blue;
     }
   }
 
@@ -50,7 +57,7 @@ class _PrototypesListScreenState extends State<PrototypesListScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              context.push('/prototypes/create').then((_) => _loadPrototypes());
+              context.push('/dashboard/prototypes/create').then((_) => _loadPrototypes());
             },
           ),
         ],
@@ -69,20 +76,24 @@ class _PrototypesListScreenState extends State<PrototypesListScreen> {
 
           if (prototypes.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.build, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text('No prototypes found', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.push('/prototypes/create').then((_) => _loadPrototypes());
-                    },
-                    child: const Text('Create Prototype'),
-                  )
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.build_circle_outlined, size: 64, color: Colors.grey),
+                    const SizedBox(height: 12),
+                    const Text('No prototypes found', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        context.push('/dashboard/prototypes/create').then((_) => _loadPrototypes());
+                      },
+                      label: const Text('Create prototype'),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -94,19 +105,67 @@ class _PrototypesListScreenState extends State<PrototypesListScreen> {
               itemCount: prototypes.length,
               itemBuilder: (context, index) {
                 final prototype = prototypes[index];
+                final statusColor = _getStatusColor(prototype.status);
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: _getStatusColor(prototype.status).withValues(alpha: 0.2),
-                      child: Icon(Icons.build, color: _getStatusColor(prototype.status)),
-                    ),
-                    title: Text(prototype.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(prototype.status.toUpperCase()),
-                    trailing: const Icon(Icons.chevron_right),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () {
-                      context.push('/prototypes/${prototype.id}').then((_) => _loadPrototypes());
+                      context.push('/dashboard/prototypes/${prototype.id}').then((_) => _loadPrototypes());
                     },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: statusColor.withValues(alpha: 0.16),
+                                child: Icon(Icons.build, color: statusColor),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      prototype.title,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'v${prototype.version} · ${prototype.status.toUpperCase()}',
+                                      style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (prototype.description != null && prototype.description!.isNotEmpty)
+                            Text(
+                              prototype.description!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (prototype.projectName != null)
+                                Chip(label: Text(prototype.projectName!)),
+                              Chip(label: Text('Views ${prototype.views}')),
+                              Chip(label: Text('Downloads ${prototype.downloads}')),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },
