@@ -86,7 +86,6 @@ const MayaAssistantPage = () => {
       const { data, error } = await supabase
         .from('projects')
         .select('id, name, description, sector')
-        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
       if (!error && data) {
         setProjects(data as Project[]);
@@ -153,6 +152,10 @@ const MayaAssistantPage = () => {
 
   const selectConversation = (id: string) => {
     setActiveConversationId(id);
+    const conv = conversations.find(c => c.id === id);
+    if (conv) {
+      setSelectedProjectId(conv.projectId || null);
+    }
     setMobileSidebarOpen(false); // close drawer after selection on mobile
   };
 
@@ -196,10 +199,15 @@ const MayaAssistantPage = () => {
 
     try {
       const systemPrompt = buildSystemPrompt(projectContext);
-      const apiMessages = [
-        { role: 'system', content: systemPrompt },
-        ...updatedMessages.map(m => ({ role: m.role, content: m.content })),
-      ];
+      
+      // The Edge function filters out 'system' messages from the client.
+      // So we inject the project context into the first user message invisibly.
+      const apiMessages = updatedMessages.map((m, i) => {
+        if (i === 0 && m.role === 'user') {
+          return { role: 'user', content: `[System Context: ${systemPrompt}]\n\n${m.content}` };
+        }
+        return { role: m.role, content: m.content };
+      });
 
       const assistantContent = await invokeMayaChat(apiMessages, 'groq');
 
