@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../auth/services/auth_service.dart';
 import '../models/enterprise_document.dart';
 import '../services/document_service.dart';
+import '../../../core/supabase_client.dart';
 import 'package:intl/intl.dart';
 
 class DocumentsScreen extends StatefulWidget {
@@ -17,6 +20,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   List<EnterpriseDocument> _docs = [];
   DashboardMetrics _metrics = DashboardMetrics();
   bool _loading = true;
+  bool _uploading = false;
   String? _error;
 
   String _search = '';
@@ -64,6 +68,62 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     }).toList();
   }
 
+  Future<void> _handleUpload() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      if (result != null && result.files.single.path != null) {
+        setState(() => _uploading = true);
+        
+        final file = File(result.files.single.path!);
+        final fileName = result.files.single.name;
+        final fileExtension = result.files.single.extension?.toLowerCase() ?? 'unknown';
+        
+        final user = context.read<AuthService>().currentUser;
+        if (user == null) return;
+        
+        final filePath = '${user.id}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+        await SupabaseConfig.client.storage.from('project-documents').upload(
+          filePath,
+          file,
+        );
+        
+        final publicUrl = SupabaseConfig.client.storage.from('project-documents').getPublicUrl(filePath);
+        
+        final newDoc = EnterpriseDocument(
+          id: '',
+          projectId: '',
+          projectName: 'My Project',
+          projectSector: 'General',
+          authorName: user.email ?? 'Unknown User',
+          name: fileName,
+          fileUrl: publicUrl,
+          module: 'vault',
+          version: '1.0',
+          archived: false,
+          fileKind: fileExtension,
+          sizeBytes: file.lengthSync(),
+          tags: [],
+          createdAt: DateTime.now(),
+        );
+        
+        await context.read<DocumentService>().uploadDocument(newDoc, user.id);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document uploaded successfully!')));
+          _fetchDocs();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload error: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _uploading = false);
+      }
+    }
+  }
+
   String _formatBytes(int bytes) {
     if (bytes < 1024) return '\$bytes B';
     if (bytes < 1024 * 1024) return '\${(bytes / 1024).toStringAsFixed(1)} KB';
@@ -99,9 +159,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
-      body: RefreshIndicator(
-        onRefresh: _fetchDocs,
-        child: CustomScrollView(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _fetchDocs,
+          child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
@@ -127,12 +188,14 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                           ],
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: _uploading ? null : _handleUpload,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2fd4ff),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text('Upload', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                          child: _uploading 
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
+                              : const Text('Upload', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -233,7 +296,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _statBadge(String label, String value, Color color) {

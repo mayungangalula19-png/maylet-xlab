@@ -33,14 +33,14 @@ class ExperimentIntegrationsTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: connected ? const Color(0xFF2fd4ff).withValues(alpha: 0.5) : Colors.white10),
+        border: Border.all(color: connected ? const Color(0xFF2fd4ff).withOpacity(0.5) : Colors.white10),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: connected ? const Color(0xFF2fd4ff).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+              color: connected ? const Color(0xFF2fd4ff).withOpacity(0.2) : Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: connected ? const Color(0xFF2fd4ff) : Colors.grey, size: 24),
@@ -60,10 +60,10 @@ class ExperimentIntegrationsTab extends StatelessWidget {
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: connected ? Colors.transparent : Colors.white.withValues(alpha: 0.1),
+              backgroundColor: connected ? Colors.transparent : Colors.white.withOpacity(0.1),
               foregroundColor: connected ? Colors.redAccent : Colors.white,
               elevation: 0,
-              side: BorderSide(color: connected ? Colors.redAccent.withValues(alpha: 0.5) : Colors.transparent),
+              side: BorderSide(color: connected ? Colors.redAccent.withOpacity(0.5) : Colors.transparent),
             ),
             child: Text(connected ? 'Disconnect' : 'Connect'),
           ),

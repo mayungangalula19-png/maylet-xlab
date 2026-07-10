@@ -51,7 +51,7 @@ class ProjectOverviewTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -67,7 +67,7 @@ class ProjectOverviewTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -103,7 +103,7 @@ class ProjectOverviewTab extends StatelessWidget {
                 runSpacing: 8,
                 children: project.techStack.map((tech) => Chip(
                   label: Text(tech, style: const TextStyle(color: Colors.white, fontSize: 12)),
-                  backgroundColor: const Color(0xFF7c5fe6).withValues(alpha: 0.2),
+                  backgroundColor: const Color(0xFF7c5fe6).withOpacity(0.2),
                   side: const BorderSide(color: Color(0xFF7c5fe6), width: 1),
                 )).toList(),
               ),
@@ -116,7 +116,7 @@ class ProjectOverviewTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -137,7 +137,7 @@ class ProjectOverviewTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),

@@ -12,6 +12,12 @@ class AuthService {
 
   User? get currentUser => _client.auth.currentUser;
 
+  bool get isAdmin {
+    final email = currentUser?.email?.toLowerCase();
+    if (email == null) return false;
+    return const ['admintest@gmail.com', 'mayungangalula19@gmail.com'].contains(email);
+  }
+
   /// Returns true if the 24-hour session window has expired.
   Future<bool> isSessionExpired() async {
     final prefs = await SharedPreferences.getInstance();

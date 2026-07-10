@@ -96,19 +96,21 @@ class _ExperimentsListScreenState extends State<ExperimentsListScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Science Dashboard',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Manage your scientific experiments',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
-                            ),
-                          ],
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Science Dashboard',
+                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Manage your scientific experiments',
+                                style: TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                            ],
+                          ),
                         ),
                         ElevatedButton(
                           onPressed: () => context.go('/dashboard/experiments/create'),
@@ -129,7 +131,7 @@ class _ExperimentsListScreenState extends State<ExperimentsListScreen> {
                         hintStyle: const TextStyle(color: Colors.grey),
                         prefixIcon: const Icon(Icons.search, color: Color(0xFF2fd4ff)),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        fillColor: Colors.white.withOpacity(0.05),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: BorderSide.none,
@@ -217,7 +219,7 @@ class _ExperimentsListScreenState extends State<ExperimentsListScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF2fd4ff).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+            color: isActive ? const Color(0xFF2fd4ff).withOpacity(0.2) : Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: isActive ? const Color(0xFF2fd4ff) : Colors.transparent),
           ),
@@ -274,10 +276,10 @@ class _ExperimentsListScreenState extends State<ExperimentsListScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _stageColor(exp.pipelineStage).withValues(alpha: 0.15),
+                      color: _stageColor(exp.pipelineStage).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: _stageColor(exp.pipelineStage).withValues(alpha: 0.5),
+                        color: _stageColor(exp.pipelineStage).withOpacity(0.5),
                         width: 1,
                       ),
                     ),

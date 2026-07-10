@@ -81,9 +81,9 @@ class _ExperimentDetailScreenState extends State<ExperimentDetailScreen> {
                       margin: const EdgeInsets.only(left: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _stageColor(exp.pipelineStage).withValues(alpha: 0.15),
+                        color: _stageColor(exp.pipelineStage).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _stageColor(exp.pipelineStage).withValues(alpha: 0.5)),
+                        border: Border.all(color: _stageColor(exp.pipelineStage).withOpacity(0.5)),
                       ),
                       child: Text(
                         exp.pipelineStage.toUpperCase(),

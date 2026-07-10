@@ -71,7 +71,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
                   ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
-                    BoxShadow(color: const Color(0xFF059669).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                    BoxShadow(color: const Color(0xFF059669).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
                   ],
                 ),
                 child: Row(
@@ -87,7 +87,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text('Available now', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
@@ -207,7 +207,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: _getStatusColor(pitch.status).withValues(alpha: 0.2),
+                                        color: _getStatusColor(pitch.status).withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
@@ -237,7 +237,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
                                 const SizedBox(height: 8),
                                 LinearProgressIndicator(
                                   value: progress,
-                                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                                  backgroundColor: Colors.grey.withOpacity(0.2),
                                   color: Colors.green,
                                 ),
                               ],
@@ -265,14 +265,14 @@ class _FundingListScreenState extends State<FundingListScreen> {
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF131829) : scheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+            border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
           ),
           child: Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
+                  color: color.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -293,7 +293,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF131829) : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +301,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
+              color: iconColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 28),
@@ -313,7 +313,7 @@ class _FundingListScreenState extends State<FundingListScreen> {
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6), fontSize: 12)),
+                Text(subtitle, style: TextStyle(color: scheme.onSurface.withOpacity(0.6), fontSize: 12)),
                 const SizedBox(height: 8),
                 Row(
                   children: [

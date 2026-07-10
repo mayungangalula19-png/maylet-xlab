@@ -149,7 +149,7 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500)),
@@ -207,8 +207,8 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: accent ? color.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.4),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: accent ? color.withOpacity(0.15) : Colors.black.withOpacity(0.4),
+        border: Border.all(color: color.withOpacity(0.2)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -227,14 +227,14 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
           child: Icon(icon, color: color, size: 20),
         ),
         title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
@@ -270,9 +270,9 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
+        color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
+        border: Border.all(color: color.withOpacity(0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +289,7 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
                 child: Text('${d.avgProgress}% avg', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
               ),
             ],
@@ -310,7 +310,7 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: d.avgProgress / 100,
-              backgroundColor: Colors.white.withValues(alpha: 0.05),
+              backgroundColor: Colors.white.withOpacity(0.05),
               valueColor: AlwaysStoppedAnimation(color),
               minHeight: 4,
             ),
@@ -382,9 +382,9 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
           children: _roles.map((r) => Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
             child: Text(r, style: const TextStyle(color: Colors.white70, fontSize: 11)),
           )).toList(),
@@ -404,16 +404,16 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
+        color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF7c5fe6).withValues(alpha: 0.15),
+              color: const Color(0xFF7c5fe6).withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.groups, color: Color(0xFF7c5fe6), size: 24),
@@ -465,9 +465,9 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
         ...integrations.map((i) => Container(
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withOpacity(0.3),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
           child: ListTile(
             leading: Icon(i['icon'] as IconData, color: const Color(0xFF7c5fe6), size: 22),
@@ -485,9 +485,9 @@ class _EnterpriseScreenState extends State<EnterpriseScreen> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Column(
         children: [

@@ -58,34 +58,37 @@ class _ValidationScreenState extends State<ValidationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
-      body: RefreshIndicator(
-        onRefresh: _fetchValidations,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Validation Center',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _fetchValidations,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Validation Center',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Decision gate between Experiment and Funding',
+                                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Decision gate between Experiment and Funding',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
+                          ),
+                          ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2fd4ff),
@@ -149,7 +152,7 @@ class _ValidationScreenState extends State<ValidationScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _statBadge(String label, String value, Color color) {
@@ -157,9 +160,9 @@ class _ValidationScreenState extends State<ValidationScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Column(
           children: [
@@ -199,9 +202,9 @@ class _ValidationScreenState extends State<ValidationScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _verdictColor(record.decision).withValues(alpha: 0.15),
+                      color: _verdictColor(record.decision).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _verdictColor(record.decision).withValues(alpha: 0.5)),
+                      border: Border.all(color: _verdictColor(record.decision).withOpacity(0.5)),
                     ),
                     child: Text(
                       record.decision.toUpperCase(),

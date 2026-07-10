@@ -206,9 +206,9 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.white24),
             filled: true,
-            fillColor: Colors.black.withValues(alpha: 0.4),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+            fillColor: Colors.black.withOpacity(0.4),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF7c5fe6))),
           ),
         ),
@@ -305,7 +305,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                             ElevatedButton(
                               onPressed: () => context.push('/vault'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                                backgroundColor: Colors.white.withOpacity(0.1),
                                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                                 elevation: 0,
@@ -322,7 +322,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFfc8181).withValues(alpha: 0.12),
+                              color: const Color(0xFFfc8181).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(_error!, style: const TextStyle(color: Color(0xFFfeb2b2), fontSize: 13)),
@@ -334,7 +334,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF48bb78).withValues(alpha: 0.12),
+                              color: const Color(0xFF48bb78).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(_message!, style: const TextStyle(color: Color(0xFF9ae6b4), fontSize: 13)),
@@ -351,7 +351,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                             hintStyle: const TextStyle(color: Colors.grey),
                             prefixIcon: const Icon(Icons.search, color: Colors.grey),
                             filled: true,
-                            fillColor: Colors.white.withValues(alpha: 0.05),
+                            fillColor: Colors.white.withOpacity(0.05),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                           ),
                         ),
@@ -377,9 +377,9 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(32),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
+                          color: Colors.black.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                          border: Border.all(color: Colors.white.withOpacity(0.05)),
                         ),
                         child: Column(
                           children: [
@@ -431,7 +431,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
+                          color: Colors.black.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Text('No project documents uploaded yet.', style: TextStyle(color: Colors.grey), textAlign: TextAlign.center),
@@ -461,9 +461,9 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,7 +480,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFfc8181).withValues(alpha: 0.15),
+                          color: const Color(0xFFfc8181).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text('Confidential', style: TextStyle(color: Color(0xFFfeb2b2), fontSize: 10, fontWeight: FontWeight.bold)),
@@ -505,7 +505,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: Colors.white.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.edit, color: Colors.white54, size: 16),
@@ -518,7 +518,7 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFfc8181).withValues(alpha: 0.1),
+                    color: const Color(0xFFfc8181).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.delete, color: Color(0xFFfeb2b2), size: 16),
@@ -536,9 +536,9 @@ class _EnterpriseVaultScreenState extends State<EnterpriseVaultScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.2),
+        color: Colors.black.withOpacity(0.2),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Row(
         children: [

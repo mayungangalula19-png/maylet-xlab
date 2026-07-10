@@ -16,7 +16,7 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _workspacesFuture = context.read<CommercializationService>().fetchWorkspaces();
   }
 
@@ -35,6 +35,8 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
             Tab(text: 'Overview'),
             Tab(text: 'Go-to-Market'),
             Tab(text: 'Revenue'),
+            Tab(text: 'IP & Licensing'),
+            Tab(text: 'Spin-offs'),
             Tab(text: 'Partnership'),
           ],
         ),
@@ -54,6 +56,8 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
               _overviewTab(activeWorkspace),
               _goToMarketTab(activeWorkspace),
               _revenueTab(activeWorkspace),
+              _ipLicensingTab(activeWorkspace),
+              _spinOffsTab(activeWorkspace),
               _partnershipTab(activeWorkspace),
             ],
           );
@@ -100,7 +104,7 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isComplete ? Colors.green.withValues(alpha: 0.1) : color.withValues(alpha: 0.1),
+            color: isComplete ? Colors.green.withOpacity(0.1) : color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(isComplete ? Icons.check_circle : icon, color: isComplete ? Colors.green : color),
@@ -149,11 +153,134 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
     );
   }
 
+  Widget _ipLicensingTab(CommercializationWorkspace? workspace) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFF7c5fe6), Color(0xFF2fd4ff)]),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Intellectual Property', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Protect and monetize your innovations through patents, trademarks, and licensing agreements.', style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _infoCard('Patent Portfolio', 'File and manage patents for your innovations', Icons.verified_user, Colors.blue),
+        _infoCard('Trademark Registration', 'Register and protect your brand identity', Icons.branding_watermark, Colors.purple),
+        _infoCard('Licensing Agreements', 'Create and manage IP licensing deals', Icons.handshake, Colors.green),
+        _infoCard('Trade Secrets', 'Document and protect proprietary methods', Icons.lock_outline, Colors.orange),
+        _infoCard('White-Label Rights', 'Package your tech for white-label distribution', Icons.widgets, Colors.teal),
+        const SizedBox(height: 16),
+        const Text('Revenue Models', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _revenueModelCard('SaaS', 'Cloud product with tiered plans', Icons.cloud, 85),
+        _revenueModelCard('Subscription', 'Recurring membership or access', Icons.repeat, 72),
+        _revenueModelCard('Licensing', 'IP, patents, or white-label rights', Icons.gavel, 60),
+        _revenueModelCard('API Usage', 'Pay-per-call or usage-based API', Icons.api, 45),
+      ],
+    );
+  }
+
+  Widget _spinOffsTab(CommercializationWorkspace? workspace) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFFf59e0b), Color(0xFFef4444)]),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Spin-off Companies', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Launch independent ventures from validated research and prototypes.', style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _infoCard('Company Formation', 'Legal setup, incorporation, and governance', Icons.business, Colors.blue),
+        _infoCard('Founding Team', 'Assemble co-founders and key hires', Icons.group_add, Colors.green),
+        _infoCard('Seed Funding', 'Prepare pitch deck and secure initial capital', Icons.attach_money, Colors.amber),
+        _infoCard('Product Roadmap', 'Define MVP features and launch timeline', Icons.map, Colors.purple),
+        _infoCard('Market Entry', 'Go-to-market plan for the spin-off', Icons.rocket_launch, Colors.red),
+        const SizedBox(height: 16),
+        const Text('Launch Checklist', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _checklistItem('Go-to-market strategy defined', true),
+        _checklistItem('Pricing model finalized', true),
+        _checklistItem('Legal entity registered', false),
+        _checklistItem('MVP ready for beta', false),
+        _checklistItem('First 10 customers acquired', false),
+      ],
+    );
+  }
+
+  Widget _revenueModelCard(String label, String description, IconData icon, int fitScore) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(icon, size: 28, color: const Color(0xFF2fd4ff)),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(description, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              ])),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              const Text('Fit Score', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const SizedBox(width: 8),
+              Expanded(child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: fitScore / 100,
+                  backgroundColor: Colors.white10,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    fitScore > 70 ? Colors.green : fitScore > 50 ? Colors.orange : Colors.red,
+                  ),
+                  minHeight: 6,
+                ),
+              )),
+              const SizedBox(width: 8),
+              Text('$fitScore%', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _checklistItem(String label, bool done) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Icon(done ? Icons.check_circle : Icons.radio_button_unchecked, color: done ? Colors.green : Colors.grey),
+        title: Text(label, style: TextStyle(decoration: done ? TextDecoration.lineThrough : null, color: done ? Colors.grey : null)),
+      ),
+    );
+  }
+
   Widget _infoCard(String title, String description, IconData icon, Color color) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: color)),
+        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: color)),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(description),
         trailing: const Icon(Icons.arrow_forward_ios, size: 14),
@@ -185,7 +312,7 @@ class _CommercializationScreenState extends State<CommercializationScreen> with 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: color)),
+        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: color)),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('$type · $detail'),
         trailing: ElevatedButton(onPressed: () {}, style: ElevatedButton.styleFrom(backgroundColor: color), child: const Text('Connect', style: TextStyle(fontSize: 12))),

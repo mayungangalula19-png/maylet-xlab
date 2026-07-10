@@ -42,41 +42,44 @@ class _ResearchCenterScreenState extends State<ResearchCenterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
-      body: RefreshIndicator(
-        onRefresh: _fetchProjects,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Research Center',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _fetchProjects,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Research Center',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Conduct research and prepare innovations.',
+                                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Conduct research and prepare innovations.',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2fd4ff),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text('New Project', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                        ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2fd4ff),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            child: const Text('New Project', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -121,7 +124,7 @@ class _ResearchCenterScreenState extends State<ResearchCenterScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _projectCard(ResearchProject project) {
@@ -151,7 +154,7 @@ class _ResearchCenterScreenState extends State<ResearchCenterScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2fd4ff).withValues(alpha: 0.15),
+                      color: const Color(0xFF2fd4ff).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text('Workspace', style: TextStyle(color: Color(0xFF2fd4ff), fontWeight: FontWeight.bold, fontSize: 10)),

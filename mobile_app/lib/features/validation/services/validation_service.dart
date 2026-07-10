@@ -3,7 +3,7 @@ import '../models/validation_record.dart';
 
 class ValidationService {
   Future<List<ValidationRecord>> listValidations({String? userId}) async {
-    var query = SupabaseConfig.client.from('validation_records').select('*');
+    var query = SupabaseConfig.client.from('validations').select('*');
     if (userId != null) {
       query = query.eq('user_id', userId);
     }
@@ -14,7 +14,7 @@ class ValidationService {
 
   Future<ValidationRecord> getValidation(String id) async {
     final res = await SupabaseConfig.client
-        .from('validation_records')
+        .from('validations')
         .select('*')
         .eq('id', id)
         .single();

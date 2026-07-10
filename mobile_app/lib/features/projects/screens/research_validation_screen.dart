@@ -57,7 +57,7 @@ class ResearchValidationScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
+                    color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(status.toUpperCase(), style: TextStyle(fontSize: 10, color: statusColor, fontWeight: FontWeight.bold)),
@@ -65,11 +65,11 @@ class ResearchValidationScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(description, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+            Text(description, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
             const SizedBox(height: 16),
             LinearProgressIndicator(
               value: status == 'Validated' ? 1.0 : status == 'In Review' ? 0.6 : 0.2,
-              backgroundColor: Colors.grey.withValues(alpha: 0.2),
+              backgroundColor: Colors.grey.withOpacity(0.2),
               color: statusColor,
             ),
           ],

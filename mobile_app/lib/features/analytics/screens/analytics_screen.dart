@@ -21,172 +21,201 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Analytics'),
+        title: const Text('📊 Analytics Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () => setState(() {
               _statsFuture = context.read<AnalyticsService>().fetchStats();
             }),
           ),
         ],
       ),
-      body: FutureBuilder<AnalyticsStats>(
-        future: _statsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error loading analytics', style: TextStyle(color: scheme.error)),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => setState(() {
-                      _statsFuture = context.read<AnalyticsService>().fetchStats();
-                    }),
-                    child: const Text('Retry'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0A0A0F), Color(0xFF0F0F1A), Color(0xFF1A1A2E)],
+          ),
+        ),
+        child: SafeArea(
+          child: FutureBuilder<AnalyticsStats>(
+            future: _statsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator(color: Color(0xFF7c5fe6)));
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                      const SizedBox(height: 16),
+                      const Text('Error loading analytics', style: TextStyle(color: Colors.redAccent)),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7c5fe6)),
+                        onPressed: () => setState(() {
+                          _statsFuture = context.read<AnalyticsService>().fetchStats();
+                        }),
+                        child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
-          final stats = snapshot.data!;
+              final stats = snapshot.data!;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Hero Funding Card
-                _buildHeroFundingCard(stats, scheme, isDark),
-                const SizedBox(height: 20),
-
-                // Core Metrics Grid
-                Text(
-                  'Innovation Metrics',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.3,
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStatCard(
-                      icon: Icons.folder,
-                      label: 'Projects',
-                      value: stats.totalProjects,
-                      color: const Color(0xFF2563EB),
-                      scheme: scheme,
+                    const Text(
+                      'Track your innovation journey with real‑time metrics',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
-                    _buildStatCard(
-                      icon: Icons.group,
-                      label: 'Teams',
-                      value: stats.activeTeams,
-                      color: const Color(0xFF059669),
-                      scheme: scheme,
+                    const SizedBox(height: 24),
+
+                    // Core Metrics Grid matching web
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.5,
+                      children: [
+                        _buildStatCard(
+                          icon: '📁',
+                          label: 'Projects',
+                          value: stats.totalProjects,
+                          color: const Color(0xFF7c5fe6),
+                        ),
+                        _buildStatCard(
+                          icon: '🧪',
+                          label: 'Experiments',
+                          value: stats.totalExperiments,
+                          color: const Color(0xFF2fd4ff),
+                        ),
+                        _buildStatCard(
+                          icon: '📦',
+                          label: 'Prototypes',
+                          value: stats.totalPrototypes,
+                          color: const Color(0xFF48bb78),
+                        ),
+                        _buildStatCard(
+                          icon: '👥',
+                          label: 'Team Members',
+                          value: stats.activeTeams,
+                          color: const Color(0xFFf6c90e),
+                        ),
+                        _buildStatCard(
+                          icon: '💰',
+                          label: 'Funding Pitches',
+                          value: stats.totalPitches,
+                          color: const Color(0xFFfc8181),
+                        ),
+                        _buildStatCard(
+                          icon: '🔒',
+                          label: 'Vault Entries',
+                          value: stats.vaultEntries,
+                          color: const Color(0xFF0891B2),
+                        ),
+                      ],
                     ),
-                    _buildStatCard(
-                      icon: Icons.science,
-                      label: 'Experiments',
-                      value: stats.totalExperiments,
-                      color: const Color(0xFFD97706),
-                      scheme: scheme,
-                    ),
-                    _buildStatCard(
-                      icon: Icons.build,
-                      label: 'Prototypes',
-                      value: stats.totalPrototypes,
-                      color: const Color(0xFF7C3AED),
-                      scheme: scheme,
-                    ),
-                    _buildStatCard(
-                      icon: Icons.lock,
-                      label: 'Vault Entries',
-                      value: stats.vaultEntries,
-                      color: const Color(0xFF0891B2),
-                      scheme: scheme,
-                    ),
-                    _buildStatCard(
-                      icon: Icons.attach_money,
-                      label: 'Pitches',
-                      value: stats.totalPitches,
-                      color: const Color(0xFFDB2777),
-                      scheme: scheme,
-                    ),
+                    const SizedBox(height: 24),
+
+                    // Hero Funding Card
+                    _buildHeroFundingCard(stats),
+                    const SizedBox(height: 24),
+
+                  // Activity breakdown / Timeline simulated
+                    _buildTimelineCard(stats),
                   ],
                 ),
-                const SizedBox(height: 20),
-
-                // Activity breakdown
-                Text(
-                  'Activity Breakdown',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildActivityBar('Projects', stats.totalProjects, 10, const Color(0xFF2563EB), scheme),
-                _buildActivityBar('Teams', stats.activeTeams, 10, const Color(0xFF059669), scheme),
-                _buildActivityBar('Experiments', stats.totalExperiments, 10, const Color(0xFFD97706), scheme),
-                _buildActivityBar('Prototypes', stats.totalPrototypes, 10, const Color(0xFF7C3AED), scheme),
-                _buildActivityBar('Vault Entries', stats.vaultEntries, 10, const Color(0xFF0891B2), scheme),
-              ],
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildHeroFundingCard(AnalyticsStats stats, ColorScheme scheme, bool isDark) {
+  Widget _buildStatCard({
+    required String icon,
+    required String label,
+    required int value,
+    required Color color,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 32)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value.toString(),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroFundingCard(AnalyticsStats stats) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF1E3A5F), const Color(0xFF2563EB)]
-              : [const Color(0xFF2563EB), const Color(0xFF3B82F6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(
             children: [
-              Icon(Icons.trending_up, color: Colors.white70, size: 20),
+              Icon(Icons.trending_up, color: Color(0xFF7c5fe6), size: 24),
               SizedBox(width: 8),
               Text(
                 'Total Funding Raised',
-                style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             '\$${stats.totalFundingRaised.toStringAsFixed(0)}',
             style: const TextStyle(
@@ -205,10 +234,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
-              value: stats.fundingProgress,
-              minHeight: 10,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              value: stats.fundingProgress > 0 ? stats.fundingProgress : 0.01,
+              minHeight: 8,
+              backgroundColor: Colors.white.withOpacity(0.1),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7c5fe6)),
             ),
           ),
           const SizedBox(height: 8),
@@ -221,86 +250,61 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required int value,
-    required Color color,
-    required ColorScheme scheme,
-  }) {
+  Widget _buildTimelineCard(AnalyticsStats stats) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
-      padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 22),
+          const Text(
+            'Recent Activity',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
-          Text(
-            value.toString(),
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: scheme.onSurface,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: scheme.onSurface.withValues(alpha: 0.6)),
-          ),
+          const SizedBox(height: 16),
+          if (stats.recentActivities.isEmpty)
+            const Text('No recent activity.', style: TextStyle(color: Colors.grey))
+          else
+            ...stats.recentActivities.map((act) {
+              final date = act['created_at'] != null ? DateTime.parse(act['created_at']) : DateTime.now();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildTimelineItem(act['action'] ?? 'Activity', '${date.month}/${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}'),
+              );
+            }),
         ],
       ),
     );
   }
 
-  Widget _buildActivityBar(String label, int value, int maxValue, Color color, ColorScheme scheme) {
-    final progress = maxValue > 0 ? (value / maxValue).clamp(0.0, 1.0) : 0.0;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildTimelineItem(String title, String date) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: const BoxDecoration(
+            color: Color(0xFF2fd4ff),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-              Text(
-                value.toString(),
-                style: TextStyle(fontWeight: FontWeight.bold, color: color),
-              ),
+              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              Text(date, style: const TextStyle(color: Colors.white54, fontSize: 12)),
             ],
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress.toDouble(),
-              minHeight: 8,
-              backgroundColor: scheme.outlineVariant.withValues(alpha: 0.3),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
+

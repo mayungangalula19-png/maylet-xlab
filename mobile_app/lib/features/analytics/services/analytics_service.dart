@@ -16,9 +16,11 @@ class AnalyticsService {
     }
 
     try {
-      // Run queries safely one-by-one to isolate errors
-      final projects = await _client.from('projects').select('id').eq('user_id', userId);
-      final teams = await _client.from('team_members').select('id').eq('user_id', userId);
+      List projects = [];
+      try { projects = await _client.from('projects').select('id').eq('user_id', userId); } catch (_) {}
+      
+      List teams = [];
+      try { teams = await _client.from('team_members').select('id').eq('user_id', userId); } catch (_) {}
       
       List experiments = [];
       try { experiments = await _client.from('experiments').select('id').eq('user_id', userId); } catch (_) {}
@@ -41,6 +43,16 @@ class AnalyticsService {
         }
       } catch (_) {}
 
+      List activities = [];
+      try {
+        activities = await _client
+            .from('activities')
+            .select('action, created_at')
+            .eq('user_id', userId)
+            .order('created_at', ascending: false)
+            .limit(5);
+      } catch (_) {}
+
       double raised = 0;
       double target = 0;
       for (final p in pitches) {
@@ -57,6 +69,7 @@ class AnalyticsService {
         totalFundingRaised: raised,
         totalFundingTarget: target,
         totalPitches: pitches.length,
+        recentActivities: List<Map<String, dynamic>>.from(activities),
       );
     } catch (e) {
       rethrow;

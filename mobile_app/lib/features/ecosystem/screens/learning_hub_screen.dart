@@ -122,7 +122,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                       hintStyle: const TextStyle(color: Colors.grey),
                       prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      fillColor: Colors.white.withOpacity(0.05),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                     ),
                   ),
@@ -133,7 +133,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
+                            color: Colors.white.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: DropdownButtonHideUnderline(
@@ -160,7 +160,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
+                            color: Colors.white.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: DropdownButtonHideUnderline(
@@ -230,8 +230,8 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.4),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
+          color: Colors.black.withOpacity(0.4),
+          border: Border.all(color: color.withOpacity(0.2)),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -256,9 +256,9 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
+        color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(20),
-        border: done ? Border.all(color: const Color(0xFF48bb78).withValues(alpha: 0.5), width: 1.5) : Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: done ? Border.all(color: const Color(0xFF48bb78).withOpacity(0.5), width: 1.5) : Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +275,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                   : null,
             ),
             child: Center(
-              child: Icon(icon, size: 48, color: Colors.white.withValues(alpha: 0.3)),
+              child: Icon(icon, size: 48, color: Colors.white.withOpacity(0.3)),
             ),
           ),
           // Content
@@ -296,7 +296,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(color: levelColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: levelColor.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
                       child: Text(r['skill_level'] ?? 'All Levels', style: TextStyle(color: levelColor, fontSize: 10, fontWeight: FontWeight.bold)),
                     ),
                   ],
@@ -332,7 +332,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                     runSpacing: 4,
                     children: tags.take(3).map((tag) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
                       child: Text(tag, style: const TextStyle(color: Colors.white54, fontSize: 10)),
                     )).toList(),
                   ),
@@ -347,7 +347,7 @@ class _LearningHubScreenState extends State<LearningHubScreen> {
                         icon: const Icon(Icons.open_in_new, size: 16, color: Colors.white),
                         label: const Text('Open', style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          backgroundColor: Colors.white.withOpacity(0.1),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           elevation: 0,
                         ),

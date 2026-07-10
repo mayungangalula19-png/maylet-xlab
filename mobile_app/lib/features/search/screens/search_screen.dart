@@ -88,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: scheme.primary.withValues(alpha: 0.1),
+                      color: scheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(proj.status ?? 'idea', style: TextStyle(fontSize: 10, color: scheme.primary)),

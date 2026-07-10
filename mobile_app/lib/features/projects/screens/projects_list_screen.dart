@@ -82,19 +82,21 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Innovation Command Center',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Portfolio operations and live metrics',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
-                            ),
-                          ],
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Innovation Command Center',
+                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Portfolio operations and live metrics',
+                                style: TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                            ],
+                          ),
                         ),
                         ElevatedButton(
                           onPressed: () => context.go('/dashboard/projects/create'),
@@ -115,7 +117,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
                         hintStyle: const TextStyle(color: Colors.grey),
                         prefixIcon: const Icon(Icons.search, color: Color(0xFF667eea)),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        fillColor: Colors.white.withOpacity(0.05),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: BorderSide.none,
@@ -152,7 +154,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -231,7 +233,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF7c5fe6) : Colors.white.withValues(alpha: 0.05),
+            color: isActive ? const Color(0xFF7c5fe6) : Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(

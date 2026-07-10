@@ -78,9 +78,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(snapshot.data!.status!).withValues(alpha: 0.15),
+                          color: _getStatusColor(snapshot.data!.status!).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _getStatusColor(snapshot.data!.status!).withValues(alpha: 0.5)),
+                          border: Border.all(color: _getStatusColor(snapshot.data!.status!).withOpacity(0.5)),
                         ),
                         child: Text(
                           snapshot.data!.status!.toUpperCase(),
@@ -132,7 +132,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 ProjectTeamTab(projectId: project.id, projectName: project.name),
                 DocumentsScreen(projectId: project.id),
                 ProjectAILabTab(projectId: project.id, projectName: project.name),
-                ProjectFundingTab(projectId: project.id, projectName: project.name),
+                ProjectFundingTab(projectId: project.id),
                 ProjectSettingsTab(project: project),
               ],
             );

@@ -116,7 +116,7 @@ class _PitchDetailScreenState extends State<PitchDetailScreen> {
                         LinearProgressIndicator(
                           value: progress,
                           minHeight: 12,
-                          backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                          backgroundColor: Colors.grey.withOpacity(0.2),
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(6),
                         ),

@@ -47,16 +47,16 @@ class DocumentService {
     // For now we'll fetch from research_documents. Assuming we have some data there.
     try {
       final res = await SupabaseConfig.client
-          .from('research_documents')
-          .select('*, projects!inner(name, sector, user_id), profiles!inner(full_name)')
-          .eq('projects.user_id', userId)
+          .from('documents')
+          .select('*, projects!inner(name, sector)')
+          .eq('user_id', userId)
           .order('created_at', ascending: false);
 
       return (res as List).map((json) {
         final Map<String, dynamic> mutableJson = Map<String, dynamic>.from(json);
         mutableJson['project_name'] = json['projects']?['name'];
         mutableJson['project_sector'] = json['projects']?['sector'];
-        mutableJson['author_name'] = json['profiles']?['full_name'];
+        mutableJson['author_name'] = 'User'; // Fallback
         return EnterpriseDocument.fromJson(mutableJson);
       }).toList();
     } catch (e) {
@@ -105,6 +105,36 @@ class DocumentService {
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  Future<void> uploadDocument(EnterpriseDocument doc, String userId) async {
+    try {
+      String? targetProjectId = doc.projectId.isNotEmpty ? doc.projectId : null;
+      if (targetProjectId == null) {
+        final projects = await SupabaseConfig.client
+            .from('projects')
+            .select('id')
+            .eq('user_id', userId)
+            .limit(1);
+        if (projects.isNotEmpty) {
+          targetProjectId = projects.first['id'] as String;
+        } else {
+          throw Exception('You must create a project before uploading documents.');
+        }
+      }
+
+      await SupabaseConfig.client.from('documents').insert({
+        'name': doc.name,
+        'file_url': doc.fileUrl,
+        'file_type': doc.fileKind,
+        'size_bytes': doc.sizeBytes,
+        'project_id': targetProjectId,
+        'user_id': userId,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   MayaDocInsight generateMayaInsight(EnterpriseDocument doc, List<EnterpriseDocument> allDocs) {

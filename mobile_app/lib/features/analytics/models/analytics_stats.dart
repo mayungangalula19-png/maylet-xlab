@@ -7,6 +7,7 @@ class AnalyticsStats {
   final double totalFundingRaised;
   final double totalFundingTarget;
   final int totalPitches;
+  final List<Map<String, dynamic>> recentActivities;
 
   AnalyticsStats({
     required this.totalProjects,
@@ -17,6 +18,7 @@ class AnalyticsStats {
     required this.totalFundingRaised,
     required this.totalFundingTarget,
     required this.totalPitches,
+    this.recentActivities = const [],
   });
 
   double get fundingProgress =>

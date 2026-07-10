@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/supabase_client.dart';
 import '../models/ai_chat_models.dart';
 import '../services/maya_ai_service.dart';
 
@@ -21,11 +22,29 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
   List<AiChatSession> _sessions = [];
   bool _showSessions = false;
 
+  List<Map<String, dynamic>> _projects = [];
+  String? _selectedProjectId;
+
   @override
   void initState() {
     super.initState();
     _service = context.read<MayaAiService>();
     _loadSessions();
+    _loadProjects();
+  }
+
+  Future<void> _loadProjects() async {
+    try {
+      final res = await SupabaseConfig.client.from('projects').select('id, name');
+      if (mounted) {
+        setState(() {
+          _projects = List<Map<String, dynamic>>.from(res);
+          if (_projects.isNotEmpty) {
+            _selectedProjectId = _projects.first['id'];
+          }
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -181,11 +200,37 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('MAYA AI', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(
-                  _currentSession?.title ?? 'Select a conversation',
-                  style: TextStyle(fontSize: 11, color: scheme.onSurface.withValues(alpha: 0.6)),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (_projects.isNotEmpty)
+                  DropdownButton<String>(
+                    value: _selectedProjectId,
+                    dropdownColor: const Color(0xFF1A1A2E),
+                    underline: const SizedBox(),
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 16),
+                    style: TextStyle(fontSize: 11, color: scheme.onSurface.withOpacity(0.6)),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() => _selectedProjectId = newValue);
+                      }
+                    },
+                    items: _projects.map<DropdownMenuItem<String>>((Map<String, dynamic> project) {
+                      return DropdownMenuItem<String>(
+                        value: project['id'],
+                        child: SizedBox(
+                          width: 120, // Constrain width so it fits in AppBar
+                          child: Text(
+                            project['name'] ?? 'Project',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  )
+                else
+                  Text(
+                    _currentSession?.title ?? 'Select a conversation',
+                    style: TextStyle(fontSize: 11, color: scheme.onSurface.withOpacity(0.6)),
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
           ],
@@ -260,7 +305,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [const Color(0xFF6C3AED).withValues(alpha: 0.2), Colors.transparent],
+                    colors: [const Color(0xFF6C3AED).withOpacity(0.2), Colors.transparent],
                   ),
                 ),
                 child: const Center(
@@ -353,7 +398,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF131829) : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -365,7 +410,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11), overflow: TextOverflow.ellipsis),
-                Text(subtitle, style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6), fontSize: 9), overflow: TextOverflow.ellipsis),
+                Text(subtitle, style: TextStyle(color: scheme.onSurface.withOpacity(0.6), fontSize: 9), overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -381,7 +426,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF131829) : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -390,7 +435,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
           Expanded(
             child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           ),
-          Text(time, style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.5), fontSize: 10)),
+          Text(time, style: TextStyle(color: scheme.onSurface.withOpacity(0.5), fontSize: 10)),
         ],
       ),
     );
@@ -401,7 +446,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
       height: 250,
       decoration: BoxDecoration(
         color: scheme.surface,
-        border: Border(bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.3))),
+        border: Border(bottom: BorderSide(color: scheme.outlineVariant.withOpacity(0.3))),
       ),
       child: _sessions.isEmpty
           ? const Center(child: Text('No conversations yet', style: TextStyle(color: Colors.grey)))
@@ -420,7 +465,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
                   title: Text(session.title, overflow: TextOverflow.ellipsis),
                   subtitle: Text(session.agentRole.toUpperCase(), style: const TextStyle(fontSize: 11)),
                   selected: isActive,
-                  selectedTileColor: Colors.blue.withValues(alpha: 0.08),
+                  selectedTileColor: Colors.blue.withOpacity(0.08),
                   onTap: () => _openSession(session),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
@@ -495,7 +540,7 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: scheme.shadow.withValues(alpha: 0.06),
+                    color: scheme.shadow.withOpacity(0.06),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -573,47 +618,50 @@ class _MayaAiScreenState extends State<MayaAiScreen> with TickerProviderStateMix
 
   Widget _buildInputBar(ColorScheme scheme, bool isDark) {
     return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        decoration: BoxDecoration(
-          color: scheme.surface,
-          border: Border(top: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.3))),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _inputController,
-                maxLines: 4,
-                minLines: 1,
-                decoration: InputDecoration(
-                  hintText: 'Ask MAYA anything...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            border: Border(top: BorderSide(color: scheme.outlineVariant.withOpacity(0.3))),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _inputController,
+                  maxLines: 4,
+                  minLines: 1,
+                  decoration: InputDecoration(
+                    hintText: 'Ask MAYA anything...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: isDark ? scheme.surfaceContainerHighest : scheme.surfaceContainerLow,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
-                  filled: true,
-                  fillColor: isDark ? scheme.surfaceContainerHighest : scheme.surfaceContainerLow,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendMessage(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => _sendMessage(),
                 ),
               ),
-              child: IconButton(
-                icon: const Icon(Icons.send_rounded, color: Colors.white),
-                onPressed: _sendMessage,
+              const SizedBox(width: 8),
+              Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+                  ),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.send_rounded, color: Colors.white),
+                  onPressed: _sendMessage,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

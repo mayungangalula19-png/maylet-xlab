@@ -176,7 +176,7 @@ class _PrototypeDetailScreenState extends State<PrototypeDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
+                    color: statusColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(

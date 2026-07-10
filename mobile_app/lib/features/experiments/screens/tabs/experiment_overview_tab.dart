@@ -43,7 +43,7 @@ class ExperimentOverviewTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -66,7 +66,7 @@ class ExperimentOverviewTab extends StatelessWidget {
                           width: 24,
                           height: 24,
                           decoration: BoxDecoration(
-                            color: isDone ? const Color(0xFF2fd4ff) : (isActive ? const Color(0xFF2fd4ff).withValues(alpha: 0.2) : Colors.transparent),
+                            color: isDone ? const Color(0xFF2fd4ff) : (isActive ? const Color(0xFF2fd4ff).withOpacity(0.2) : Colors.transparent),
                             shape: BoxShape.circle,
                             border: Border.all(color: isDone || isActive ? const Color(0xFF2fd4ff) : Colors.white24, width: 2),
                           ),
@@ -104,7 +104,7 @@ class ExperimentOverviewTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -137,9 +137,9 @@ class ExperimentOverviewTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Column(
         children: [

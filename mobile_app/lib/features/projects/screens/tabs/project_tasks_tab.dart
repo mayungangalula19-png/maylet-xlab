@@ -30,219 +30,184 @@ class _ProjectTasksTabState extends State<ProjectTasksTab> {
     try {
       final res = await SupabaseConfig.client
           .from('tasks')
-          .select('*')
+          .select('*, profiles:assigned_to(full_name)')
           .eq('project_id', widget.projectId)
           .order('created_at', ascending: false);
-      setState(() {
-        _tasks = List<Map<String, dynamic>>.from(res);
-        _loading = false;
-      });
-    } catch (_) {
-      // Demo data if table doesn't exist
-      setState(() {
-        _tasks = [
-          {'id': '1', 'title': 'Market Research', 'description': 'Analyze top 3 competitors', 'status': 'done', 'due_date': DateTime.now().subtract(const Duration(days: 2)).toIso8601String()},
-          {'id': '2', 'title': 'Wireframing', 'description': 'Create initial screens', 'status': 'in_progress', 'due_date': DateTime.now().add(const Duration(days: 2)).toIso8601String()},
-          {'id': '3', 'title': 'Pitch Deck', 'description': 'Draft investor slides', 'status': 'todo', 'due_date': DateTime.now().add(const Duration(days: 5)).toIso8601String()},
-        ];
-        _loading = false;
-      });
+      
+      if (mounted) {
+        setState(() {
+          _tasks = List<Map<String, dynamic>>.from(res);
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading tasks: $e')));
+        setState(() => _loading = false);
+      }
     }
   }
 
-  Future<void> _updateStatus(String taskId, String currentStatus) async {
-    final newStatus = currentStatus == 'done' ? 'todo' :
-                      currentStatus == 'in_progress' ? 'done' : 'in_progress';
-    try {
-      await SupabaseConfig.client.from('tasks').update({'status': newStatus}).eq('id', taskId);
-    } catch (_) {} // Ignored for demo mode
-    _fetchTasks();
-  }
-
-  Future<void> _deleteTask(String taskId) async {
-    try {
-      await SupabaseConfig.client.from('tasks').delete().eq('id', taskId);
-    } catch (_) {} // Ignored for demo mode
-    _fetchTasks();
-  }
-
   Future<void> _addTask() async {
-    if (_titleController.text.isEmpty) return;
+    if (_titleController.text.trim().isEmpty) return;
     try {
       await SupabaseConfig.client.from('tasks').insert({
         'project_id': widget.projectId,
-        'title': _titleController.text,
-        'description': _descController.text,
+        'title': _titleController.text.trim(),
+        'description': _descController.text.trim(),
         'status': 'todo',
       });
-    } catch (_) {} // Ignored for demo mode
-    
-    _titleController.clear();
-    _descController.clear();
-    setState(() => _showAddForm = false);
-    _fetchTasks();
+      _titleController.clear();
+      _descController.clear();
+      setState(() => _showAddForm = false);
+      _fetchTasks();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error adding task: $e')));
+    }
+  }
+
+  Future<void> _updateStatus(String taskId, String status) async {
+    try {
+      await SupabaseConfig.client.from('tasks').update({'status': status}).eq('id', taskId);
+      _fetchTasks();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating task: $e')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
-
-    final todo = _tasks.where((t) => t['status'] == 'todo').toList();
-    final inProgress = _tasks.where((t) => t['status'] == 'in_progress').toList();
-    final done = _tasks.where((t) => t['status'] == 'done').toList();
-
-    return RefreshIndicator(
-      onRefresh: _fetchTasks,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    if (_loading) return const Center(child: CircularProgressIndicator(color: Color(0xFF2fd4ff)));
+    
+    return Column(
+      children: [
+        if (!_showAddForm)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Add Task'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2fd4ff),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => setState(() => _showAddForm = true),
+              ),
+            ),
+          ),
+          
+        if (_showAddForm)
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1A2E),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.05)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Project Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                ElevatedButton.icon(
-                  onPressed: () => setState(() => _showAddForm = !_showAddForm),
-                  icon: Icon(_showAddForm ? Icons.close : Icons.add, size: 18),
-                  label: Text(_showAddForm ? 'Cancel' : 'Add Task'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7c5fe6),
-                    foregroundColor: Colors.white,
+                const Text('New Task', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _titleController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Task Title',
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.black26,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            if (_showAddForm) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _descController,
+                  style: const TextStyle(color: Colors.white),
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: 'Description (optional)',
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.black26,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
                 ),
-                child: Column(
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextField(
-                      controller: _titleController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(labelText: 'Task Title', labelStyle: TextStyle(color: Colors.grey)),
+                    TextButton(
+                      onPressed: () => setState(() => _showAddForm = false),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
                     ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _descController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(labelText: 'Description', labelStyle: TextStyle(color: Colors.grey)),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _addTask,
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7c5fe6)),
-                        child: const Text('Save Task', style: TextStyle(color: Colors.white)),
-                      ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _addTask,
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2fd4ff), foregroundColor: Colors.black),
+                      child: const Text('Save'),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            _buildKanbanColumn('To Do', todo, Colors.orange),
-            _buildKanbanColumn('In Progress', inProgress, Colors.blue),
-            _buildKanbanColumn('Done', done, Colors.green),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildKanbanColumn(String title, List<Map<String, dynamic>> columnTasks, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-              const SizedBox(width: 8),
-              Text('$title (${columnTasks.length})', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-            ],
+              ],
+            ),
           ),
+
+        Expanded(
+          child: _tasks.isEmpty
+              ? const Center(child: Text('No tasks found.', style: TextStyle(color: Colors.grey)))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = _tasks[index];
+                    final status = task['status'] ?? 'todo';
+                    final date = task['created_at'] != null ? DateFormat.yMMMd().format(DateTime.parse(task['created_at'])) : '';
+                    
+                    return Card(
+                      color: const Color(0xFF1A1A2E),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: Colors.white.withOpacity(0.05)),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+                        leading: CircleAvatar(
+                          backgroundColor: status == 'done' ? Colors.green.withOpacity(0.2) : const Color(0xFF2fd4ff).withOpacity(0.2),
+                          child: Icon(status == 'done' ? Icons.check : Icons.assignment, color: status == 'done' ? Colors.green : const Color(0xFF2fd4ff)),
+                        ),
+                        title: Text(task['title'] ?? 'Task', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (task['description'] != null && task['description'].toString().isNotEmpty)
+                              Padding(padding: const EdgeInsets.only(top: 4), child: Text(task['description'], style: TextStyle(color: Colors.grey.shade400))),
+                            const SizedBox(height: 4),
+                            Text('Created $date', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                          ],
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert, color: Colors.grey),
+                          color: const Color(0xFF1A1A2E),
+                          onSelected: (val) => _updateStatus(task['id'], val),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(value: 'todo', child: Text('To Do', style: TextStyle(color: Colors.white))),
+                            const PopupMenuItem(value: 'in_progress', child: Text('In Progress', style: TextStyle(color: Colors.blue))),
+                            const PopupMenuItem(value: 'done', child: Text('Done', style: TextStyle(color: Colors.green))),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
         ),
-        if (columnTasks.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.02), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10, style: BorderStyle.solid)),
-            child: const Text('No tasks', style: TextStyle(color: Colors.white54, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
-          )
-        else
-          ...columnTasks.map((task) => _buildTaskCard(task)),
-        const SizedBox(height: 16),
       ],
-    );
-  }
-
-  Widget _buildTaskCard(Map<String, dynamic> task) {
-    final status = task['status'] as String;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(child: Text(task['title'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
-              IconButton(icon: const Icon(Icons.close, color: Colors.grey, size: 20), onPressed: () => _deleteTask(task['id'].toString())),
-            ],
-          ),
-          if (task['description'] != null && task['description'].toString().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(task['description'], style: const TextStyle(color: Colors.white70, fontSize: 14)),
-            ),
-          if (task['due_date'] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text('Due: ${DateFormat.yMMMd().format(DateTime.parse(task['due_date']))}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
-              ),
-            ),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () => _updateStatus(task['id'].toString(), status),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: status == 'done' ? Colors.orange : status == 'in_progress' ? Colors.green : Colors.blue),
-                foregroundColor: status == 'done' ? Colors.orange : status == 'in_progress' ? Colors.green : Colors.blue,
-              ),
-              child: Text(
-                status == 'done' ? 'Reopen →' :
-                status == 'in_progress' ? 'Complete →' : 'Start Progress →',
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

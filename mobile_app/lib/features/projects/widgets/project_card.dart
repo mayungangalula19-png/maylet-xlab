@@ -58,10 +58,10 @@ class ProjectCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(project.status!).withValues(alpha: 0.15),
+                        color: _getStatusColor(project.status!).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: _getStatusColor(project.status!).withValues(alpha: 0.5),
+                          color: _getStatusColor(project.status!).withOpacity(0.5),
                           width: 1,
                         ),
                       ),

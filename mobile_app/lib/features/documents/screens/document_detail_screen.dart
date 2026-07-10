@@ -96,7 +96,7 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _colorForKind(_doc.fileKind).withValues(alpha: 0.1),
+                    color: _colorForKind(_doc.fileKind).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(_iconForKind(_doc.fileKind), color: _colorForKind(_doc.fileKind), size: 40),
@@ -144,7 +144,7 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF6C3AED).withValues(alpha: 0.3)),
+                border: Border.all(color: const Color(0xFF6C3AED).withOpacity(0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

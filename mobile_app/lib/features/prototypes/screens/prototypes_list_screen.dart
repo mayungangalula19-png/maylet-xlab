@@ -121,7 +121,7 @@ class _PrototypesListScreenState extends State<PrototypesListScreen> {
                           Row(
                             children: [
                               CircleAvatar(
-                                backgroundColor: statusColor.withValues(alpha: 0.16),
+                                backgroundColor: statusColor.withOpacity(0.16),
                                 child: Icon(Icons.build, color: statusColor),
                               ),
                               const SizedBox(width: 12),

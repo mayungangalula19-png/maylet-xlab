@@ -83,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 8),
                   Chip(
                     label: Text(role.toString().toUpperCase()),
-                    backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                    backgroundColor: Colors.blue.withOpacity(0.1),
                     labelStyle: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 32),
@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _menuItem(Icons.settings, 'Settings', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()))),
                   _menuItem(Icons.help_outline, 'Help & Support', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()))),
                   
-                  if (role == 'admin' || role == 'super_admin') ...[
+                  if (context.read<AuthService>().isAdmin) ...[
                     const Divider(height: 32),
                     _menuItem(Icons.admin_panel_settings, 'Admin Console', () => context.push('/admin'), color: Colors.deepPurple),
                   ],

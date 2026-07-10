@@ -5,6 +5,7 @@ import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/projects/screens/create_project_screen.dart';
 import '../features/projects/screens/project_detail_screen.dart';
 import '../features/teams/screens/create_team_screen.dart';
+import '../features/teams/screens/team_detail_screen.dart';
 import '../features/experiments/screens/create_experiment_screen.dart';
 import '../features/experiments/screens/experiment_detail_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
@@ -80,9 +81,18 @@ class AppRouter {
           }
         }
 
-        // 4. Normal auth flow
+        // 4. Admin route protection
+        if (state.matchedLocation.startsWith('/admin') && isLoggedIn) {
+          final email = session.user.email?.toLowerCase();
+          final isAdmin = const ['admintest@gmail.com', 'mayungangalula19@gmail.com'].contains(email);
+          if (!isAdmin) return '/dashboard';
+        }
+
+        // 5. Normal auth flow
         if (!isLoggedIn && !isLoggingIn && !isOnboarding) return '/login';
-        if (isLoggedIn && (isLoggingIn || isOnboarding)) return '/dashboard';
+        if (isLoggedIn && (isLoggingIn || isOnboarding)) {
+          return '/dashboard';
+        }
 
         return null;
       },
@@ -131,6 +141,13 @@ class AppRouter {
           GoRoute(
             path: 'teams/create',
             builder: (context, state) => const CreateTeamScreen(),
+          ),
+          GoRoute(
+            path: 'teams/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return TeamDetailScreen(teamId: id);
+            },
           ),
           GoRoute(
             path: 'experiments/create',

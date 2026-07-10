@@ -89,7 +89,7 @@ class _TeamsListScreenState extends State<TeamsListScreen> {
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.green.withValues(alpha: 0.15),
+                      backgroundColor: Colors.green.withOpacity(0.15),
                       child: const Icon(Icons.group, color: Colors.green),
                     ),
                     title: Text(team.name, style: const TextStyle(fontWeight: FontWeight.bold)),

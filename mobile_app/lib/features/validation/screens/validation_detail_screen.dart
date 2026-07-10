@@ -70,9 +70,9 @@ class _ValidationDetailScreenState extends State<ValidationDetailScreen> {
                     margin: const EdgeInsets.only(left: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _decisionColor(rec.decision).withValues(alpha: 0.15),
+                      color: _decisionColor(rec.decision).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _decisionColor(rec.decision).withValues(alpha: 0.5)),
+                      border: Border.all(color: _decisionColor(rec.decision).withOpacity(0.5)),
                     ),
                     child: Text(
                       rec.decision.toUpperCase(),
@@ -159,7 +159,7 @@ class _ValidationDetailScreenState extends State<ValidationDetailScreen> {
               height: radius * 2,
               child: CircularProgressIndicator(
                 value: score / 100,
-                backgroundColor: color.withValues(alpha: 0.1),
+                backgroundColor: color.withOpacity(0.1),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 strokeWidth: radius > 25 ? 6 : 4,
               ),
@@ -237,7 +237,7 @@ class _ValidationDetailScreenState extends State<ValidationDetailScreen> {
             decoration: InputDecoration(
               labelText: 'Verdict',
               filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.05),
+              fillColor: Colors.white.withOpacity(0.05),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             ),
             items: const [
@@ -257,7 +257,7 @@ class _ValidationDetailScreenState extends State<ValidationDetailScreen> {
             decoration: InputDecoration(
               labelText: 'Reviewer Notes',
               filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.05),
+              fillColor: Colors.white.withOpacity(0.05),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             ),
           ),

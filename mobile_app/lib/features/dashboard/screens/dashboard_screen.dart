@@ -48,17 +48,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBody() {
-    switch (_selectedIndex) {
-      case 1: return const ProjectsListScreen();
-      case 2: return const TeamsListScreen();
-      case 3: return const ExperimentsListScreen();
-      case 4: return const PrototypesListScreen();
-      case 5: return const VaultListScreen();
-      case 6: return const ProfileScreen();
-      case 7: return const MayaAiScreen();
-      case 0:
-      default: return _buildDashboardHome();
-    }
+    return IndexedStack(
+      index: _selectedIndex,
+      children: [
+        _buildDashboardHome(),
+        const ProjectsListScreen(),
+        const TeamsListScreen(),
+        const ExperimentsListScreen(),
+        const PrototypesListScreen(),
+        const VaultListScreen(),
+        const ProfileScreen(),
+        const MayaAiScreen(),
+      ],
+    );
   }
 
   Widget _buildDashboardHome() {
@@ -86,7 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 4),
           Text(
             "Let's turn your ideas into reality.",
-            style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6), fontSize: 14),
+            style: TextStyle(color: scheme.onSurface.withOpacity(0.6), fontSize: 14),
           ),
           const SizedBox(height: 20),
 
@@ -103,14 +105,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1A1F35) : scheme.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+                      border: Border.all(color: scheme.outlineVariant.withOpacity(0.4)),
                     ),
                     child: Row(
                       children: [
                         const SizedBox(width: 12),
-                        Icon(Icons.search, color: scheme.onSurface.withValues(alpha: 0.4), size: 20),
+                        Icon(Icons.search, color: scheme.onSurface.withOpacity(0.4), size: 20),
                         const SizedBox(width: 8),
-                        Text('Search anything...', style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.4), fontSize: 14)),
+                        Text('Search anything...', style: TextStyle(color: scheme.onSurface.withOpacity(0.4), fontSize: 14)),
                       ],
                     ),
                   ),
@@ -299,14 +301,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         decoration: BoxDecoration(
           color: color.withValues(alpha: isDark ? 0.15 : 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.25)),
+          border: Border.all(color: color.withOpacity(0.25)),
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 20),
             const SizedBox(height: 4),
             Text(count, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
-            Text(label, style: TextStyle(color: color.withValues(alpha: 0.8), fontSize: 10), overflow: TextOverflow.ellipsis),
+            Text(label, style: TextStyle(color: color.withOpacity(0.8), fontSize: 10), overflow: TextOverflow.ellipsis),
           ],
         ),
       ),
@@ -325,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             decoration: BoxDecoration(
               color: color.withValues(alpha: isDark ? 0.2 : 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
+              border: Border.all(color: color.withOpacity(0.3)),
             ),
             child: Icon(icon, color: color, size: 26),
           ),
@@ -362,7 +364,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF131829) : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -370,7 +372,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
+              color: iconColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 24),
@@ -388,7 +390,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.15),
+                        color: statusColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(status, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
@@ -396,7 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(team, style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.5), fontSize: 11)),
+                Text(team, style: TextStyle(color: scheme.onSurface.withOpacity(0.5), fontSize: 11)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -406,7 +408,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: LinearProgressIndicator(
                           value: progress,
                           minHeight: 6,
-                          backgroundColor: scheme.outlineVariant.withValues(alpha: 0.3),
+                          backgroundColor: scheme.outlineVariant.withOpacity(0.3),
                           valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                         ),
                       ),
@@ -456,7 +458,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.mail_outline),
-            onPressed: () => context.push('/messages'),
+            onPressed: () => context.push('/dashboard/messages'),
             tooltip: 'Messages',
           ),
           IconButton(
@@ -510,6 +512,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
+            if (context.watch<AuthService>().isAdmin) ...[
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings, color: Colors.amber),
+                title: const Text('Admin Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () { Navigator.pop(context); context.push('/admin'); },
+              ),
+              const Divider(),
+            ],
             _drawerItem(Icons.dashboard, 'Dashboard', 0),
             _drawerItem(Icons.folder, 'Projects', 1),
             _drawerItem(Icons.group, 'Teams', 2),
@@ -537,28 +547,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListTile(
               leading: const Icon(Icons.store),
               title: const Text('Marketplace'),
-              onTap: () { Navigator.pop(context); context.push('/marketplace'); },
+              onTap: () { Navigator.pop(context); context.push('/dashboard/marketplace'); },
             ),
             ListTile(
               leading: const Icon(Icons.work),
               title: const Text('Careers'),
-              onTap: () { Navigator.pop(context); context.push('/careers'); },
+              onTap: () { Navigator.pop(context); context.push('/dashboard/careers'); },
             ),
             ListTile(
               leading: const Icon(Icons.account_balance),
               title: const Text('Deal Room'),
-              onTap: () { Navigator.pop(context); context.push('/deal-room'); },
+              onTap: () { Navigator.pop(context); context.push('/dashboard/deal-room'); },
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.article),
               title: const Text('Newsletter'),
-              onTap: () { Navigator.pop(context); context.push('/newsletter'); },
+              onTap: () { Navigator.pop(context); context.push('/dashboard/newsletter'); },
             ),
             ListTile(
               leading: const Icon(Icons.mail_outline),
               title: const Text('Messages'),
-              onTap: () { Navigator.pop(context); context.push('/messages'); },
+              onTap: () { Navigator.pop(context); context.push('/dashboard/messages'); },
             ),
             const Divider(),
             const Padding(
@@ -635,7 +645,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6C3AED).withValues(alpha: 0.5),
+              color: const Color(0xFF6C3AED).withOpacity(0.5),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),

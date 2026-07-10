@@ -80,8 +80,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withValues(alpha: 0.3),
-                          Colors.black.withValues(alpha: 0.8),
+                          Colors.black.withOpacity(0.3),
+                          Colors.black.withOpacity(0.8),
                         ],
                         stops: const [0.0, 0.5, 1.0],
                       ),
@@ -169,7 +169,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             },
                             icon: const Icon(Icons.arrow_forward, color: Colors.white),
                             style: IconButton.styleFrom(
-                              backgroundColor: Colors.white.withValues(alpha: 0.2),
+                              backgroundColor: Colors.white.withOpacity(0.2),
                               padding: const EdgeInsets.all(16),
                             ),
                           ).animate().fade(),
