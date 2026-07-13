@@ -240,8 +240,10 @@ const MayaAssistantPage = () => {
     }
   };
 
-  return (
-    <div className="maya-container">
+return (
+    <div className="maya-container maya-chat-active">
+
+
       {/* ── Header ── */}
       <div className="maya-header">
         <button
