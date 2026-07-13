@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import {
   createContext,
   useContext,
@@ -11,7 +12,11 @@ import type { Session, User } from '@supabase/supabase-js';
 import { useAuthState } from '../modules/shared/hooks/useAuthState';
 import { resolveUserRole } from '../services/auth.service';
 import { dedupeAsync, invalidateCache, setCached } from '../lib/utils/queryCache';
+import { supabase, clearSupabaseCache } from '../lib/supabase/client';
 
+// ============================================================
+// INTERFACE – Sasa inajumuisha logout na clearCache
+// ============================================================
 export interface AuthContextValue {
   session: Session | null;
   user: User | null;
@@ -20,6 +25,8 @@ export interface AuthContextValue {
   roleLoading: boolean;
   isAdmin: boolean;
   refreshRole: () => Promise<void>;
+  logout: () => Promise<void>;      // 🔐 IMEONGEZWA
+  clearCache: () => void;           // 🔐 IMEONGEZWA
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -33,7 +40,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchRole = useCallback(
     async (userId: string) => {
       const cacheKey = `profile-role:${userId}`;
-      // Invalidate cache to force fresh fetch
       invalidateCache(cacheKey);
       console.log('[AuthContext] Fetching role for user:', userId);
 
@@ -66,17 +72,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, fetchRole]);
 
+  // ── LOGOUT – MUHIMU SANA KWA USA LAMA ──
+  const logout = useCallback(async () => {
+    console.log('[AuthContext] 🔐 Logging out...');
+
+    // 1. Sign out from Supabase
+    await supabase.auth.signOut();
+
+    // 2. Safisha cache yote ya Supabase
+    clearSupabaseCache();
+
+    // 3. Safisha role na data
+    setRole(null);
+    setRoleLoading(false);
+    invalidateCache('profile-role:');
+
+    // 4. Ikiwa una store za global (Zustand/Redux), safisha hapa
+    // e.g., useAuthStore.getState().clearAuth();
+    // e.g., useChatStore.getState().resetChat();
+
+    console.log('[AuthContext] ✅ Logout complete, cache cleared');
+  }, []);
+
+  // ── CLEAR CACHE – KWA MATUMIZI YA ZIADA ──
+  const clearCache = useCallback(() => {
+    console.log('[AuthContext] 🧹 Clearing cache...');
+    clearSupabaseCache();
+    invalidateCache('profile-role:');
+    setRole(null);
+  }, []);
+
   // ── Fetch role on user change ──
   useEffect(() => {
+    // Ikiwa hakuna user au session, safisha kila kitu
     if (!user || !session) {
       setRole(null);
       setRoleLoading(false);
       invalidateCache('profile-role:');
+
+      // Ikiwa user amejitokeza (logged out) lakini bado kuna session iliyobaki,
+      // safisha cache pia
+      if (!user && session) {
+        clearSupabaseCache();
+      }
       return;
     }
 
     let isMounted = true;
-    // Immediately set loading=true so AdminRoute waits for us
     setRoleLoading(true);
     console.log('[AuthContext] User detected, setting roleLoading=true, fetching role...');
 
@@ -108,6 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log('[AuthContext] isAdmin:', isAdmin);
   }, [role, isAdmin]);
 
+  // ── VALUE – SASA INAJUMUISHA logout na clearCache ──
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
@@ -117,8 +160,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       roleLoading,
       isAdmin,
       refreshRole,
+      logout,        // ✅ IMEONGEZWA
+      clearCache,    // ✅ IMEONGEZWA
     }),
-    [session, user, loading, role, roleLoading, isAdmin, refreshRole]
+    [session, user, loading, role, roleLoading, isAdmin, refreshRole, logout, clearCache]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
