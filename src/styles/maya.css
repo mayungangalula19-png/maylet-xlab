@@ -15,6 +15,14 @@
   overflow: hidden;
 }
 
+/* Prevent page scroll when chat panel is active (mobile) */
+.maya-container.maya-chat-active {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+
+
 /* ── Header ─────────────────────────────────────── */
 .maya-header {
   flex-shrink: 0;
